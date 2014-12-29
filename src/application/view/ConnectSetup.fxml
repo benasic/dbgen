@@ -5,11 +5,11 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="400.0" maxWidth="500.0" minHeight="400.0" minWidth="500.0" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.ConnectInfoController">
    <children>
-      <Label layoutX="225.0" layoutY="48.0" text="Name" />
-      <TextField layoutX="300.0" layoutY="44.0" />
-      <ChoiceBox layoutX="33.0" layoutY="44.0" prefWidth="150.0" />
-      <ComboBox layoutX="33.0" layoutY="94.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="connectionChoiceBox" layoutX="109.0" layoutY="10.0" prefHeight="25.0" prefWidth="459.0" />
+      <Label layoutX="20.0" layoutY="14.0" text="Connect Type:" />
+      <Label layoutX="20.0" layoutY="54.0" text="Host:" />
+      <TextField fx:id="hostName" layoutX="109.0" layoutY="50.0" prefHeight="25.0" prefWidth="459.0" />
    </children>
 </AnchorPane>

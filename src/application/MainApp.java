@@ -3,16 +3,34 @@ package application;
 import java.io.IOException;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import application.controller.ConnectInfoController;
+import application.model.ConnectInfo;
 
 public class MainApp extends Application {
 
 	private Stage primaryStage;
 	private BorderPane rootLayout;
+	private ObservableList<ConnectInfo> connectInfoData = FXCollections.observableArrayList();
+	
+	public MainApp() {
+		generateData();
+	}
+
+	private void generateData() {
+		connectInfoData.add(new ConnectInfo("Postgres", "prva"));
+		connectInfoData.add(new ConnectInfo("test", "druga"));
+	}
+	
+	public ObservableList<ConnectInfo> getConnectInfoData() {
+        return connectInfoData;
+    }
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -55,6 +73,10 @@ public class MainApp extends Application {
 
 			// Set person overview into the center of root layout.
 			rootLayout.setCenter(connectionSetup);
+			
+			ConnectInfoController controller = loader.getController();
+	        controller.setMainApp(this);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -72,4 +94,6 @@ public class MainApp extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
+	
+	
 }
