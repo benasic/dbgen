@@ -15,7 +15,7 @@ public final class JDBC_Constants {
 		private Port() {
 		}
 
-		public static final int POSTGRES = 5432;
+		public static final String POSTGRES = "5432";
 
 	}
 

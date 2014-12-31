@@ -10,27 +10,30 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import application.controller.ConnectInfoController;
-import application.model.ConnectInfo;
+import application.controller.ConnectionController;
+import application.model.ConnectionInfo;
 
 public class MainApp extends Application {
 
 	private Stage primaryStage;
 	private BorderPane rootLayout;
-	private ObservableList<ConnectInfo> connectInfoData = FXCollections.observableArrayList();
-	
+	private ObservableList<ConnectionInfo> connectionInfoData = FXCollections.observableArrayList();
+
 	public MainApp() {
 		generateData();
 	}
 
 	private void generateData() {
-		connectInfoData.add(new ConnectInfo("Postgres", "prva"));
-		connectInfoData.add(new ConnectInfo("test", "druga"));
+		ConnectionInfo postgres = new ConnectionInfo("Postgres",JDBC_Constants.Name.POSTGRES , "localhost", JDBC_Constants.Port.POSTGRES, "test");
+		postgres.addParametar("user", "filip");
+		postgres.addParametar("password", "filip");
+		connectionInfoData.add(postgres);
+		connectionInfoData.add(new ConnectionInfo("test" ,"123", "localhost", "1234", "test 123"));
 	}
-	
-	public ObservableList<ConnectInfo> getConnectInfoData() {
-        return connectInfoData;
-    }
+
+	public ObservableList<ConnectionInfo> getConnectInfoData() {
+		return connectionInfoData;
+	}
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -73,10 +76,10 @@ public class MainApp extends Application {
 
 			// Set person overview into the center of root layout.
 			rootLayout.setCenter(connectionSetup);
-			
-			ConnectInfoController controller = loader.getController();
-	        controller.setMainApp(this);
-			
+
+			ConnectionController controller = loader.getController();
+			controller.setMainApp(this);
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -94,6 +97,5 @@ public class MainApp extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-	
-	
+
 }

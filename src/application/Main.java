@@ -23,15 +23,15 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 		launch(args);
-		ConnectionString connectionString = new ConnectionString(JDBC_Constants.Name.POSTGRES, "localhost",
-				JDBC_Constants.Port.POSTGRES, "test");
-		connectionString.addCredential("filip", "filip");
-		DatabaseTools db = new DatabaseTools(connectionString.toString());
-		try {
-			db.TestConnection();
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-		}
+//		ConnectionString connectionString = new ConnectionString(JDBC_Constants.Name.POSTGRES, "localhost",
+//				JDBC_Constants.Port.POSTGRES, "test");
+//		connectionString.addCredential("filip", "filip");
+//		DatabaseTools db = new DatabaseTools(connectionString.toString());
+//		try {
+//			db.TestConnection();
+//		} catch (SQLException e) {
+//			System.out.println(e.getMessage());
+//		}
 
 	}
 }
