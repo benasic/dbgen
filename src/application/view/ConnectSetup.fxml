@@ -32,6 +32,6 @@
       <Button fx:id="newParametarButton" layoutX="386.0" layoutY="215.0" mnemonicParsing="false" text="Add new connection parametar" />
       <Button fx:id="deleteParametarButton" layoutX="386.0" layoutY="254.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="183.0" text="Remove selected parametar" />
       <Button fx:id="testConnectionButton" layoutX="336.0" layoutY="352.0" mnemonicParsing="false" text="Test connection" />
-      <Button layoutX="461.0" layoutY="352.0" mnemonicParsing="false" text="Retrive metadata" />
+      <Button fx:id="retrieveMetadataButton" layoutX="461.0" layoutY="352.0" mnemonicParsing="false" text="Retrieve metadata" />
    </children>
 </AnchorPane>

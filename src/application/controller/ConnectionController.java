@@ -51,6 +51,9 @@ public class ConnectionController {
 	private Button testConnectionButton;
 	
 	@FXML
+	private Button retrieveMetadataButton;
+	
+	@FXML
 	private TableColumn<ConnectionParametars, String> keyColumn;
 	
 	@FXML
@@ -127,6 +130,18 @@ public class ConnectionController {
 					db.TestConnection();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+		});
+		retrieveMetadataButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				DatabaseTools db = new DatabaseTools(currentConnectionInfo.getConnectionString());
+				try {
+					db.retrieveMetadata();
+				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 				
