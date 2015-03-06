@@ -1,1 +1,1 @@
-All source code is in the branch "prototype".
+The project will be completed by 30/06/2015.
