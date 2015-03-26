@@ -2,19 +2,24 @@ package application.controller;
 
 import java.sql.SQLException;
 
-import sun.security.pkcs11.Secmod.DbMode;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import application.DatabaseTools;
+import application.JDBC_Repository;
 import application.MainApp;
 import application.model.ConnectionInfo;
 import application.model.ConnectionParametars;
@@ -59,10 +64,9 @@ public class ConnectionController {
 	@FXML
 	private TableColumn<ConnectionParametars, String> valueColumn;
 
-	private MainApp mainApp;
-	
 	private ObservableList<ConnectionParametars> currentParametars;
-	private ConnectionInfo currentConnectionInfo;
+	//private ConnectionInfo currentConnectionInfo;
+	//TODO vidjeti da li je pametno držati u repozitoriju
 	
 	@FXML
 	private void initialize() {
@@ -71,7 +75,7 @@ public class ConnectionController {
 				.addListener((observable, oldValue, newValue) -> {
 					unbindConnectInfo(oldValue);
 					bindConnectInfo(newValue);
-					currentConnectionInfo = newValue;
+					JDBC_Repository.getInstance().setconnectionInfo(newValue);
 				});
 		keyColumn.setCellValueFactory(cellData -> cellData.getValue().getkeyProperty());
 		keyColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -125,28 +129,42 @@ public class ConnectionController {
 		testConnectionButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				DatabaseTools db = new DatabaseTools(currentConnectionInfo.getConnectionString());
+			    ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getconnectionInfo();
+				DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
+				Alert testConectionAlert;
 				try {
-					db.TestConnection();
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				    String testConnectionResult  = db.TestConnection();
+				    testConectionAlert = new Alert(AlertType.INFORMATION);
+				    testConectionAlert.setTitle("Connection test");
+				    testConectionAlert.setContentText(testConnectionResult);
+				    testConectionAlert.showAndWait();
+                } catch (SQLException e2) {
+                    testConectionAlert = new Alert(AlertType.ERROR);
+                    testConectionAlert.setTitle("Connection test");
+                    testConectionAlert.setContentText(e2.getMessage());
+                    testConectionAlert.showAndWait();
+                }
 				
 			}
 		});
 		retrieveMetadataButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				DatabaseTools db = new DatabaseTools(currentConnectionInfo.getConnectionString());
+			    ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getconnectionInfo();
+                DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
 				try {
-					db.retrieveMetadata();
+				    db.TestConnection();
+					((Stage) retrieveMetadataButton.getScene().getWindow()).close();;
 				} catch (SQLException e1) {
-					e1.printStackTrace();
+				    Alert retrieveMetadataAlert = new Alert(AlertType.ERROR);
+				    retrieveMetadataAlert.setTitle("Connection test");
+				    retrieveMetadataAlert.setContentText(e1.getMessage());
+				    retrieveMetadataAlert.showAndWait();
 				}
-				
 			}
 		});
+		
+		
 	}
 
 	private void bindConnectInfo(ConnectionInfo connectInfo) {
@@ -167,7 +185,6 @@ public class ConnectionController {
 	}
 
 	public void setMainApp(MainApp mainApp) {
-		this.mainApp = mainApp;
 		// Add observable list data to the choice box
 		connectionChoiceBox.setItems(mainApp.getConnectInfoData());
 		connectionChoiceBox.getSelectionModel().selectFirst();
