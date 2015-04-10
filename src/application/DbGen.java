@@ -37,7 +37,11 @@ public class DbGen extends Application {
         postgres.addParametar("user", "filip");
         postgres.addParametar("password", "filip");
         connectionInfoData.add(postgres);
-        connectionInfoData.add(new ConnectionInfo("test", "123", "localhost", "1234", "test 123"));
+        ConnectionInfo sqlserver = new ConnectionInfo("SQLServer", JDBC_Constants.Name.SQLSERVER, "localhost",
+                JDBC_Constants.Port.SQLSERVER, "test");
+        sqlserver.addParametar("user", "filip");
+        sqlserver.addParametar("password", "filip");
+        connectionInfoData.add(sqlserver);
     }
 
     public ObservableList<ConnectionInfo> getConnectInfoData() {

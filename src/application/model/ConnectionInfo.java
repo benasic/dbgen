@@ -1,5 +1,6 @@
 package application.model;
 
+import application.JDBC_Constants;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -89,19 +90,44 @@ public class ConnectionInfo {
 	
 	//Connection string
 	private void generateConnectionString(){
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("jdbc:" + JDBCName + "://" + host.get() + ":" + port.get() + "/" + database.get());
-		if(parametars.size() != 0){
-			stringBuilder.append("?");
-			for(ConnectionParametars parametar : parametars){
-				stringBuilder.append(parametar.getKey() + "=" + parametar.getValue());
-				if(parametars.indexOf(parametar) != parametars.size() - 1){
-					stringBuilder.append("&");
-				}
-			}
+		if(JDBCName.equals(JDBC_Constants.Name.SQLSERVER)){
+		    generateSQLServerConnectionString();
+		} else {
+		    generateReguralConnectionString();
 		}
-		connectionString = stringBuilder.toString();
+		
 	}
+	
+	private void generateSQLServerConnectionString(){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("jdbc:" + JDBCName + "://" + host.get() + ":" + port.get() + ";databaseName="
+                + database.get());
+        if (parametars.size() != 0) {
+            stringBuilder.append(";");
+            for (ConnectionParametars parametar : parametars) {
+                stringBuilder.append(parametar.getKey() + "=" + parametar.getValue());
+                if (parametars.indexOf(parametar) != parametars.size() - 1) {
+                    stringBuilder.append(";");
+                }
+            }
+        }
+        connectionString = stringBuilder.toString();
+	}
+	
+    private void generateReguralConnectionString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("jdbc:" + JDBCName + "://" + host.get() + ":" + port.get() + "/" + database.get());
+        if (parametars.size() != 0) {
+            stringBuilder.append("?");
+            for (ConnectionParametars parametar : parametars) {
+                stringBuilder.append(parametar.getKey() + "=" + parametar.getValue());
+                if (parametars.indexOf(parametar) != parametars.size() - 1) {
+                    stringBuilder.append("&");
+                }
+            }
+        }
+        connectionString = stringBuilder.toString();
+    }
 	
 	public String getConnectionString(){
 		generateConnectionString();
