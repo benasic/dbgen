@@ -17,7 +17,7 @@ import application.controller.ConnectionController;
 import application.controller.MainAppController;
 import application.model.ConnectionInfo;
 
-public class MainApp extends Application {
+public class DbGen extends Application {
 
     private Stage primaryStage;
     private Stage connectionStage;
@@ -27,7 +27,7 @@ public class MainApp extends Application {
     
     private boolean earlyExit = false;
 
-    public MainApp() {
+    public DbGen() {
         generateData();
     }
 
@@ -88,7 +88,7 @@ public class MainApp extends Application {
     public Scene initRootLayout() throws IOException {
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(MainApp.class.getResource("view/MainAppLayout.fxml"));
+        loader.setLocation(DbGen.class.getResource("view/MainAppLayout.fxml"));
         mainAppLayout = (AnchorPane) loader.load();
         mainAppController = loader.getController();
         return new Scene(mainAppLayout);
@@ -101,7 +101,7 @@ public class MainApp extends Application {
         try {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/ConnectSetup.fxml"));
+            loader.setLocation(DbGen.class.getResource("view/ConnectSetup.fxml"));
             AnchorPane connectionSetup = (AnchorPane) loader.load();
 
             // Set person overview into the center of root layout.

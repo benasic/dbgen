@@ -31,7 +31,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
 import application.DatabaseTools;
 import application.JDBC_Repository;
-import application.MainApp;
+import application.DbGen;
 import application.model.ColumnInfo;
 
 public class MainAppController {
@@ -131,7 +131,7 @@ public class MainAppController {
                     testConectionAlert.setContentText("String type selected");
                     testConectionAlert.show();
                     FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(MainApp.class.getResource("view/StringGenerator.fxml"));
+                    loader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
                     AnchorPane stringGeneratorSubScene = null;
                     try {
                         stringGeneratorSubScene = (AnchorPane) loader.load();

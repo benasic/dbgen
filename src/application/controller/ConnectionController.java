@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import application.DatabaseTools;
 import application.JDBC_Repository;
-import application.MainApp;
+import application.DbGen;
 import application.model.ConnectionInfo;
 import application.model.ConnectionParametars;
 
@@ -184,7 +184,7 @@ public class ConnectionController {
 		}
 	}
 
-	public void setMainApp(MainApp mainApp) {
+	public void setMainApp(DbGen mainApp) {
 		// Add observable list data to the choice box
 		connectionChoiceBox.setItems(mainApp.getConnectInfoData());
 		connectionChoiceBox.getSelectionModel().selectFirst();
