@@ -4,3 +4,6 @@
 .checkstyle
 build.fxbuild
 .settings/
+.idea/
+out/
+dbgen.iml
