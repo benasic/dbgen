@@ -16,7 +16,7 @@ public class ConnectionInfo {
 	private String JDBCName;
 	private String connectionString;
 	
-	private final ObservableList<ConnectionParametars> parametars;
+	private final ObservableList<ConnectionParameters> parameters;
 	
 	public ConnectionInfo(String connectionName, String JDBCName, String host, String port, String database){
 		this.connectionName = new SimpleStringProperty(connectionName);
@@ -24,7 +24,7 @@ public class ConnectionInfo {
 		this.host = new SimpleStringProperty(host);
 		this.port = new SimpleStringProperty(port);
 		this.database = new SimpleStringProperty(database);
-		parametars = FXCollections.observableArrayList();
+		parameters = FXCollections.observableArrayList();
 	}
 	
 	//Conenction name
@@ -80,12 +80,12 @@ public class ConnectionInfo {
 	}
 	
 	//Parametars
-	public ObservableList<ConnectionParametars> getParametars(){
-		return parametars;
+	public ObservableList<ConnectionParameters> getParameters(){
+		return parameters;
 	}
 	
 	public void addParametar(String key, String value){
-		parametars.add(new ConnectionParametars(key, value));
+		parameters.add(new ConnectionParameters(key, value));
 	}
 	
 	//Connection string
@@ -102,11 +102,11 @@ public class ConnectionInfo {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("jdbc:" + JDBCName + "://" + host.get() + ":" + port.get() + ";databaseName="
                 + database.get());
-        if (parametars.size() != 0) {
+        if (parameters.size() != 0) {
             stringBuilder.append(";");
-            for (ConnectionParametars parametar : parametars) {
+            for (ConnectionParameters parametar : parameters) {
                 stringBuilder.append(parametar.getKey() + "=" + parametar.getValue());
-                if (parametars.indexOf(parametar) != parametars.size() - 1) {
+                if (parameters.indexOf(parametar) != parameters.size() - 1) {
                     stringBuilder.append(";");
                 }
             }
@@ -117,11 +117,11 @@ public class ConnectionInfo {
     private void generateReguralConnectionString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("jdbc:" + JDBCName + "://" + host.get() + ":" + port.get() + "/" + database.get());
-        if (parametars.size() != 0) {
+        if (parameters.size() != 0) {
             stringBuilder.append("?");
-            for (ConnectionParametars parametar : parametars) {
+            for (ConnectionParameters parametar : parameters) {
                 stringBuilder.append(parametar.getKey() + "=" + parametar.getValue());
-                if (parametars.indexOf(parametar) != parametars.size() - 1) {
+                if (parameters.indexOf(parametar) != parameters.size() - 1) {
                     stringBuilder.append("&");
                 }
             }

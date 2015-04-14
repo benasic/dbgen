@@ -1,33 +1,28 @@
 package application;
 
-import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-
+import application.model.ColumnInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import application.model.ColumnInfo;
+
+import java.lang.reflect.Field;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DatabaseTools {
     private Connection DBConnection;
     private String connectionString;
     private DatabaseMetaData metadata;
-    private Map<Integer, String> jdbcTypeNames = new HashMap<Integer, String>();
+    private Map<Integer, String> jdbcTypeNames = new HashMap<>();
 
     public DatabaseTools(String connectionString) {
         this.connectionString = connectionString;
         getAllJdbcTypeNames();
     }
     
-    private void OpenConenction() throws SQLException {
+    private void OpenConnection() throws SQLException {
             DBConnection = DriverManager.getConnection(connectionString);
     }
     
@@ -39,11 +34,8 @@ public class DatabaseTools {
     private void getAllJdbcTypeNames() {
         for (Field field : Types.class.getFields()) {
             try {
-                jdbcTypeNames.put((Integer)field.get(null), field.getName());
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+                jdbcTypeNames.put((Integer) field.get(null), field.getName());
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -51,13 +43,13 @@ public class DatabaseTools {
     }
 
     public String TestConnection() throws SQLException {
-        OpenConenction();
+        OpenConnection();
         CloseConnection();
-        return "Connection sucessfull";
+        return "Connection successful";
     }
 
     public void retrieveMetadata() throws SQLException {
-        OpenConenction();
+        OpenConnection();
         
         metadata = DBConnection.getMetaData();
         String productName = metadata.getDatabaseProductName();
@@ -69,9 +61,9 @@ public class DatabaseTools {
 
     public ObservableList<ColumnInfo> GetTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
             throws SQLException {
-        OpenConenction();
+        OpenConnection();
         
-        List<String> tableNames = new ArrayList<String>();
+        List<String> tableNames = new ArrayList<>();
         ObservableList<ColumnInfo> columnInfoCollection = FXCollections.observableArrayList();
         
         metadata = DBConnection.getMetaData();

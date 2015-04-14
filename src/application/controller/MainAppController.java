@@ -1,27 +1,18 @@
 package application.controller;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-
-
-
-
-import com.sun.javafx.scene.traversal.SubSceneTraversalEngine;
-
-
-
+import application.DatabaseTools;
+import application.DbGen;
+import application.JDBC_Repository;
+import application.model.ColumnInfo;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.SubScene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.image.Image;
@@ -29,10 +20,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
-import application.DatabaseTools;
-import application.JDBC_Repository;
-import application.DbGen;
-import application.model.ColumnInfo;
+
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainAppController {
     @FXML
@@ -42,8 +33,7 @@ public class MainAppController {
     private BorderPane mainBorderPane;
     
     private ObservableList<ColumnInfo> columnInfoList = null;
-    
-    private SubScene currentGenerator = null;
+
     
     @FXML
     private void initialize() {
@@ -98,12 +88,12 @@ public class MainAppController {
         columnInfoTreeTableView.getColumns().add(columnType);
         
         columnName.setCellValueFactory(new Callback<CellDataFeatures<ColumnInfo, String>, ObservableValue<String>>() {
+            @Override
             public ObservableValue<String> call(CellDataFeatures<ColumnInfo, String> p) {
                 ColumnInfo columnInfo = p.getValue().getValue();
-                if(columnInfo.getColumnSize().equals("")){
+                if (columnInfo.getColumnSize().equals("")) {
                     return new ReadOnlyStringWrapper(columnInfo.getTableName());
-                }
-                else{
+                } else {
                     return new ReadOnlyStringWrapper(columnInfo.getColumnName());
                 }
             }
@@ -128,14 +118,14 @@ public class MainAppController {
                 testConectionAlert.setTitle("Test");
                 switch (newValue.getValue().getColumnType()) {
                 case "VARCHAR":
-                    testConectionAlert.setContentText("String type selected");
-                    testConectionAlert.show();
+                    System.out.print(newValue.getValue().generator.generate());
                     FXMLLoader loader = new FXMLLoader();
                     loader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
                     AnchorPane stringGeneratorSubScene = null;
                     try {
-                        stringGeneratorSubScene = (AnchorPane) loader.load();
-                        //currentGenerator = new SubScene(mainBorderPane,400,400);
+                        stringGeneratorSubScene = loader.load();
+                        StringGeneratorController stringGeneratorController = loader.getController();
+                        stringGeneratorController.setGenerator(newValue.getValue().generator);
                         mainBorderPane.setCenter(stringGeneratorSubScene);
                     } catch (Exception e) {
                         e.printStackTrace();

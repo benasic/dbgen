@@ -1,20 +1,25 @@
 package application.model;
 
+import application.generator.Generator;
+import application.generator.StringGenerator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 public class ColumnInfo {
 
-    private StringProperty tableName;
-    private StringProperty columnName;
-    private StringProperty columnType;
-    private StringProperty columnSize;
+    private final StringProperty tableName;
+    private final StringProperty columnName;
+    private final StringProperty columnType;
+    private final StringProperty columnSize;
+
+    public Generator generator = null;
 
     public ColumnInfo() {
         tableName = new SimpleStringProperty();
         columnName = new SimpleStringProperty();
         columnType = new SimpleStringProperty();
         columnSize = new SimpleStringProperty();
+        generator = new StringGenerator();
     }
 
     public ColumnInfo(String tableName, String columnName, String columnType, String columnSize) {
@@ -22,6 +27,8 @@ public class ColumnInfo {
         this.columnName = new SimpleStringProperty(columnName);
         this.columnType = new SimpleStringProperty(columnType);
         this.columnSize = new SimpleStringProperty(columnSize);
+        generator = new StringGenerator();
+
     }
 
     // Table Name

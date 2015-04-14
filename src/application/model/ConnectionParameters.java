@@ -3,12 +3,12 @@ package application.model;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class ConnectionParametars {
+public class ConnectionParameters {
 	
 	private final StringProperty key;
 	private final StringProperty value;
 	
-	public ConnectionParametars(String key, String value){
+	public ConnectionParameters(String key, String value){
 		this.key = new SimpleStringProperty(key);
 		this.value = new SimpleStringProperty(value);
 	}
@@ -21,7 +21,7 @@ public class ConnectionParametars {
 		this.key.set(key);
 	}
 	
-	public StringProperty getkeyProperty(){
+	public StringProperty getKeyProperty(){
 		return key;
 	}
 	

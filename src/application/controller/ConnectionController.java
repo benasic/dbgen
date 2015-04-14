@@ -1,28 +1,21 @@
 package application.controller;
 
-import java.sql.SQLException;
-
+import application.DatabaseTools;
+import application.DbGen;
+import application.JDBC_Repository;
+import application.model.ConnectionInfo;
+import application.model.ConnectionParameters;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-import application.DatabaseTools;
-import application.JDBC_Repository;
-import application.DbGen;
-import application.model.ConnectionInfo;
-import application.model.ConnectionParametars;
+
+import java.sql.SQLException;
 
 public class ConnectionController {
 	@FXML
@@ -44,7 +37,7 @@ public class ConnectionController {
 	private TextField newValue;
 	
 	@FXML
-	private TableView<ConnectionParametars> parametarsTable;
+	private TableView<ConnectionParameters> parametarsTable;
 	
 	@FXML
 	private Button newParametarButton;
@@ -59,14 +52,14 @@ public class ConnectionController {
 	private Button retrieveMetadataButton;
 	
 	@FXML
-	private TableColumn<ConnectionParametars, String> keyColumn;
+	private TableColumn<ConnectionParameters, String> keyColumn;
 	
 	@FXML
-	private TableColumn<ConnectionParametars, String> valueColumn;
+	private TableColumn<ConnectionParameters, String> valueColumn;
 
-	private ObservableList<ConnectionParametars> currentParametars;
+	private ObservableList<ConnectionParameters> currentParameters;
 	//private ConnectionInfo currentConnectionInfo;
-	//TODO vidjeti da li je pametno držati u repozitoriju
+	//TODO vidjeti da li je pametno drzati u repozitoriju
 	
 	@FXML
 	private void initialize() {
@@ -77,14 +70,14 @@ public class ConnectionController {
 					bindConnectInfo(newValue);
 					JDBC_Repository.getInstance().setconnectionInfo(newValue);
 				});
-		keyColumn.setCellValueFactory(cellData -> cellData.getValue().getkeyProperty());
+		keyColumn.setCellValueFactory(cellData -> cellData.getValue().getKeyProperty());
 		keyColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 		keyColumn.setOnEditCommit(
-			    new EventHandler<CellEditEvent<ConnectionParametars, String>>() {
+			    new EventHandler<CellEditEvent<ConnectionParameters, String>>() {
 			        @Override
-			        public void handle(CellEditEvent<ConnectionParametars, String> t) {
+			        public void handle(CellEditEvent<ConnectionParameters, String> t) {
 
-			            ((ConnectionParametars) t.getTableView().getItems().get(
+			            ((ConnectionParameters) t.getTableView().getItems().get(
 			                t.getTablePosition().getRow())
 			                ).setKey(t.getNewValue());
 			        }
@@ -92,11 +85,11 @@ public class ConnectionController {
 			);
 		valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 		valueColumn.setOnEditCommit(
-			    new EventHandler<CellEditEvent<ConnectionParametars, String>>() {
+			    new EventHandler<CellEditEvent<ConnectionParameters, String>>() {
 			        @Override
-			        public void handle(CellEditEvent<ConnectionParametars, String> t) {
+			        public void handle(CellEditEvent<ConnectionParameters, String> t) {
 
-			            ((ConnectionParametars) t.getTableView().getItems().get(
+			            ((ConnectionParameters) t.getTableView().getItems().get(
 			                t.getTablePosition().getRow())
 			                ).setValue(t.getNewValue());
 			        }
@@ -108,10 +101,10 @@ public class ConnectionController {
 		    @Override 
 		    public void handle(ActionEvent e) {
 		    	if(!newKey.getText().equals("") && !newValue.getText().equals("")){
-		    		currentParametars.add(new ConnectionParametars(
-				        	newKey.getText(),
-				            newValue.getText()
-				        ));
+		    		currentParameters.add(new ConnectionParameters(
+							newKey.getText(),
+							newValue.getText()
+					));
 				        newKey.clear();
 				        newValue.clear();
 		    	}
@@ -120,9 +113,9 @@ public class ConnectionController {
 		deleteParametarButton.setOnAction(new EventHandler<ActionEvent>() {
 		    @Override
 		    public void handle(ActionEvent e) {
-		    	ConnectionParametars parametar = parametarsTable.getSelectionModel().getSelectedItem();
+		    	ConnectionParameters parametar = parametarsTable.getSelectionModel().getSelectedItem();
 		    	if(parametar != null){
-		    		currentParametars.remove(parametar);
+		    		currentParameters.remove(parametar);
 		    	} 
 		    }
 		});
@@ -168,8 +161,8 @@ public class ConnectionController {
 	}
 
 	private void bindConnectInfo(ConnectionInfo connectInfo) {
-		currentParametars = connectInfo.getParametars();
-		parametarsTable.setItems(currentParametars);
+		currentParameters = connectInfo.getParameters();
+		parametarsTable.setItems(currentParameters);
 		hostName.textProperty().bindBidirectional(connectInfo.getHostProperty());
 		port.textProperty().bindBidirectional(connectInfo.getPortProperty());
 		database.textProperty().bindBidirectional(connectInfo.getDatabaseProperty());
