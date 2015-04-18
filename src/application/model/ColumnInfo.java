@@ -1,7 +1,6 @@
 package application.model;
 
 import application.generator.Generator;
-import application.generator.StringGenerator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -12,14 +11,13 @@ public class ColumnInfo {
     private final StringProperty columnType;
     private final StringProperty columnSize;
 
-    public Generator generator = null;
+    private Generator generator;
 
     public ColumnInfo() {
         tableName = new SimpleStringProperty();
         columnName = new SimpleStringProperty();
         columnType = new SimpleStringProperty();
         columnSize = new SimpleStringProperty();
-        generator = new StringGenerator();
     }
 
     public ColumnInfo(String tableName, String columnName, String columnType, String columnSize) {
@@ -27,8 +25,14 @@ public class ColumnInfo {
         this.columnName = new SimpleStringProperty(columnName);
         this.columnType = new SimpleStringProperty(columnType);
         this.columnSize = new SimpleStringProperty(columnSize);
-        generator = new StringGenerator();
+    }
 
+    public Generator getGenerator() {
+        return generator;
+    }
+
+    public void setGenerator(Generator generator) {
+        this.generator = generator;
     }
 
     // Table Name

@@ -1,5 +1,7 @@
 package application;
 
+import application.generator.IntegerGenerator;
+import application.generator.StringGenerator;
 import application.model.ColumnInfo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -81,6 +83,14 @@ public class DatabaseTools {
                 columnInfo.setColumnName(result.getString("COLUMN_NAME"));
                 columnInfo.setColumnType(jdbcTypeNames.get(Integer.parseInt(result.getString("DATA_TYPE"))));
                 columnInfo.setColumnSize(result.getString("COLUMN_SIZE"));
+                switch (columnInfo.getColumnType()){
+                    case "VARCHAR":
+                        columnInfo.setGenerator(new StringGenerator());
+                        break;
+                    case "INTEGER":
+                        columnInfo.setGenerator(new IntegerGenerator());
+                }
+
                 columnInfoCollection.add(columnInfo);
             }
         }

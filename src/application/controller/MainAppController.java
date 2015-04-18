@@ -9,8 +9,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableColumn.CellDataFeatures;
@@ -114,29 +112,33 @@ public class MainAppController {
         
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
-                Alert testConectionAlert = new Alert(AlertType.INFORMATION);
-                testConectionAlert.setTitle("Test");
+                FXMLLoader loader = new FXMLLoader();
+                AnchorPane stringGeneratorSubScene = null;
                 switch (newValue.getValue().getColumnType()) {
-                case "VARCHAR":
-                    System.out.print(newValue.getValue().generator.generate());
-                    FXMLLoader loader = new FXMLLoader();
-                    loader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
-                    AnchorPane stringGeneratorSubScene = null;
-                    try {
-                        stringGeneratorSubScene = loader.load();
-                        StringGeneratorController stringGeneratorController = loader.getController();
-                        stringGeneratorController.setGenerator(newValue.getValue().generator);
-                        mainBorderPane.setCenter(stringGeneratorSubScene);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case "INTEGER":
-                    testConectionAlert.setContentText("Integer type selected");
-                    testConectionAlert.show();
-                    break;
-                default:
-                    break;
+                    case "VARCHAR":
+                        loader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
+                        try {
+                            stringGeneratorSubScene = loader.load();
+                            StringGeneratorController stringGeneratorController = loader.getController();
+                            stringGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                            mainBorderPane.setCenter(stringGeneratorSubScene);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case "INTEGER":
+                        loader.setLocation(DbGen.class.getResource("view/IntegerGenerator.fxml"));
+                        try {
+                            stringGeneratorSubScene = loader.load();
+                            IntegerGeneratorController integerGeneratorController = loader.getController();
+                            integerGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                            mainBorderPane.setCenter(stringGeneratorSubScene);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    default:
+                        break;
                 }
 
         });
