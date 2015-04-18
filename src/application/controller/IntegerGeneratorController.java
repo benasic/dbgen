@@ -4,9 +4,8 @@ import application.generator.Generator;
 import application.generator.IntegerGenerator;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
-import javafx.util.StringConverter;
-import javafx.util.converter.IntegerStringConverter;
-
+import javafx.util.converter.NumberStringConverter;
+import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,9 +22,7 @@ public class IntegerGeneratorController {
         generatorTextField.textProperty().addListener((observable, oldValue, newValue) ->
         {
             Matcher m = p.matcher(newValue);
-            System.out.print(oldValue + ' '  + newValue + '\n');
             if(m.find()){
-                System.out.println("Promjena");
                 generatorTextField.textProperty().setValue(m.replaceAll(""));
             }
         });
@@ -33,6 +30,12 @@ public class IntegerGeneratorController {
 
     public void setGenerator(Generator generator){
         integerGenerator = (IntegerGenerator)generator;
-        generatorTextField.textProperty().bindBidirectional(this.integerGenerator.getGeneratorIntegerProperty(),(StringConverter)new IntegerStringConverter());
+        NumberStringConverter numberStringConverter = new NumberStringConverter(){
+            @Override
+            protected NumberFormat getNumberFormat() {
+                return NumberFormat.getIntegerInstance();
+            }
+        };
+        generatorTextField.textProperty().bindBidirectional(this.integerGenerator.getGeneratorIntegerProperty(), numberStringConverter);
     }
 }
