@@ -1,6 +1,7 @@
 package application.controller;
 
 import application.DatabaseTools;
+import application.DbGen;
 import application.JDBC_Repository;
 import application.model.ColumnInfo;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -36,12 +37,13 @@ public class MainAppController {
     private AnchorPane integerGeneratorSubScene;
     private StringGeneratorController stringGeneratorController;
     private IntegerGeneratorController integerGeneratorController;
-
+    private Image tableIcon;
 
     @FXML
     private void initialize() {
-        stringLoader.setLocation(getClass().getResource("../view/StringGenerator.fxml"));
-        integerLoader.setLocation(getClass().getResource("../view/IntegerGenerator.fxml"));
+        tableIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/tables1.png"));
+        stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
+        integerLoader.setLocation(DbGen.class.getResource("view/IntegerGenerator.fxml"));
         try {
             stringGeneratorSubScene = stringLoader.load();
             integerGeneratorSubScene = integerLoader.load();
@@ -77,8 +79,7 @@ public class MainAppController {
                 tempRoot.getChildren().add(new TreeItem<>(columnInfo));
             }
             else{
-                ImageView tableIcon = new ImageView (new Image(getClass().getResourceAsStream("../view/tables1.png")));
-                tempRoot = new TreeItem<>(new ColumnInfo(columnInfo.getTableName(), "", "", ""), tableIcon);
+                tempRoot = new TreeItem<>(new ColumnInfo(columnInfo.getTableName(), "", "", ""), new ImageView (tableIcon));
                 tempRoot.setExpanded(false);
                 tempRoot.getChildren().add(new TreeItem<>(columnInfo));
                 roots.put(columnInfo.getTableName(), tempRoot);

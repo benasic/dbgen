@@ -1,21 +1,19 @@
 package application;
 
-import java.io.IOException;
-
+import application.controller.ConnectionController;
+import application.controller.MainAppController;
+import application.model.ConnectionInfo;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import application.controller.ConnectionController;
-import application.controller.MainAppController;
-import application.model.ConnectionInfo;
+
+import java.io.IOException;
 
 public class DbGen extends Application {
 
@@ -24,7 +22,7 @@ public class DbGen extends Application {
     private MainAppController mainAppController = null;
     private AnchorPane mainAppLayout;
     private ObservableList<ConnectionInfo> connectionInfoData = FXCollections.observableArrayList();
-    
+
     private boolean earlyExit = false;
 
     public DbGen() {
@@ -62,22 +60,18 @@ public class DbGen extends Application {
             connectionStage.initModality(Modality.APPLICATION_MODAL);
             connectionStage.initOwner(primaryStage);
             showConnectionSetup();
-            connectionStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-
-                @Override
-                public void handle(WindowEvent event) {
-                    System.out.println("Program exit");
-                    earlyExit = true;
-                    Platform.exit();
-                }
+            connectionStage.setOnCloseRequest(event -> {
+                System.out.println("Program exit");
+                earlyExit = true;
+                Platform.exit();
             });
             connectionStage.showAndWait();
-            
-            
+
+
             if(!earlyExit){
                 mainAppController.init();
             }
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -86,14 +80,14 @@ public class DbGen extends Application {
 
     /**
      * Initializes the root layout.
-     * 
+     *
      * @throws IOException
      */
     public Scene initRootLayout() throws IOException {
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(DbGen.class.getResource("view/MainAppLayout.fxml"));
-        mainAppLayout = (AnchorPane) loader.load();
+        mainAppLayout = loader.load();
         mainAppController = loader.getController();
         return new Scene(mainAppLayout);
     }
@@ -106,7 +100,7 @@ public class DbGen extends Application {
             // Load person overview.
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(DbGen.class.getResource("view/ConnectSetup.fxml"));
-            AnchorPane connectionSetup = (AnchorPane) loader.load();
+            AnchorPane connectionSetup = loader.load();
 
             // Set person overview into the center of root layout.
             AnchorPane.setTopAnchor(connectionSetup, 10.0);
@@ -123,7 +117,7 @@ public class DbGen extends Application {
 
     /**
      * Returns the main stage.
-     * 
+     *
      * @return
      */
     public Stage getPrimaryStage() {
