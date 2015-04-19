@@ -68,7 +68,7 @@ public class ConnectionController {
                 .addListener((observable, oldValue, newValue) -> {
                     unbindConnectInfo(oldValue);
                     bindConnectInfo(newValue);
-                    JDBC_Repository.getInstance().setconnectionInfo(newValue);
+                    JDBC_Repository.getInstance().setConnectionInfo(newValue);
                 });
         keyColumn.setCellValueFactory(cellData -> cellData.getValue().getKeyProperty());
         keyColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -122,7 +122,7 @@ public class ConnectionController {
         testConnectionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getconnectionInfo();
+                ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getConnectionInfo();
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 Alert testConectionAlert;
                 try {
@@ -143,7 +143,7 @@ public class ConnectionController {
         retrieveMetadataButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getconnectionInfo();
+                ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getConnectionInfo();
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 try {
                     db.TestConnection();

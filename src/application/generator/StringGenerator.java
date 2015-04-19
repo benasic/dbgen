@@ -2,6 +2,7 @@ package application.generator;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class StringGenerator implements Generator {
 
@@ -13,7 +14,7 @@ public class StringGenerator implements Generator {
 
     public String generate(){
 
-        return generatorStringProperty.getValue();
+        return RandomStringUtils.randomAlphabetic(10);
     }
 
     public StringProperty getGeneratorStringProperty(){

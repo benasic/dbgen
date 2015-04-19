@@ -31,6 +31,9 @@ public class MainAppController {
     private TableView<String> tableView;
 
     @FXML
+    private Button prepareButton;
+
+    @FXML
     private Button previewButton;
 
     @FXML
@@ -68,7 +71,7 @@ public class MainAppController {
     }
 
     private void getTableInfoData(){
-        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getconnectionInfo().getConnectionString());
+        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
         try {
             columnInfoList = dt.GetTables(null, null, null, new String[] {"TABLE"});
         } catch (SQLException e) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -36,8 +36,9 @@
          <top>
             <HBox prefHeight="30.0" prefWidth="800.0" spacing="10.0" BorderPane.alignment="CENTER">
                <children>
+                  <Button fx:id="prepareButton" mnemonicParsing="false" text="Prepare date" />
                   <Button fx:id="previewButton" mnemonicParsing="false" text="Preview data" />
-                  <Button fx:id="generateButton" mnemonicParsing="false" text="Generate" />
+                  <Button fx:id="generateButton" mnemonicParsing="false" text="Generate into database" />
                </children>
                <padding>
                   <Insets left="10.0" top="2.0" />
