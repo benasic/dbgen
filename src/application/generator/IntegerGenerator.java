@@ -12,10 +12,10 @@ public class IntegerGenerator implements Generator {
 
     public IntegerGenerator(){
         generatorIntegerProperty = new SimpleIntegerProperty(65);
+        random.setSeed(generatorIntegerProperty.getValue());
     }
 
     public Integer generate(){
-        random.setSeed(generatorIntegerProperty.getValue());
         return random.nextInt();
     }
 

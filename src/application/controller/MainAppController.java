@@ -3,6 +3,7 @@ package application.controller;
 import application.DatabaseTools;
 import application.DbGen;
 import application.JDBC_Repository;
+import application.generator.Generator;
 import application.model.ColumnInfo;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.ObservableList;
@@ -16,8 +17,11 @@ import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MainAppController {
 
@@ -28,7 +32,7 @@ public class MainAppController {
     private BorderPane mainBorderPane;
 
     @FXML
-    private TableView<String> tableView;
+    private TableView<Object[]> tableView;
 
     @FXML
     private Button prepareButton;
@@ -40,6 +44,7 @@ public class MainAppController {
     private Button generateButton;
 
     private ObservableList<ColumnInfo> columnInfoList = null;
+    private List<ColumnInfo> selectedColumnInfoList = new ArrayList<>();
 
     private final FXMLLoader stringLoader = new FXMLLoader();
     private final FXMLLoader integerLoader = new FXMLLoader();
@@ -68,6 +73,7 @@ public class MainAppController {
         getTableInfoData();
         fillTableInfoTreeTableView();
         addTableViewSynchronizationWithColumnInfo();
+        addPrepareDataListener();
     }
 
     private void getTableInfoData(){
@@ -166,5 +172,37 @@ public class MainAppController {
                     }
                 }
             }));
+    }
+
+    private void addPrepareDataListener(){
+        prepareButton.setOnAction(event -> {
+            TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
+            if(selectedColumnInfoTreeItem != null){
+                selectedColumnInfoList.clear();
+                // if root is selected
+                if(selectedColumnInfoTreeItem.getValue().getColumnName().equals("")){
+                    selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream().map(TreeItem::getValue).collect(Collectors.toList()));
+                }
+                // if leaf is selected
+                else{
+                    TreeItem<ColumnInfo> columnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
+                    selectedColumnInfoList.addAll(columnInfoTreeItem.getChildren().stream().map(TreeItem::getValue).collect(Collectors.toList()));
+                }
+
+                // calling generator for each of selected item
+                // TODO for now 100 times, must be replaced with user option for each table
+                // TODO add different collection type support
+                JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
+
+                for(ColumnInfo columnInfo : selectedColumnInfoList){
+                    String hash = columnInfo.getHash();
+                    Generator generator = columnInfo.getGenerator();
+                    jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
+                    for(int i = 0; i < 100; i++){
+                        jdbc_repository.insertIntoCollection(hash, generator.generate());
+                    }
+                }
+            }
+        });
     }
 }
