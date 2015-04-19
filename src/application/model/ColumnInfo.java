@@ -1,5 +1,6 @@
 package application.model;
 
+import application.Utils;
 import application.generator.Generator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -11,6 +12,7 @@ public class ColumnInfo {
     private final StringProperty columnType;
     private final StringProperty columnSize;
 
+    private String hash;
     private Generator generator;
 
     public ColumnInfo() {
@@ -85,6 +87,17 @@ public class ColumnInfo {
 
     public StringProperty getColumnSizeProperty() {
         return columnSize;
+    }
+
+    public String getHash(){
+        if(hash == null){
+            generateHash();
+        }
+        return hash;
+    }
+
+    private void generateHash(){
+        hash = Utils.generateSHA256String(getTableName() + getColumnName());
     }
 
 }

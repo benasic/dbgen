@@ -28,7 +28,7 @@ public class MainAppController {
     private BorderPane mainBorderPane;
 
     @FXML
-    private TableView tableView;
+    private TableView<String> tableView;
 
     @FXML
     private Button previewButton;
@@ -84,14 +84,13 @@ public class MainAppController {
             TreeItem<ColumnInfo> tempRoot;
             if(roots.keySet().contains(columnInfo.getTableName())){
                 tempRoot = roots.get(columnInfo.getTableName());
-                tempRoot.getChildren().add(new TreeItem<>(columnInfo));
             }
             else{
                 tempRoot = new TreeItem<>(new ColumnInfo(columnInfo.getTableName(), "", "", ""), new ImageView (tableIcon));
                 tempRoot.setExpanded(false);
-                tempRoot.getChildren().add(new TreeItem<>(columnInfo));
                 roots.put(columnInfo.getTableName(), tempRoot);
             }
+            tempRoot.getChildren().add(new TreeItem<>(columnInfo));
         }
 
         TreeItem<ColumnInfo> mainRoot = new TreeItem<>(new ColumnInfo("root", "", "", ""));
