@@ -8,9 +8,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -28,6 +26,15 @@ public class MainAppController {
 
     @FXML
     private BorderPane mainBorderPane;
+
+    @FXML
+    private TableView tableView;
+
+    @FXML
+    private Button previewButton;
+
+    @FXML
+    private Button generateButton;
 
     private ObservableList<ColumnInfo> columnInfoList = null;
 
@@ -57,6 +64,7 @@ public class MainAppController {
     public void init(){
         getTableInfoData();
         fillTableInfoTreeTableView();
+        addTableViewSynchronizationWithColumnInfo();
     }
 
     private void getTableInfoData(){
@@ -134,5 +142,27 @@ public class MainAppController {
                         break;
                 }
         });
+    }
+
+    private void addTableViewSynchronizationWithColumnInfo() {
+        columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
+            .addListener(((observable, oldValue, newValue) -> {
+                // in case root is selected
+                if (newValue.getValue().getColumnName().equals("")) {
+                    tableView.getColumns().clear();
+                    for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
+                        tableView.getColumns().add(new TableColumn<>(columnInfoTreeItem.getValue().getColumnName()));
+                    }
+                }
+                // in case internal element is selected, but only if it
+                // has different root element then previous one
+                else if (oldValue == null || !newValue.getParent().equals(oldValue.getParent())) {
+                    tableView.getColumns().clear();
+                    TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
+                    for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
+                        tableView.getColumns().add(new TableColumn<>(columnInfoTreeItem.getValue().getColumnName()));
+                    }
+                }
+            }));
     }
 }
