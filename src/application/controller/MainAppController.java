@@ -6,6 +6,7 @@ import application.JDBC_Repository;
 import application.generator.Generator;
 import application.model.ColumnInfo;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,10 +18,7 @@ import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MainAppController {
@@ -32,7 +30,7 @@ public class MainAppController {
     private BorderPane mainBorderPane;
 
     @FXML
-    private TableView<Object[]> tableView;
+    private TableView tableView;
 
     @FXML
     private Button prepareButton;
@@ -45,6 +43,7 @@ public class MainAppController {
 
     private ObservableList<ColumnInfo> columnInfoList = null;
     private List<ColumnInfo> selectedColumnInfoList = new ArrayList<>();
+    private ObservableList<ObservableList<Object>> previewObservableList = FXCollections.observableArrayList();
 
     private final FXMLLoader stringLoader = new FXMLLoader();
     private final FXMLLoader integerLoader = new FXMLLoader();
@@ -74,6 +73,7 @@ public class MainAppController {
         fillTableInfoTreeTableView();
         addTableViewSynchronizationWithColumnInfo();
         addPrepareDataListener();
+        addPreviewDataListener();
     }
 
     private void getTableInfoData(){
@@ -158,17 +158,25 @@ public class MainAppController {
                 // in case root is selected
                 if (newValue.getValue().getColumnName().equals("")) {
                     tableView.getColumns().clear();
+                    tableView.getItems().clear();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
-                        tableView.getColumns().add(new TableColumn<>(columnInfoTreeItem.getValue().getColumnName()));
+                        int column = newValue.getChildren().indexOf(columnInfoTreeItem);
+                        TableColumn<ObservableList,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
+                        tableView.getColumns().add(objectStringTableColumn);
                     }
                 }
                 // in case internal element is selected, but only if it
                 // has different root element then previous one
                 else if (oldValue == null || !newValue.getParent().equals(oldValue.getParent())) {
                     tableView.getColumns().clear();
+                    tableView.getItems().clear();
                     TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
-                        tableView.getColumns().add(new TableColumn<>(columnInfoTreeItem.getValue().getColumnName()));
+                        int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
+                        TableColumn<ObservableList,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
+                        tableView.getColumns().add(objectStringTableColumn);
                     }
                 }
             }));
@@ -177,14 +185,14 @@ public class MainAppController {
     private void addPrepareDataListener(){
         prepareButton.setOnAction(event -> {
             TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
-            if(selectedColumnInfoTreeItem != null){
+            if (selectedColumnInfoTreeItem != null) {
                 selectedColumnInfoList.clear();
                 // if root is selected
-                if(selectedColumnInfoTreeItem.getValue().getColumnName().equals("")){
+                if (selectedColumnInfoTreeItem.getValue().getColumnName().equals("")) {
                     selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream().map(TreeItem::getValue).collect(Collectors.toList()));
                 }
                 // if leaf is selected
-                else{
+                else {
                     TreeItem<ColumnInfo> columnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
                     selectedColumnInfoList.addAll(columnInfoTreeItem.getChildren().stream().map(TreeItem::getValue).collect(Collectors.toList()));
                 }
@@ -194,14 +202,43 @@ public class MainAppController {
                 // TODO add different collection type support
                 JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
 
-                for(ColumnInfo columnInfo : selectedColumnInfoList){
+                for (ColumnInfo columnInfo : selectedColumnInfoList) {
                     String hash = columnInfo.getHash();
                     Generator generator = columnInfo.getGenerator();
                     jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
-                    for(int i = 0; i < 100; i++){
+                    for (int i = 0; i < 100; i++) {
                         jdbc_repository.insertIntoCollection(hash, generator.generate());
                     }
                 }
+            }
+        });
+    }
+
+    private void addPreviewDataListener(){
+        previewButton.setOnAction(event -> {
+            if(selectedColumnInfoList.size() != 0){
+                previewObservableList.clear();
+                tableView.getItems().clear();
+                for(int i = 0; i < selectedColumnInfoList.size(); i++){
+                    String hash = selectedColumnInfoList.get(i).getHash();
+                    Iterator<Object> objectIterator = JDBC_Repository.getInstance().returnCollectionIterator(hash);
+                    int counter = previewObservableList.size();
+                    int previewObservableListSize = previewObservableList.size();
+                    while(objectIterator.hasNext()) {
+                        // append to existing collection
+                        if (i > 0) {
+                            previewObservableList.get(previewObservableListSize - counter).add(objectIterator.next());
+                            counter--;
+                        }
+                        // case when need to recreate entire collection
+                        else if (i == 0) {
+                            previewObservableList.add(FXCollections.observableArrayList(objectIterator.next()));
+                        }
+                    }
+                }
+
+                tableView.setItems(previewObservableList);
+
             }
         });
     }
