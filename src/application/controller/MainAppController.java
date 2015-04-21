@@ -30,7 +30,7 @@ public class MainAppController {
     private BorderPane mainBorderPane;
 
     @FXML
-    private TableView tableView;
+    private TableView<ObservableList<Object>> tableView;
 
     @FXML
     private Button prepareButton;
@@ -161,8 +161,8 @@ public class MainAppController {
                     tableView.getItems().clear();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
                         int column = newValue.getChildren().indexOf(columnInfoTreeItem);
-                        TableColumn<ObservableList,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
-                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
+                        TableColumn<ObservableList<Object>,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
                         tableView.getColumns().add(objectStringTableColumn);
                     }
                 }
@@ -174,8 +174,8 @@ public class MainAppController {
                     TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
                         int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
-                        TableColumn<ObservableList,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
-                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
+                        TableColumn<ObservableList<Object>,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
                         tableView.getColumns().add(objectStringTableColumn);
                     }
                 }
