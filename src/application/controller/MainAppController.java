@@ -74,6 +74,7 @@ public class MainAppController {
         addTableViewSynchronizationWithColumnInfo();
         addPrepareDataListener();
         addPreviewDataListener();
+        addGenerateDataListener();
     }
 
     private void getTableInfoData(){
@@ -206,7 +207,7 @@ public class MainAppController {
                     String hash = columnInfo.getHash();
                     Generator generator = columnInfo.getGenerator();
                     jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
-                    for (int i = 0; i < 100; i++) {
+                    for (int i = 0; i < 100000; i++) {
                         jdbc_repository.insertIntoCollection(hash, generator.generate());
                     }
                 }
@@ -239,6 +240,23 @@ public class MainAppController {
 
                 tableView.setItems(previewObservableList);
 
+            }
+        });
+    }
+
+    private void addGenerateDataListener(){
+        generateButton.setOnAction(event -> {
+            if(previewObservableList.isEmpty()){
+                return;
+            }
+
+            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+            try {
+                dt.generateData(previewObservableList, selectedColumnInfoList);
+            } catch (SQLException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
             }
         });
     }

@@ -2,8 +2,7 @@ package application.model;
 
 import application.Utils;
 import application.generator.Generator;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 public class ColumnInfo {
 
@@ -11,6 +10,8 @@ public class ColumnInfo {
     private final StringProperty columnName;
     private final StringProperty columnType;
     private final StringProperty columnSize;
+    private final IntegerProperty sqlType;
+
 
     private String hash;
     private Generator generator;
@@ -20,6 +21,7 @@ public class ColumnInfo {
         columnName = new SimpleStringProperty();
         columnType = new SimpleStringProperty();
         columnSize = new SimpleStringProperty();
+        sqlType = new SimpleIntegerProperty();
     }
 
     public ColumnInfo(String tableName, String columnName, String columnType, String columnSize) {
@@ -27,6 +29,7 @@ public class ColumnInfo {
         this.columnName = new SimpleStringProperty(columnName);
         this.columnType = new SimpleStringProperty(columnType);
         this.columnSize = new SimpleStringProperty(columnSize);
+        this.sqlType = new SimpleIntegerProperty();
     }
 
     public Generator getGenerator() {
@@ -87,6 +90,16 @@ public class ColumnInfo {
 
     public StringProperty getColumnSizeProperty() {
         return columnSize;
+    }
+
+    // SQL Type
+
+    public Integer getSqlType(){
+        return  sqlType.get();
+    }
+
+    public void setSqlType(int sqlType){
+        this.sqlType.set(sqlType);
     }
 
     public String getHash(){
