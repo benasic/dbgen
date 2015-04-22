@@ -5,6 +5,7 @@ import application.DbGen;
 import application.JDBC_Repository;
 import application.generator.Generator;
 import application.model.ColumnInfo;
+import application.utils.XML;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,6 +32,9 @@ public class MainAppController {
 
     @FXML
     private TableView<ObservableList<Object>> tableView;
+
+    @FXML
+    private Button saveButton;
 
     @FXML
     private Button prepareButton;
@@ -75,6 +79,7 @@ public class MainAppController {
         addPrepareDataListener();
         addPreviewDataListener();
         addGenerateDataListener();
+        addSaveProjectListener();
     }
 
     private void getTableInfoData(){
@@ -162,7 +167,7 @@ public class MainAppController {
                     tableView.getItems().clear();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
                         int column = newValue.getChildren().indexOf(columnInfoTreeItem);
-                        TableColumn<ObservableList<Object>,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                        TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
                         objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
                         tableView.getColumns().add(objectStringTableColumn);
                     }
@@ -175,12 +180,21 @@ public class MainAppController {
                     TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
                         int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
-                        TableColumn<ObservableList<Object>,String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                        TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
                         objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
                         tableView.getColumns().add(objectStringTableColumn);
                     }
                 }
             }));
+    }
+
+    private void addSaveProjectListener() {
+        saveButton.setOnAction(event -> {
+            if(columnInfoList != null && !columnInfoList.isEmpty()){
+                List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
+                XML.createXML(columnInfos);
+            }
+        });
     }
 
     private void addPrepareDataListener(){

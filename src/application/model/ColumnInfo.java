@@ -1,6 +1,6 @@
 package application.model;
 
-import application.Utils;
+import application.utils.Utils;
 import application.generator.Generator;
 import javafx.beans.property.*;
 
