@@ -85,7 +85,7 @@ public class MainAppController {
     private void getTableInfoData(){
         DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
         try {
-            columnInfoList = dt.GetTables(null, null, null, new String[] {"TABLE"});
+            columnInfoList = dt.GetColumnsInformation(null, null, null, new String[]{"TABLE"});
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

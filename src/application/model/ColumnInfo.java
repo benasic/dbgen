@@ -12,6 +12,8 @@ public class ColumnInfo {
     private final StringProperty columnSize;
     private final IntegerProperty sqlType;
 
+    private BooleanProperty nullable;
+    private BooleanProperty autoIncrement;
 
     private String hash;
     private Generator generator;
@@ -100,6 +102,38 @@ public class ColumnInfo {
 
     public void setSqlType(int sqlType){
         this.sqlType.set(sqlType);
+    }
+
+    // Nullable
+
+    public boolean getNullable() {
+        return nullable.get();
+    }
+
+    public BooleanProperty nullableProperty() {
+        return nullable;
+    }
+
+    public void setNullable(boolean nullable) {
+        if(this.nullable != null){
+            this.nullable = new ReadOnlyBooleanWrapper(nullable);
+        }
+    }
+
+    // AutoIncrement
+
+    public boolean getAutoIncrement() {
+        return autoIncrement.get();
+    }
+
+    public BooleanProperty autoIncrementProperty() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement) {
+        if(this.autoIncrement != null){
+            this.autoIncrement = new ReadOnlyBooleanWrapper(autoIncrement);
+        }
     }
 
     public String getHash(){

@@ -58,16 +58,17 @@ public class DatabaseTools {
         CloseConnection();
     }
 
-    public ObservableList<ColumnInfo> GetTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
+    public ObservableList<ColumnInfo> GetColumnsInformation(String catalog, String schemaPattern, String tableNamePattern, String[] types)
             throws SQLException {
+
         OpenConnection();
 
-        List<String> tableNames = new ArrayList<>();
         ObservableList<ColumnInfo> columnInfoCollection = FXCollections.observableArrayList();
 
         metadata = DBConnection.getMetaData();
         ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
 
+        List<String> tableNames = new ArrayList<>();
         while (result.next()) {
             tableNames.add(result.getString("TABLE_NAME"));
         }
@@ -81,6 +82,17 @@ public class DatabaseTools {
                 columnInfo.setColumnType(jdbcTypeNames.get(Integer.parseInt(result.getString("DATA_TYPE"))));
                 columnInfo.setColumnSize(result.getString("COLUMN_SIZE"));
                 columnInfo.setSqlType(Integer.parseInt(result.getString("DATA_TYPE")));
+
+                // if column is nullable
+                columnInfo.setNullable(Integer.parseInt(result.getString("NULLABLE")) == 1);
+
+                // if column is auto incremented
+                // this field can return empty string which means that values can not be determined
+                // TODO that can cause potentials problem with some database
+                columnInfo.setAutoIncrement(result.getString("IS_AUTOINCREMENT").equals("YES"));
+
+                System.out.println(result.getString("IS_AUTOINCREMENT") + " " + result.getString("COLUMN_NAME"));
+
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
                         columnInfo.setGenerator(new StringGenerator());
