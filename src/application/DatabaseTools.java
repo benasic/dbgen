@@ -77,11 +77,16 @@ public class DatabaseTools {
             result = metadata.getColumns(catalog, schemaPattern, tableName, null);
             while (result.next()) {
                 ColumnInfo columnInfo = new ColumnInfo();
+                // set table name
                 columnInfo.setTableName(tableName);
                 columnInfo.setColumnName(result.getString("COLUMN_NAME"));
                 columnInfo.setColumnType(jdbcTypeNames.get(Integer.parseInt(result.getString("DATA_TYPE"))));
                 columnInfo.setColumnSize(result.getString("COLUMN_SIZE"));
                 columnInfo.setSqlType(Integer.parseInt(result.getString("DATA_TYPE")));
+                System.out.println(result.getString("DATA_TYPE") + " " + result.getString("TYPE_NAME"));
+
+                // JDBC implementation dependable
+                columnInfo.setDatabaseType(result.getString("TYPE_NAME"));
 
                 // if column is nullable
                 columnInfo.setNullable(Integer.parseInt(result.getString("NULLABLE")) == 1);
@@ -91,7 +96,9 @@ public class DatabaseTools {
                 // TODO that can cause potentials problem with some database
                 columnInfo.setAutoIncrement(result.getString("IS_AUTOINCREMENT").equals("YES"));
 
-                System.out.println(result.getString("IS_AUTOINCREMENT") + " " + result.getString("COLUMN_NAME"));
+                columnInfo.setOrdinalPosition(Integer.parseInt(result.getString("ORDINAL_POSITION")));
+
+                System.out.println(result.getString("IS_AUTOINCREMENT") + " " + result.getString("COLUMN_NAME") + " " + result.getString("ORDINAL_POSITION"));
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":

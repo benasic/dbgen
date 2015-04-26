@@ -12,8 +12,10 @@ public class ColumnInfo {
     private final StringProperty columnSize;
     private final IntegerProperty sqlType;
 
+    private StringProperty databaseType;
     private BooleanProperty nullable;
     private BooleanProperty autoIncrement;
+    private IntegerProperty ordinalPosition;
 
     private String hash;
     private Generator generator;
@@ -104,6 +106,22 @@ public class ColumnInfo {
         this.sqlType.set(sqlType);
     }
 
+    // Database Type
+
+    public String getDatabaseType() {
+        return databaseType.get();
+    }
+
+    public StringProperty databaseTypeProperty() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(String databaseType) {
+        if(this.databaseType != null){
+            this.databaseType = new ReadOnlyStringWrapper(databaseType);
+        }
+    }
+
     // Nullable
 
     public boolean getNullable() {
@@ -133,6 +151,22 @@ public class ColumnInfo {
     public void setAutoIncrement(boolean autoIncrement) {
         if(this.autoIncrement != null){
             this.autoIncrement = new ReadOnlyBooleanWrapper(autoIncrement);
+        }
+    }
+
+    // Ordinar Position
+
+    public int getOrdinalPosition() {
+        return ordinalPosition.get();
+    }
+
+    public IntegerProperty ordinalPositionProperty() {
+        return ordinalPosition;
+    }
+
+    public void setOrdinalPosition(int ordinalPosition) {
+        if(this.ordinalPosition != null){
+            this.ordinalPosition = new ReadOnlyIntegerWrapper(ordinalPosition);
         }
     }
 
