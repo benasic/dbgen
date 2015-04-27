@@ -126,7 +126,7 @@ public class ConnectionController {
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 Alert testConectionAlert;
                 try {
-                    String testConnectionResult = db.TestConnection();
+                    String testConnectionResult = db.testConnection();
                     testConectionAlert = new Alert(AlertType.INFORMATION);
                     testConectionAlert.setTitle("Connection test");
                     testConectionAlert.setContentText(testConnectionResult);
@@ -146,7 +146,7 @@ public class ConnectionController {
                 ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getConnectionInfo();
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 try {
-                    db.TestConnection();
+                    db.testConnection();
                     ((Stage) retrieveMetadataButton.getScene().getWindow()).close();
                     ;
                 } catch (SQLException e1) {

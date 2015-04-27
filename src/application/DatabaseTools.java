@@ -3,6 +3,7 @@ package application;
 import application.generator.IntegerGenerator;
 import application.generator.StringGenerator;
 import application.model.ColumnInfo;
+import application.model.helper.PrimaryKey;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -15,6 +16,7 @@ public class DatabaseTools {
     private String connectionString;
     private DatabaseMetaData metadata;
     private Map<Integer, String> jdbcTypeNames = new HashMap<>();
+    private List<String> tableList = new ArrayList<>();
 
     public DatabaseTools(String connectionString) {
         this.connectionString = connectionString;
@@ -41,64 +43,68 @@ public class DatabaseTools {
         }
     }
 
-    public String TestConnection() throws SQLException {
+    public String testConnection() throws SQLException {
         OpenConnection();
         CloseConnection();
         return "Connection successful";
     }
 
-    public void retrieveMetadata() throws SQLException {
-        OpenConnection();
+    private void fillTableList(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 
-        metadata = DBConnection.getMetaData();
-        String productName = metadata.getDatabaseProductName();
-        String productVersion = metadata.getDatabaseProductVersion();
-        System.out.println(productName + " " + productVersion);
-
-        CloseConnection();
+        ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
+        tableList.clear();
+        while (result.next()) {
+            tableList.add(result.getString("TABLE_NAME"));
+        }
     }
 
-    public ObservableList<ColumnInfo> GetColumnsInformation(String catalog, String schemaPattern, String tableNamePattern, String[] types)
+    public ObservableList<ColumnInfo> getColumnInfoObservableList(String catalog, String schemaPattern, String tableNamePattern, String[] types)
             throws SQLException {
 
         OpenConnection();
-
         ObservableList<ColumnInfo> columnInfoCollection = FXCollections.observableArrayList();
 
         metadata = DBConnection.getMetaData();
-        ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
+        fillTableList(catalog, schemaPattern, tableNamePattern, types);
 
-        List<String> tableNames = new ArrayList<>();
-        while (result.next()) {
-            tableNames.add(result.getString("TABLE_NAME"));
-        }
+        for (String tableName : tableList) {
 
-        for (String tableName : tableNames) {
-            result = metadata.getColumns(catalog, schemaPattern, tableName, null);
-            while (result.next()) {
+            ResultSet resultPrimaryKeys = metadata.getPrimaryKeys(catalog, schemaPattern, tableName);
+            List<PrimaryKey> primaryKeys = new ArrayList<>();
+            while (resultPrimaryKeys.next()){
+                PrimaryKey primaryKey = new PrimaryKey();
+                primaryKey.setName(resultPrimaryKeys.getString("PK_NAME"));
+                primaryKey.setColumnName(resultPrimaryKeys.getString("COLUMN_NAME"));
+                primaryKey.setTableName(resultPrimaryKeys.getString("TABLE_NAME"));
+                primaryKey.setSequenceNumber(Integer.parseInt(resultPrimaryKeys.getString("KEY_SEQ")));
+                primaryKeys.add(primaryKey);
+            }
+
+            ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
+            while (resultColumns.next()) {
                 ColumnInfo columnInfo = new ColumnInfo();
                 // set table name
                 columnInfo.setTableName(tableName);
-                columnInfo.setColumnName(result.getString("COLUMN_NAME"));
-                columnInfo.setColumnType(jdbcTypeNames.get(Integer.parseInt(result.getString("DATA_TYPE"))));
-                columnInfo.setColumnSize(result.getString("COLUMN_SIZE"));
-                columnInfo.setSqlType(Integer.parseInt(result.getString("DATA_TYPE")));
-                System.out.println(result.getString("DATA_TYPE") + " " + result.getString("TYPE_NAME"));
+                columnInfo.setColumnName(resultColumns.getString("COLUMN_NAME"));
+                columnInfo.setColumnType(jdbcTypeNames.get(Integer.parseInt(resultColumns.getString("DATA_TYPE"))));
+                columnInfo.setColumnSize(resultColumns.getString("COLUMN_SIZE"));
+                columnInfo.setSqlType(Integer.parseInt(resultColumns.getString("DATA_TYPE")));
+                System.out.println(resultColumns.getString("DATA_TYPE") + " " + resultColumns.getString("TYPE_NAME"));
 
                 // JDBC implementation dependable
-                columnInfo.setDatabaseType(result.getString("TYPE_NAME"));
+                columnInfo.setDatabaseType(resultColumns.getString("TYPE_NAME"));
 
                 // if column is nullable
-                columnInfo.setNullable(Integer.parseInt(result.getString("NULLABLE")) == 1);
+                columnInfo.setNullable(Integer.parseInt(resultColumns.getString("NULLABLE")) == 1);
 
                 // if column is auto incremented
                 // this field can return empty string which means that values can not be determined
                 // TODO that can cause potentials problem with some database
-                columnInfo.setAutoIncrement(result.getString("IS_AUTOINCREMENT").equals("YES"));
+                columnInfo.setAutoIncrement(resultColumns.getString("IS_AUTOINCREMENT").equals("YES"));
 
-                columnInfo.setOrdinalPosition(Integer.parseInt(result.getString("ORDINAL_POSITION")));
+                columnInfo.setOrdinalPosition(Integer.parseInt(resultColumns.getString("ORDINAL_POSITION")));
 
-                System.out.println(result.getString("IS_AUTOINCREMENT") + " " + result.getString("COLUMN_NAME") + " " + result.getString("ORDINAL_POSITION"));
+                System.out.println(resultColumns.getString("IS_AUTOINCREMENT") + " " + resultColumns.getString("COLUMN_NAME") + " " + resultColumns.getString("ORDINAL_POSITION"));
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
