@@ -3,7 +3,9 @@ package application;
 import application.generator.IntegerGenerator;
 import application.generator.StringGenerator;
 import application.model.ColumnInfo;
+import application.model.helper.ForeignKey;
 import application.model.helper.PrimaryKey;
+import application.utils.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -70,14 +72,29 @@ public class DatabaseTools {
         for (String tableName : tableList) {
 
             ResultSet resultPrimaryKeys = metadata.getPrimaryKeys(catalog, schemaPattern, tableName);
-            List<PrimaryKey> primaryKeys = new ArrayList<>();
-            while (resultPrimaryKeys.next()){
+            Map<String, PrimaryKey> primaryKeyMap = new HashMap<>();
+            while (resultPrimaryKeys.next()) {
                 PrimaryKey primaryKey = new PrimaryKey();
                 primaryKey.setName(resultPrimaryKeys.getString("PK_NAME"));
                 primaryKey.setColumnName(resultPrimaryKeys.getString("COLUMN_NAME"));
                 primaryKey.setTableName(resultPrimaryKeys.getString("TABLE_NAME"));
-                primaryKey.setSequenceNumber(Integer.parseInt(resultPrimaryKeys.getString("KEY_SEQ")));
-                primaryKeys.add(primaryKey);
+                primaryKey.setSequenceNumber(resultPrimaryKeys.getInt("KEY_SEQ"));
+                primaryKeyMap.put(primaryKey.getHash(), primaryKey);
+            }
+
+            ResultSet resultForeignKeys = metadata.getImportedKeys(catalog, schemaPattern, tableName);
+            Map<String, ForeignKey> foreignKeyMap = new HashMap<>();
+            while( resultForeignKeys.next()){
+                ForeignKey foreignKey = new ForeignKey();
+                foreignKey.setName(resultForeignKeys.getString("FK_NAME"));
+                foreignKey.setColumnName(resultForeignKeys.getString("FKCOLUMN_NAME"));
+                foreignKey.setTableName(resultForeignKeys.getString("FKTABLE_NAME"));
+                foreignKey.setSequenceNumber(resultForeignKeys.getInt("KEY_SEQ"));
+
+                String primaryKeyHash = Utils.generateSHA256String(resultForeignKeys.getString("PKTABLE_NAME") + resultForeignKeys.getString("PKTABLE_NAME"));
+                foreignKey.setPrimaryKey(primaryKeyMap.get(primaryKeyHash));
+
+                foreignKeyMap.put(foreignKey.getHash(), foreignKey);
             }
 
             ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);

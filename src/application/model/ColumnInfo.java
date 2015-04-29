@@ -170,6 +170,8 @@ public class ColumnInfo {
         }
     }
 
+    // Hash
+
     public String getHash(){
         if(hash == null){
             generateHash();

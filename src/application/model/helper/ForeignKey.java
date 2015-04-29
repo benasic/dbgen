@@ -2,11 +2,12 @@ package application.model.helper;
 
 import application.utils.Utils;
 
-public class PrimaryKey {
+public class ForeignKey {
 
     private String name;
     private String columnName;
     private String tableName;
+    private PrimaryKey primaryKey;
     private int sequenceNumber;
     private String hash;
 
@@ -34,6 +35,14 @@ public class PrimaryKey {
         this.tableName = tableName;
     }
 
+    public PrimaryKey getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(PrimaryKey primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
     public int getSequenceNumber() {
         return sequenceNumber;
     }
@@ -53,3 +62,4 @@ public class PrimaryKey {
         hash = Utils.generateSHA256String(getTableName() + getColumnName());
     }
 }
+
