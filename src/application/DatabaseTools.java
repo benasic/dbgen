@@ -5,6 +5,7 @@ import application.generator.StringGenerator;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
 import application.model.helper.PrimaryKey;
+import application.model.helper.UniqueKey;
 import application.utils.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,8 +18,11 @@ public class DatabaseTools {
     private Connection DBConnection;
     private String connectionString;
     private DatabaseMetaData metadata;
-    private Map<Integer, String> jdbcTypeNames = new HashMap<>();
-    private List<String> tableList = new ArrayList<>();
+    private static final Map<Integer, String> jdbcTypeNames = new HashMap<>();
+    private static final List<String> tableList = new ArrayList<>();
+    private static final Map<String, PrimaryKey> primaryKeyMap = new HashMap<>();
+    private static final Map<String, ForeignKey> foreignKeyMap = new HashMap<>();
+    private static final Map<String, UniqueKey> uniqueKeyMap = new HashMap<>();
 
     public DatabaseTools(String connectionString) {
         this.connectionString = connectionString;
@@ -35,6 +39,9 @@ public class DatabaseTools {
     }
 
     private void getAllJdbcTypeNames() {
+        if(!jdbcTypeNames.isEmpty()){
+            return;
+        }
         for (Field field : Types.class.getFields()) {
             try {
                 jdbcTypeNames.put((Integer) field.get(null), field.getName());
@@ -53,10 +60,65 @@ public class DatabaseTools {
 
     private void fillTableList(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 
-        ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
         tableList.clear();
+
+        ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
         while (result.next()) {
             tableList.add(result.getString("TABLE_NAME"));
+        }
+    }
+
+    private void fetchPrimaryKeys(String catalog, String schema) throws SQLException {
+
+        primaryKeyMap.clear();
+        for(String table : tableList){
+            ResultSet resultSet = metadata.getPrimaryKeys(catalog, schema, table);
+            while (resultSet.next()) {
+                PrimaryKey primaryKey = new PrimaryKey();
+                primaryKey.setName(resultSet.getString("PK_NAME"));
+                primaryKey.setColumnName(resultSet.getString("COLUMN_NAME"));
+                primaryKey.setTableName(resultSet.getString("TABLE_NAME"));
+                primaryKey.setSequenceNumber(resultSet.getInt("KEY_SEQ"));
+                primaryKeyMap.put(primaryKey.getHash(), primaryKey);
+            }
+        }
+    }
+
+    private void fetchForeignKeys(String catalog, String schema) throws SQLException{
+
+        foreignKeyMap.clear();
+        for (String table : tableList){
+            ResultSet resultForeignKeys = metadata.getImportedKeys(catalog, schema, table);
+            while( resultForeignKeys.next()) {
+                ForeignKey foreignKey = new ForeignKey();
+                foreignKey.setName(resultForeignKeys.getString("FK_NAME"));
+                foreignKey.setColumnName(resultForeignKeys.getString("FKCOLUMN_NAME"));
+                foreignKey.setTableName(resultForeignKeys.getString("FKTABLE_NAME"));
+                foreignKey.setSequenceNumber(resultForeignKeys.getInt("KEY_SEQ"));
+
+                String primaryKeyHash = Utils.generateSHA256String(resultForeignKeys.getString("PKTABLE_NAME") + resultForeignKeys.getString("PKCOLUMN_NAME"));
+                foreignKey.setPrimaryKey(primaryKeyMap.get(primaryKeyHash));
+
+                foreignKeyMap.put(foreignKey.getHash(), foreignKey);
+            }
+        }
+    }
+
+    private void fetchUniqueKeys(String catalog, String schema, boolean unique, boolean approximate) throws SQLException {
+
+        uniqueKeyMap.clear();
+        for (String table : tableList){
+            ResultSet resultUniqueKeys = metadata.getIndexInfo(catalog, schema, table, unique, approximate);
+            while (resultUniqueKeys.next()){
+                UniqueKey uniqueKey = new UniqueKey();
+                uniqueKey.setName(resultUniqueKeys.getString("INDEX_NAME"));
+                uniqueKey.setTableName(resultUniqueKeys.getString("TABLE_NAME"));
+                uniqueKey.setColumnName(resultUniqueKeys.getString("COLUMN_NAME"));
+                uniqueKey.setSequenceNumber(resultUniqueKeys.getInt("ORDINAL_POSITION"));
+                uniqueKey.setCardinality(resultUniqueKeys.getLong("CARDINALITY"));
+                uniqueKey.setType(resultUniqueKeys.getShort("TYPE"));
+                uniqueKeyMap.put(uniqueKey.getHash(), uniqueKey);
+            }
         }
     }
 
@@ -67,35 +129,13 @@ public class DatabaseTools {
         ObservableList<ColumnInfo> columnInfoCollection = FXCollections.observableArrayList();
 
         metadata = DBConnection.getMetaData();
+
         fillTableList(catalog, schemaPattern, tableNamePattern, types);
+        fetchPrimaryKeys(catalog, schemaPattern);
+        fetchForeignKeys(catalog, schemaPattern);
+        fetchUniqueKeys(catalog, schemaPattern, true, true);
 
         for (String tableName : tableList) {
-
-            ResultSet resultPrimaryKeys = metadata.getPrimaryKeys(catalog, schemaPattern, tableName);
-            Map<String, PrimaryKey> primaryKeyMap = new HashMap<>();
-            while (resultPrimaryKeys.next()) {
-                PrimaryKey primaryKey = new PrimaryKey();
-                primaryKey.setName(resultPrimaryKeys.getString("PK_NAME"));
-                primaryKey.setColumnName(resultPrimaryKeys.getString("COLUMN_NAME"));
-                primaryKey.setTableName(resultPrimaryKeys.getString("TABLE_NAME"));
-                primaryKey.setSequenceNumber(resultPrimaryKeys.getInt("KEY_SEQ"));
-                primaryKeyMap.put(primaryKey.getHash(), primaryKey);
-            }
-
-            ResultSet resultForeignKeys = metadata.getImportedKeys(catalog, schemaPattern, tableName);
-            Map<String, ForeignKey> foreignKeyMap = new HashMap<>();
-            while( resultForeignKeys.next()){
-                ForeignKey foreignKey = new ForeignKey();
-                foreignKey.setName(resultForeignKeys.getString("FK_NAME"));
-                foreignKey.setColumnName(resultForeignKeys.getString("FKCOLUMN_NAME"));
-                foreignKey.setTableName(resultForeignKeys.getString("FKTABLE_NAME"));
-                foreignKey.setSequenceNumber(resultForeignKeys.getInt("KEY_SEQ"));
-
-                String primaryKeyHash = Utils.generateSHA256String(resultForeignKeys.getString("PKTABLE_NAME") + resultForeignKeys.getString("PKTABLE_NAME"));
-                foreignKey.setPrimaryKey(primaryKeyMap.get(primaryKeyHash));
-
-                foreignKeyMap.put(foreignKey.getHash(), foreignKey);
-            }
 
             ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
             while (resultColumns.next()) {
@@ -103,25 +143,23 @@ public class DatabaseTools {
                 // set table name
                 columnInfo.setTableName(tableName);
                 columnInfo.setColumnName(resultColumns.getString("COLUMN_NAME"));
-                columnInfo.setColumnType(jdbcTypeNames.get(Integer.parseInt(resultColumns.getString("DATA_TYPE"))));
+                columnInfo.setColumnType(jdbcTypeNames.get(resultColumns.getInt("DATA_TYPE")));
                 columnInfo.setColumnSize(resultColumns.getString("COLUMN_SIZE"));
-                columnInfo.setSqlType(Integer.parseInt(resultColumns.getString("DATA_TYPE")));
+                columnInfo.setSqlType(resultColumns.getInt("DATA_TYPE"));
                 System.out.println(resultColumns.getString("DATA_TYPE") + " " + resultColumns.getString("TYPE_NAME"));
 
                 // JDBC implementation dependable
                 columnInfo.setDatabaseType(resultColumns.getString("TYPE_NAME"));
 
                 // if column is nullable
-                columnInfo.setNullable(Integer.parseInt(resultColumns.getString("NULLABLE")) == 1);
+                columnInfo.setNullable(resultColumns.getInt("NULLABLE") == 1);
 
                 // if column is auto incremented
                 // this field can return empty string which means that values can not be determined
                 // TODO that can cause potentials problem with some database
                 columnInfo.setAutoIncrement(resultColumns.getString("IS_AUTOINCREMENT").equals("YES"));
 
-                columnInfo.setOrdinalPosition(Integer.parseInt(resultColumns.getString("ORDINAL_POSITION")));
-
-                System.out.println(resultColumns.getString("IS_AUTOINCREMENT") + " " + resultColumns.getString("COLUMN_NAME") + " " + resultColumns.getString("ORDINAL_POSITION"));
+                columnInfo.setOrdinalPosition(resultColumns.getInt("ORDINAL_POSITION"));
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
