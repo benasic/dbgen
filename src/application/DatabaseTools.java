@@ -87,6 +87,14 @@ public class DatabaseTools {
                 .collect(Collectors.toSet());
     }
 
+    private Map<Integer, Set<String>> getCompositPrimaryKeyMap(Set<String> hashSet){
+        Map<Integer, Set<String>> stringHashSetMap = new HashMap<>();
+        if(hashSet.size() > 1){
+            stringHashSetMap.put(1, hashSet);
+        }
+        return stringHashSetMap;
+    }
+
     private void fetchPrimaryKeys(String catalog, String schema) throws SQLException {
 
         primaryKeyMap.clear();
@@ -166,8 +174,6 @@ public class DatabaseTools {
             Set<String> foreignKeyHashSet = getForeignKeyHashSet(tableName);
             Set<String> uniqueKeyHashSet = getUniqueKeyHashSet(tableName);
 
-            boolean isCompositePrimaryKey = primaryKeyHashSet.size() > 1;
-
             ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
             while (resultColumns.next()) {
                 ColumnInfo columnInfo = new ColumnInfo();
@@ -193,6 +199,11 @@ public class DatabaseTools {
 
                 // primary key check
                 columnInfo.setIsPrimaryKey(primaryKeyHashSet.contains(columnInfo.getHash()));
+
+                boolean isCompositePrimaryKey = !getCompositPrimaryKeyMap(primaryKeyHashSet).isEmpty();
+                if(isCompositePrimaryKey){
+                    columnInfo.setCompositePrimaryKeySet(getCompositPrimaryKeyMap(primaryKeyHashSet).get(1));
+                }
                 columnInfo.setIsCompositePrimaryKey(isCompositePrimaryKey);
 
                 // foreign key check

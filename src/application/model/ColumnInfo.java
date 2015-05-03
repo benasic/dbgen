@@ -1,8 +1,12 @@
 package application.model;
 
-import application.utils.Utils;
 import application.generator.Generator;
+import application.utils.Utils;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
+
+import java.util.Set;
 
 public class ColumnInfo {
 
@@ -23,6 +27,8 @@ public class ColumnInfo {
     private BooleanProperty isCompositePrimaryKey;
     private BooleanProperty isForeignKey;
     private BooleanProperty isUniqueKey;
+
+    private final ObservableSet<String> compositePrimaryKeySet = FXCollections.observableSet();
 
     private String hash;
     private Generator generator;
@@ -261,6 +267,15 @@ public class ColumnInfo {
         if(this.isUniqueKey == null){
             this.isUniqueKey = new ReadOnlyBooleanWrapper(isUniqueKey);
         }
+    }
+
+    public ObservableSet<String> getCompositePrimaryKeySet() {
+        return compositePrimaryKeySet;
+    }
+
+    public void setCompositePrimaryKeySet(Set<String> hashSet){
+        compositePrimaryKeySet.clear();
+        compositePrimaryKeySet.addAll(hashSet);
     }
 
     // Hash
