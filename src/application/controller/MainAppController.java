@@ -57,11 +57,17 @@ public class MainAppController {
     private IntegerGeneratorController integerGeneratorController;
     private Image tableIcon;
     private Image primaryKeyIcon;
+    private Image foreignKeyIcon;
+    private Image primaryForeignKeyIcon;
 
     @FXML
     private void initialize() {
+
         tableIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/table.png"));
         primaryKeyIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/primaryKey.png"));
+        foreignKeyIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/foreignKey.png"));
+        primaryForeignKeyIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/primaryForeignKey.png"));
+
         stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
         integerLoader.setLocation(DbGen.class.getResource("view/IntegerGenerator.fxml"));
         try {
@@ -113,10 +119,15 @@ public class MainAppController {
                 roots.put(columnInfo.getTableName(), tempRoot);
             }
             // setting child
-            if(columnInfo.getIsPrimaryKey()){
+            if(columnInfo.getIsPrimaryKey() && columnInfo.getIsForeignKey()){
+                tempRoot.getChildren().add(new TreeItem<>(columnInfo, new ImageView(primaryForeignKeyIcon)));
+            }
+            else if(columnInfo.getIsPrimaryKey()){
                 tempRoot.getChildren().add(new TreeItem<>(columnInfo, new ImageView(primaryKeyIcon)));
             }
-            else{
+            else if (columnInfo.getIsForeignKey()) {
+                tempRoot.getChildren().add(new TreeItem<>(columnInfo, new ImageView(foreignKeyIcon)));
+            } else {
                 tempRoot.getChildren().add(new TreeItem<>(columnInfo));
             }
 
@@ -157,7 +168,12 @@ public class MainAppController {
 
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
-                switch (newValue.getValue().getColumnType()) {
+                String type = newValue.getValue().getColumnType();
+                if(type == null){
+                    System.err.println("Invalid type");
+                    return;
+                }
+                switch (type) {
                     case "VARCHAR":
                         stringGeneratorController.setGenerator(newValue.getValue().getGenerator());
                         mainBorderPane.setCenter(stringGeneratorSubScene);
@@ -176,7 +192,7 @@ public class MainAppController {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener(((observable, oldValue, newValue) -> {
                 // in case root is selected
-                if (newValue.getValue().getColumnName().equals("")) {
+                if (newValue.getValue().getIsRoot()) {
                     tableView.getColumns().clear();
                     tableView.getItems().clear();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {

@@ -20,7 +20,8 @@ public class ColumnInfo {
     private BooleanProperty autoIncrement;
     private IntegerProperty ordinalPosition;
     private BooleanProperty isPrimaryKey;
-    private BooleanProperty isMultipleColumnPrimaryKey;
+    private BooleanProperty isCompositePrimaryKey;
+    private BooleanProperty isForeignKey;
 
     private String hash;
     private Generator generator;
@@ -215,17 +216,33 @@ public class ColumnInfo {
 
     // Is multiple Column Primary Key
 
-    public boolean getIsMultipleColumnPrimaryKey() {
-        return isMultipleColumnPrimaryKey.get();
+    public boolean getIsCompositePrimaryKey() {
+        return isCompositePrimaryKey.get();
     }
 
-    public BooleanProperty isMultipleColumnPrimaryKeyProperty() {
-        return isMultipleColumnPrimaryKey;
+    public BooleanProperty isCompositePrimaryKeyProperty() {
+        return isCompositePrimaryKey;
     }
 
-    public void setIsMultipleColumnPrimaryKey(boolean isMultipleColumnPrimaryKey) {
-        if(this.isMultipleColumnPrimaryKey == null){
-            this.isMultipleColumnPrimaryKey = new ReadOnlyBooleanWrapper(isMultipleColumnPrimaryKey);
+    public void setIsCompositePrimaryKey(boolean isCompositePrimaryKey) {
+        if(this.isCompositePrimaryKey == null){
+            this.isCompositePrimaryKey = new ReadOnlyBooleanWrapper(isCompositePrimaryKey);
+        }
+    }
+
+    // Is Foreign Key
+
+    public boolean getIsForeignKey() {
+        return isForeignKey.get();
+    }
+
+    public BooleanProperty isForeignKeyProperty() {
+        return isForeignKey;
+    }
+
+    public void setIsForeignKey(boolean isForeignKey) {
+        if(this.isForeignKey == null){
+            this.isForeignKey = new ReadOnlyBooleanWrapper(isForeignKey);
         }
     }
 
