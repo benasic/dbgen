@@ -30,6 +30,11 @@ public class DbGen extends Application {
     }
 
     private void generateData() {
+        ConnectionInfo mysql = new ConnectionInfo("MySql", JDBC_Constants.Name.MYSQL, "localhost",
+                JDBC_Constants.Port.MYSQL, "sakila");
+        mysql.addParametar("user", "filip");
+        mysql.addParametar("password", "filip");
+        connectionInfoData.add(mysql);
         ConnectionInfo postgres = new ConnectionInfo("Postgres", JDBC_Constants.Name.POSTGRES, "localhost",
                 JDBC_Constants.Port.POSTGRES, "test");
         postgres.addParametar("user", "filip");

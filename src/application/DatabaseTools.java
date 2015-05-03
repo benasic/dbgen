@@ -21,9 +21,9 @@ public class DatabaseTools {
     private DatabaseMetaData metadata;
     private static final Map<Integer, String> jdbcTypeNames = new HashMap<>();
     private static final List<String> tableList = new ArrayList<>();
-    private static final Map<String, PrimaryKey> primaryKeyMap = new HashMap<>();
-    private static final Map<String, ForeignKey> foreignKeyMap = new HashMap<>();
-    private static final Map<String, UniqueKey> uniqueKeyMap = new HashMap<>();
+    private static final Map<String, PrimaryKey> primaryKeyMap = new LinkedHashMap<>();
+    private static final Map<String, ForeignKey> foreignKeyMap = new LinkedHashMap<>();
+    private static final Map<String, UniqueKey> uniqueKeyMap = new LinkedHashMap<>();
 
     public DatabaseTools(String connectionString) {
         this.connectionString = connectionString;
