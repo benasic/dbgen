@@ -22,6 +22,7 @@ public class ColumnInfo {
     private BooleanProperty isPrimaryKey;
     private BooleanProperty isCompositePrimaryKey;
     private BooleanProperty isForeignKey;
+    private BooleanProperty isUniqueKey;
 
     private String hash;
     private Generator generator;
@@ -246,6 +247,21 @@ public class ColumnInfo {
         }
     }
 
+    // Is Unique Key
+
+    public boolean getIsUniqueKey() {
+        return isUniqueKey.get();
+    }
+
+    public BooleanProperty isUniqueKeyProperty() {
+        return isUniqueKey;
+    }
+
+    public void setIsUniqueKey(boolean isUniqueKey) {
+        if(this.isUniqueKey == null){
+            this.isUniqueKey = new ReadOnlyBooleanWrapper(isUniqueKey);
+        }
+    }
 
     // Hash
 

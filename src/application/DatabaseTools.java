@@ -164,6 +164,8 @@ public class DatabaseTools {
 
             Set<String> primaryKeyHashSet = getPrimaryKeyHashSet(tableName);
             Set<String> foreignKeyHashSet = getForeignKeyHashSet(tableName);
+            Set<String> uniqueKeyHashSet = getUniqueKeyHashSet(tableName);
+
             boolean isCompositePrimaryKey = primaryKeyHashSet.size() > 1;
 
             ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
@@ -196,6 +198,8 @@ public class DatabaseTools {
                 // foreign key check
                 columnInfo.setIsForeignKey(foreignKeyHashSet.contains(columnInfo.getHash()));
 
+                // unique key check
+                columnInfo.setIsUniqueKey(uniqueKeyHashSet.contains(columnInfo.getHash()));
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
