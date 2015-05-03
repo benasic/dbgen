@@ -12,11 +12,15 @@ public class ColumnInfo {
     private final StringProperty columnSize;
     private final IntegerProperty sqlType;
 
+    // helper for determining root element
+    private BooleanProperty isRoot;
+
     private StringProperty databaseType;
     private BooleanProperty nullable;
     private BooleanProperty autoIncrement;
     private IntegerProperty ordinalPosition;
     private BooleanProperty isPrimaryKey;
+    private BooleanProperty isMultipleColumnPrimaryKey;
 
     private String hash;
     private Generator generator;
@@ -27,14 +31,16 @@ public class ColumnInfo {
         columnType = new SimpleStringProperty();
         columnSize = new SimpleStringProperty();
         sqlType = new SimpleIntegerProperty();
+        setIsRoot(false);
     }
 
-    public ColumnInfo(String tableName, String columnName, String columnType, String columnSize) {
+    public ColumnInfo(String tableName, boolean root) {
         this.tableName = new SimpleStringProperty(tableName);
-        this.columnName = new SimpleStringProperty(columnName);
-        this.columnType = new SimpleStringProperty(columnType);
-        this.columnSize = new SimpleStringProperty(columnSize);
+        this.columnName = new SimpleStringProperty();
+        this.columnType = new SimpleStringProperty();
+        this.columnSize = new SimpleStringProperty();
         this.sqlType = new SimpleIntegerProperty();
+        setIsRoot(root);
     }
 
     public Generator getGenerator() {
@@ -103,8 +109,28 @@ public class ColumnInfo {
         return  sqlType.get();
     }
 
+    public IntegerProperty getSqlTypeProperty(){
+        return sqlType;
+    }
+
     public void setSqlType(int sqlType){
         this.sqlType.set(sqlType);
+    }
+
+    // Root Flag
+
+    public boolean getIsRoot() {
+        return isRoot.get();
+    }
+
+    public BooleanProperty isRootProperty() {
+        return isRoot;
+    }
+
+    public void setIsRoot(boolean isRoot) {
+        if(this.isRoot == null){
+            this.isRoot = new ReadOnlyBooleanWrapper(isRoot);
+        }
     }
 
     // Database Type
@@ -171,6 +197,8 @@ public class ColumnInfo {
         }
     }
 
+    // Is Primary Key
+
     public boolean getIsPrimaryKey() {
         return isPrimaryKey.get();
     }
@@ -180,8 +208,27 @@ public class ColumnInfo {
     }
 
     public void setIsPrimaryKey(boolean isPrimaryKey) {
-        this.isPrimaryKey.set(isPrimaryKey);
+        if(this.isPrimaryKey == null){
+            this.isPrimaryKey = new ReadOnlyBooleanWrapper(isPrimaryKey);
+        }
     }
+
+    // Is multiple Column Primary Key
+
+    public boolean getIsMultipleColumnPrimaryKey() {
+        return isMultipleColumnPrimaryKey.get();
+    }
+
+    public BooleanProperty isMultipleColumnPrimaryKeyProperty() {
+        return isMultipleColumnPrimaryKey;
+    }
+
+    public void setIsMultipleColumnPrimaryKey(boolean isMultipleColumnPrimaryKey) {
+        if(this.isMultipleColumnPrimaryKey == null){
+            this.isMultipleColumnPrimaryKey = new ReadOnlyBooleanWrapper(isMultipleColumnPrimaryKey);
+        }
+    }
+
 
     // Hash
 

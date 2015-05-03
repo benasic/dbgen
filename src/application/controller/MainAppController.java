@@ -56,10 +56,12 @@ public class MainAppController {
     private StringGeneratorController stringGeneratorController;
     private IntegerGeneratorController integerGeneratorController;
     private Image tableIcon;
+    private Image primaryKeyIcon;
 
     @FXML
     private void initialize() {
-        tableIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/tables1.png"));
+        tableIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/table.png"));
+        primaryKeyIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/primaryKey.png"));
         stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
         integerLoader.setLocation(DbGen.class.getResource("view/IntegerGenerator.fxml"));
         try {
@@ -95,20 +97,32 @@ public class MainAppController {
     private void fillTableInfoTreeTableView(){
 
         Map<String, TreeItem<ColumnInfo>> roots = new HashMap<>();
+
         for (ColumnInfo columnInfo : columnInfoList) {
+
+            // setting root elements
             TreeItem<ColumnInfo> tempRoot;
+            // find temp root
             if(roots.keySet().contains(columnInfo.getTableName())){
                 tempRoot = roots.get(columnInfo.getTableName());
             }
+            // if root doesn't exits crate new
             else{
-                tempRoot = new TreeItem<>(new ColumnInfo(columnInfo.getTableName(), "", "", ""), new ImageView (tableIcon));
-                tempRoot.setExpanded(false);
+                tempRoot = new TreeItem<>(new ColumnInfo(columnInfo.getTableName(), true), new ImageView (tableIcon));
+                tempRoot.setExpanded(true);
                 roots.put(columnInfo.getTableName(), tempRoot);
             }
-            tempRoot.getChildren().add(new TreeItem<>(columnInfo));
+            // setting child
+            if(columnInfo.getIsPrimaryKey()){
+                tempRoot.getChildren().add(new TreeItem<>(columnInfo, new ImageView(primaryKeyIcon)));
+            }
+            else{
+                tempRoot.getChildren().add(new TreeItem<>(columnInfo));
+            }
+
         }
 
-        TreeItem<ColumnInfo> mainRoot = new TreeItem<>(new ColumnInfo("root", "", "", ""));
+        TreeItem<ColumnInfo> mainRoot = new TreeItem<>(new ColumnInfo("root", false));
         mainRoot.setExpanded(true);
         for (TreeItem<ColumnInfo> root : roots.values()) {
             mainRoot.getChildren().add(root);
@@ -123,7 +137,7 @@ public class MainAppController {
 
         columnName.setCellValueFactory(p -> {
             ColumnInfo columnInfo = p.getValue().getValue();
-            if (columnInfo.getColumnSize().equals("")) {
+            if (columnInfo.getIsRoot()) {
                 return new ReadOnlyStringWrapper(columnInfo.getTableName());
             } else {
                 return new ReadOnlyStringWrapper(columnInfo.getColumnName());
@@ -131,7 +145,7 @@ public class MainAppController {
         });
         columnType.setCellValueFactory(p -> {
             ColumnInfo columnInfo = p.getValue().getValue();
-            if(columnInfo.getColumnSize().equals("")){
+            if(columnInfo.getIsRoot()){
                 return new ReadOnlyStringWrapper("");
             }
             else{

@@ -163,7 +163,7 @@ public class DatabaseTools {
         for (String tableName : tableList) {
 
             Set<String> primaryKeyHashSet = getPrimaryKeyHashSet(tableName);
-            boolean multipleColumnPrimaryKey = primaryKeyHashSet.size() > 1;
+            boolean isMultipleColumnPrimaryKey = primaryKeyHashSet.size() > 1;
 
             ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
             while (resultColumns.next()) {
@@ -187,6 +187,11 @@ public class DatabaseTools {
                 columnInfo.setAutoIncrement(resultColumns.getString("IS_AUTOINCREMENT").equals("YES"));
 
                 columnInfo.setOrdinalPosition(resultColumns.getInt("ORDINAL_POSITION"));
+
+                // primary key check
+                columnInfo.setIsPrimaryKey(primaryKeyHashSet.contains(columnInfo.getHash()));
+                columnInfo.setIsMultipleColumnPrimaryKey(isMultipleColumnPrimaryKey);
+
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
