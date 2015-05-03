@@ -16,6 +16,7 @@ public class ColumnInfo {
     private BooleanProperty nullable;
     private BooleanProperty autoIncrement;
     private IntegerProperty ordinalPosition;
+    private BooleanProperty isPrimaryKey;
 
     private String hash;
     private Generator generator;
@@ -117,7 +118,7 @@ public class ColumnInfo {
     }
 
     public void setDatabaseType(String databaseType) {
-        if(this.databaseType != null){
+        if(this.databaseType == null){
             this.databaseType = new ReadOnlyStringWrapper(databaseType);
         }
     }
@@ -133,7 +134,7 @@ public class ColumnInfo {
     }
 
     public void setNullable(boolean nullable) {
-        if(this.nullable != null){
+        if(this.nullable == null){
             this.nullable = new ReadOnlyBooleanWrapper(nullable);
         }
     }
@@ -149,7 +150,7 @@ public class ColumnInfo {
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
-        if(this.autoIncrement != null){
+        if(this.autoIncrement == null){
             this.autoIncrement = new ReadOnlyBooleanWrapper(autoIncrement);
         }
     }
@@ -165,9 +166,21 @@ public class ColumnInfo {
     }
 
     public void setOrdinalPosition(int ordinalPosition) {
-        if(this.ordinalPosition != null){
+        if(this.ordinalPosition == null){
             this.ordinalPosition = new ReadOnlyIntegerWrapper(ordinalPosition);
         }
+    }
+
+    public boolean getIsPrimaryKey() {
+        return isPrimaryKey.get();
+    }
+
+    public BooleanProperty isPrimaryKeyProperty() {
+        return isPrimaryKey;
+    }
+
+    public void setIsPrimaryKey(boolean isPrimaryKey) {
+        this.isPrimaryKey.set(isPrimaryKey);
     }
 
     // Hash

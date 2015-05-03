@@ -204,16 +204,20 @@ public class MainAppController {
                 selectedColumnInfoList.clear();
                 // if root is selected
                 if (selectedColumnInfoTreeItem.getValue().getColumnName().equals("")) {
-                    selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream().map(TreeItem::getValue).collect(Collectors.toList()));
+                    selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
+                            .map(TreeItem::getValue)
+                            .collect(Collectors.toList()));
                 }
                 // if leaf is selected
                 else {
                     TreeItem<ColumnInfo> columnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
-                    selectedColumnInfoList.addAll(columnInfoTreeItem.getChildren().stream().map(TreeItem::getValue).collect(Collectors.toList()));
+                    selectedColumnInfoList.addAll(columnInfoTreeItem.getChildren().stream()
+                            .map(TreeItem::getValue)
+                            .collect(Collectors.toList()));
                 }
 
                 // calling generator for each of selected item
-                // TODO for now 100 times, must be replaced with user option for each table
+                // TODO for now 100000 times, must be replaced with user option for each table
                 // TODO add different collection type support
                 JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
 

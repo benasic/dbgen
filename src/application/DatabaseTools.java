@@ -13,6 +13,7 @@ import javafx.collections.ObservableList;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DatabaseTools {
     private Connection DBConnection;
@@ -52,12 +53,6 @@ public class DatabaseTools {
         }
     }
 
-    public String testConnection() throws SQLException {
-        OpenConnection();
-        CloseConnection();
-        return "Connection successful";
-    }
-
     private void fillTableList(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 
         tableList.clear();
@@ -66,6 +61,30 @@ public class DatabaseTools {
         while (result.next()) {
             tableList.add(result.getString("TABLE_NAME"));
         }
+    }
+
+    private Set<String> getPrimaryKeyHashSet(String tableName){
+        return primaryKeyMap.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(entry1 -> entry1.getTableName().equals(tableName))
+                .map(PrimaryKey::getHash)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getForeignKeyHashSet(String tableName){
+        return foreignKeyMap.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(entry1 -> entry1.getTableName().equals(tableName))
+                .map(ForeignKey::getHash)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getUniqueKeyHashSet(String tableName){
+        return uniqueKeyMap.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(entry1 -> entry1.getTableName().equals(tableName))
+                .map(UniqueKey::getHash)
+                .collect(Collectors.toSet());
     }
 
     private void fetchPrimaryKeys(String catalog, String schema) throws SQLException {
@@ -122,6 +141,12 @@ public class DatabaseTools {
         }
     }
 
+    public String testConnection() throws SQLException {
+        OpenConnection();
+        CloseConnection();
+        return "Connection successful";
+    }
+
     public ObservableList<ColumnInfo> getColumnInfoObservableList(String catalog, String schemaPattern, String tableNamePattern, String[] types)
             throws SQLException {
 
@@ -137,16 +162,18 @@ public class DatabaseTools {
 
         for (String tableName : tableList) {
 
+            Set<String> primaryKeyHashSet = getPrimaryKeyHashSet(tableName);
+            boolean multipleColumnPrimaryKey = primaryKeyHashSet.size() > 1;
+
             ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
             while (resultColumns.next()) {
                 ColumnInfo columnInfo = new ColumnInfo();
-                // set table name
+
                 columnInfo.setTableName(tableName);
                 columnInfo.setColumnName(resultColumns.getString("COLUMN_NAME"));
                 columnInfo.setColumnType(jdbcTypeNames.get(resultColumns.getInt("DATA_TYPE")));
                 columnInfo.setColumnSize(resultColumns.getString("COLUMN_SIZE"));
                 columnInfo.setSqlType(resultColumns.getInt("DATA_TYPE"));
-                System.out.println(resultColumns.getString("DATA_TYPE") + " " + resultColumns.getString("TYPE_NAME"));
 
                 // JDBC implementation dependable
                 columnInfo.setDatabaseType(resultColumns.getString("TYPE_NAME"));
