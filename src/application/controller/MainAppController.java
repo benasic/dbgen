@@ -175,6 +175,9 @@ public class MainAppController {
                 }
                 switch (type) {
                     case "VARCHAR":
+                        if(oldValue != null){
+                            stringGeneratorController.unbindValues(oldValue.getValue().getGenerator());
+                        }
                         stringGeneratorController.setGenerator(newValue.getValue().getGenerator());
                         mainBorderPane.setCenter(stringGeneratorSubScene);
                         break;

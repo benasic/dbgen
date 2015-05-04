@@ -17,6 +17,11 @@ public class StringGeneratorController {
         //generatorTextField.setText("neki teks");
     }
 
+    public void unbindValues(Generator generator){
+        stringGenerator = (StringGenerator)generator;
+        generatorTextField.textProperty().unbindBidirectional(this.stringGenerator.getGeneratorStringProperty());
+    }
+
     public void setGenerator(Generator generator){
         stringGenerator = (StringGenerator)generator;
         generatorTextField.textProperty().bindBidirectional(this.stringGenerator.getGeneratorStringProperty());
