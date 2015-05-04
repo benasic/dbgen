@@ -66,7 +66,7 @@ public class DatabaseTools {
     private Set<String> getPrimaryKeyHashSet(String tableName){
         return primaryKeyMap.entrySet().stream()
                 .map(Map.Entry::getValue)
-                .filter(entry1 -> entry1.getTableName().equals(tableName))
+                .filter(entry -> entry.getTableName().equals(tableName))
                 .map(PrimaryKey::getHash)
                 .collect(Collectors.toSet());
     }
@@ -74,7 +74,7 @@ public class DatabaseTools {
     private Set<String> getForeignKeyHashSet(String tableName){
         return foreignKeyMap.entrySet().stream()
                 .map(Map.Entry::getValue)
-                .filter(entry1 -> entry1.getTableName().equals(tableName))
+                .filter(entry -> entry.getTableName().equals(tableName))
                 .map(ForeignKey::getHash)
                 .collect(Collectors.toSet());
     }
@@ -82,17 +82,68 @@ public class DatabaseTools {
     private Set<String> getUniqueKeyHashSet(String tableName){
         return uniqueKeyMap.entrySet().stream()
                 .map(Map.Entry::getValue)
-                .filter(entry1 -> entry1.getTableName().equals(tableName))
+                .filter(entry -> entry.getTableName().equals(tableName))
                 .map(UniqueKey::getHash)
                 .collect(Collectors.toSet());
     }
 
-    private Map<Integer, Set<String>> getCompositPrimaryKeyMap(Set<String> hashSet){
-        Map<Integer, Set<String>> stringHashSetMap = new HashMap<>();
-        if(hashSet.size() > 1){
-            stringHashSetMap.put(1, hashSet);
+    private Set<String> getCompositePrimaryKeySet(Set<String> hashSet, String hash){
+        Set<String> stringHashSet = new HashSet<>();
+        // composite key requires more then one column
+        if(hashSet.size() > 1 && hashSet.contains(hash)){
+            stringHashSet.addAll(hashSet);
         }
-        return stringHashSetMap;
+        return stringHashSet;
+    }
+
+    // TODO napravit tablicu za testiranje najkompliciranijeg slucaja
+    // TODO dva kompozitna strana kljuca i jedan obicni strani kljuc
+    private Set<String> getCompositeForeignKeySet(Set<String> hashSet, String hash){
+        Set<String> stringHashSet = new HashSet<>();
+        // first check minimum size for composite key
+        // second check is hash inside set
+        if(hashSet.size() > 1 && hashSet.contains(hash)){
+            //third check is there any key with sequence number > 1
+            boolean candidateExist = false;
+            Set<ForeignKey> candidateSet = new HashSet<>();
+            for(String tempHash : hashSet){
+                if(foreignKeyMap.get(tempHash).getSequenceNumber() > 1){
+                    candidateExist = true;
+                    candidateSet.add(foreignKeyMap.get(tempHash));
+                    break;
+                }
+            }
+            if(candidateExist){
+                // fourth map candidates to correct map
+                Map<String, Set<String>> stringSetMap = new HashMap<>();
+                for(ForeignKey foreignKey : candidateSet){
+                    String key = foreignKey.getPrimaryKey().getTableName();
+                    // make set for mapping
+                    if(!stringSetMap.containsKey(key)){
+                        stringSetMap.put(key, new HashSet<>());
+                    }
+                    stringSetMap.get(key).add(foreignKey.getHash());
+                }
+                // fifth resolve candidate with sequence number one
+                // only foreign key with primary key table name that exist in map can enter in set
+                // set will eliminate duplicate
+                for(String tempForeignKeyHash : hashSet){
+                    ForeignKey foreignKey = foreignKeyMap.get(tempForeignKeyHash);
+                    String tableNameKey = foreignKey.getPrimaryKey().getTableName();
+                    if(stringSetMap.containsKey(tableNameKey)){
+                        stringSetMap.get(tableNameKey).add(tempForeignKeyHash);
+                    }
+                }
+                // sixth get correct set
+                for(Set<String> finalForeignKeyHashSet : stringSetMap.values()){
+                    if(finalForeignKeyHashSet.contains(hash)){
+                        stringHashSet.addAll(finalForeignKeyHashSet);
+                        break;
+                    }
+                }
+            }
+        }
+        return stringHashSet;
     }
 
     private void fetchPrimaryKeys(String catalog, String schema) throws SQLException {
@@ -199,15 +250,19 @@ public class DatabaseTools {
 
                 // primary key check
                 columnInfo.setIsPrimaryKey(primaryKeyHashSet.contains(columnInfo.getHash()));
-
-                boolean isCompositePrimaryKey = !getCompositPrimaryKeyMap(primaryKeyHashSet).isEmpty();
+                boolean isCompositePrimaryKey = !getCompositePrimaryKeySet(primaryKeyHashSet, columnInfo.getHash()).isEmpty();
                 if(isCompositePrimaryKey){
-                    columnInfo.setCompositePrimaryKeySet(getCompositPrimaryKeyMap(primaryKeyHashSet).get(1));
+                    columnInfo.setCompositePrimaryKeySet(getCompositePrimaryKeySet(primaryKeyHashSet, columnInfo.getHash()));
                 }
                 columnInfo.setIsCompositePrimaryKey(isCompositePrimaryKey);
 
                 // foreign key check
                 columnInfo.setIsForeignKey(foreignKeyHashSet.contains(columnInfo.getHash()));
+                boolean isCompositeForeignKey = !getCompositeForeignKeySet(foreignKeyHashSet, columnInfo.getHash()).isEmpty();
+                if(isCompositeForeignKey){
+                    columnInfo.setCompositeForeignKeySet(getCompositePrimaryKeySet(foreignKeyHashSet, columnInfo.getHash()));
+                }
+                columnInfo.setIsCompositeForeignKey(isCompositeForeignKey);
 
                 // unique key check
                 columnInfo.setIsUniqueKey(uniqueKeyHashSet.contains(columnInfo.getHash()));
