@@ -60,6 +60,9 @@ public class MainAppController {
     private Image foreignKeyIcon;
     private Image primaryForeignKeyIcon;
 
+    private String lastGeneratorType;
+    private Generator lastActiveGenerator;
+
     @FXML
     private void initialize() {
 
@@ -173,15 +176,29 @@ public class MainAppController {
                     System.err.println("Invalid type");
                     return;
                 }
+                // unbind old values
+                if(lastActiveGenerator != null){
+                    switch (lastGeneratorType){
+                        case "VARCHAR":
+                            stringGeneratorController.unbindValues(lastActiveGenerator);
+                            lastActiveGenerator = null;
+                            break;
+                        case "INTEGER":
+                            integerGeneratorController.unbindValues(lastActiveGenerator);
+                            lastActiveGenerator = null;
+                    }
+                }
+
                 switch (type) {
                     case "VARCHAR":
-                        if(oldValue != null){
-                            stringGeneratorController.unbindValues(oldValue.getValue().getGenerator());
-                        }
+                        lastGeneratorType = "VARCHAR";
+                        lastActiveGenerator = newValue.getValue().getGenerator();
                         stringGeneratorController.setGenerator(newValue.getValue().getGenerator());
                         mainBorderPane.setCenter(stringGeneratorSubScene);
                         break;
                     case "INTEGER":
+                        lastGeneratorType = "INTEGER";
+                        lastActiveGenerator = newValue.getValue().getGenerator();
                         integerGeneratorController.setGenerator(newValue.getValue().getGenerator());
                         mainBorderPane.setCenter(integerGeneratorSubScene);
                         break;

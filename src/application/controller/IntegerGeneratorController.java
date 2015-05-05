@@ -5,6 +5,7 @@ import application.generator.IntegerGenerator;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.util.converter.NumberStringConverter;
+
 import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +29,11 @@ public class IntegerGeneratorController {
         });
     }
 
+    public void unbindValues(Generator generator){
+        integerGenerator = (IntegerGenerator)generator;
+        generatorTextField.textProperty().unbindBidirectional(integerGenerator.getGeneratorIntegerProperty());
+    }
+
     public void setGenerator(Generator generator){
         integerGenerator = (IntegerGenerator)generator;
         NumberStringConverter numberStringConverter = new NumberStringConverter(){
@@ -36,6 +42,6 @@ public class IntegerGeneratorController {
                 return NumberFormat.getIntegerInstance();
             }
         };
-        generatorTextField.textProperty().bindBidirectional(this.integerGenerator.getGeneratorIntegerProperty(), numberStringConverter);
+        generatorTextField.textProperty().bindBidirectional(integerGenerator.getGeneratorIntegerProperty(), numberStringConverter);
     }
 }

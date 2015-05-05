@@ -19,11 +19,11 @@ public class StringGeneratorController {
 
     public void unbindValues(Generator generator){
         stringGenerator = (StringGenerator)generator;
-        generatorTextField.textProperty().unbindBidirectional(this.stringGenerator.getGeneratorStringProperty());
+        generatorTextField.textProperty().unbindBidirectional(stringGenerator.getGeneratorStringProperty());
     }
 
     public void setGenerator(Generator generator){
         stringGenerator = (StringGenerator)generator;
-        generatorTextField.textProperty().bindBidirectional(this.stringGenerator.getGeneratorStringProperty());
+        generatorTextField.textProperty().bindBidirectional(stringGenerator.getGeneratorStringProperty());
     }
 }

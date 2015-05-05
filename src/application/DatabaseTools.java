@@ -284,6 +284,7 @@ public class DatabaseTools {
                 columnInfo.setAutoIncrement(resultColumns.getString("IS_AUTOINCREMENT").equals("YES"));
 
                 columnInfo.setOrdinalPosition(resultColumns.getInt("ORDINAL_POSITION"));
+                columnInfo.setColumnDefaultValue(resultColumns.getString("COLUMN_DEF"));
 
                 // primary key check
                 columnInfo.setIsPrimaryKey(primaryKeyHashSet.contains(columnInfo.getHash()));

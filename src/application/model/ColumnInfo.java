@@ -23,6 +23,7 @@ public class ColumnInfo {
     private BooleanProperty nullable;
     private BooleanProperty autoIncrement;
     private IntegerProperty ordinalPosition;
+    private StringProperty columnDefaultValue;
     private BooleanProperty isPrimaryKey;
     private BooleanProperty isCompositePrimaryKey;
     private BooleanProperty isForeignKey;
@@ -206,6 +207,22 @@ public class ColumnInfo {
     public void setOrdinalPosition(int ordinalPosition) {
         if(this.ordinalPosition == null){
             this.ordinalPosition = new ReadOnlyIntegerWrapper(ordinalPosition);
+        }
+    }
+
+    // Column Default Value
+
+    public String getColumnDefaultValue() {
+        return columnDefaultValue.get();
+    }
+
+    public StringProperty columnDefaultValueProperty() {
+        return columnDefaultValue;
+    }
+
+    public void setColumnDefaultValue(String columnDefaultValue) {
+        if(this.columnDefaultValue == null){
+            this.columnDefaultValue = new ReadOnlyStringWrapper(columnDefaultValue);
         }
     }
 
