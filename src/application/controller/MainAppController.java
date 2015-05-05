@@ -253,7 +253,7 @@ public class MainAppController {
             if (selectedColumnInfoTreeItem != null) {
                 selectedColumnInfoList.clear();
                 // if root is selected
-                if (selectedColumnInfoTreeItem.getValue().getColumnName().equals("")) {
+                if (selectedColumnInfoTreeItem.getValue().getIsRoot()) {
                     selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
                             .map(TreeItem::getValue)
                             .collect(Collectors.toList()));
@@ -267,7 +267,7 @@ public class MainAppController {
                 }
 
                 // calling generator for each of selected item
-                // TODO for now 100000 times, must be replaced with user option for each table
+                // TODO for now 1000 times, must be replaced with user option for each table
                 // TODO add different collection type support
                 JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
 
@@ -275,8 +275,13 @@ public class MainAppController {
                     String hash = columnInfo.getHash();
                     Generator generator = columnInfo.getGenerator();
                     jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
-                    for (int i = 0; i < 100000; i++) {
-                        jdbc_repository.insertIntoCollection(hash, generator.generate());
+                    for (int i = 0; i < 1000; i++) {
+                        if(columnInfo.getAutoIncrement()){
+                            jdbc_repository.insertIntoCollection(hash, "Auto generated in DB");
+                        }
+                        else{
+                            jdbc_repository.insertIntoCollection(hash, generator.generate());
+                        }
                     }
                 }
             }

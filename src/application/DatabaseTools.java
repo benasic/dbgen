@@ -329,6 +329,14 @@ public class DatabaseTools {
 
     public void generateData(ObservableList<ObservableList<Object>> observableLists, List<ColumnInfo> columnInfos) throws SQLException {
         if (!columnInfos.isEmpty()) {
+            Set<Integer> skippableColumns = new HashSet<>();
+
+            for(ColumnInfo columnInfo : columnInfos){
+                if(columnInfo.getAutoIncrement()){
+                    skippableColumns.add(columnInfo.getOrdinalPosition());
+                }
+            }
+
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("insert into ");
             stringBuilder.append(columnInfos.get(0).getTableName());
@@ -336,34 +344,45 @@ public class DatabaseTools {
 
             Iterator<ColumnInfo> columnInfoIterator = columnInfos.listIterator();
             while (columnInfoIterator.hasNext()){
-                stringBuilder.append(columnInfoIterator.next().getColumnName());
-                if(columnInfoIterator.hasNext()){
-                    stringBuilder.append(", ");
+                ColumnInfo columnInfo = columnInfoIterator.next();
+
+                if(!skippableColumns.contains(columnInfo.getOrdinalPosition())) {
+                    stringBuilder.append(columnInfo.getColumnName());
+                    if (columnInfoIterator.hasNext()) {
+                        stringBuilder.append(", ");
+                    }
                 }
             }
             stringBuilder.append(") values (");
             columnInfoIterator = columnInfos.listIterator();
             while (columnInfoIterator.hasNext()){
-                columnInfoIterator.next();
-                stringBuilder.append("?");
-                if(columnInfoIterator.hasNext()){
-                    stringBuilder.append(", ");
+                ColumnInfo columnInfo = columnInfoIterator.next();
+
+                if(!skippableColumns.contains(columnInfo.getOrdinalPosition())) {
+                    stringBuilder.append("?");
+                    if(columnInfoIterator.hasNext()){
+                        stringBuilder.append(", ");
+                    }
                 }
             }
             stringBuilder.append(")");
             String sql = stringBuilder.toString();
             OpenConnection();
-            final int batchSize = 1000;
+            final int batchSize = 100;
             int count = 0;
 
             PreparedStatement ps = DBConnection.prepareStatement(sql);
             for(ObservableList<Object> observableList : observableLists){
-                for(int i = 0; i < columnInfos.size(); i++){
-                    ps.setObject(i + 1, observableList.get(i),columnInfos.get(i).getSqlType());
+                // j value is used as help for object that needs to be skipped
+                for(int i = 0, j = 1; i < columnInfos.size(); i++){
+                    if(!skippableColumns.contains(i+1)){
+                        ps.setObject(j++, observableList.get(i), columnInfos.get(i).getSqlType());
+                    }
                 }
                 ps.addBatch();
                 if(++count % batchSize == 0) {
                     ps.executeBatch();
+                    System.out.println("execute batch (entry count): " + count);
                 }
             }
             ps.executeBatch();
