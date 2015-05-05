@@ -146,6 +146,43 @@ public class DatabaseTools {
         return stringHashSet;
     }
 
+    // TODO generirati slucaj kao i za strane kljuceve
+    // provjeriti kod
+    private Set<String> getCompositeUniqueKeySet(Set<String> hashSet, String hash) {
+        Set<String> stringHashSet = new HashSet<>();
+        if(hashSet.size() > 1 && hashSet.contains(hash)){
+            boolean candidateExist = false;
+            Set<UniqueKey> candidateSet = new HashSet<>();
+            for(String tempHash : hashSet){
+                if(uniqueKeyMap.get(tempHash).getSequenceNumber() > 1){
+                    candidateExist = true;
+                    candidateSet.add(uniqueKeyMap.get(tempHash));
+                    break;
+                }
+            }
+
+            if(candidateExist){
+                String keyName = uniqueKeyMap.get(hash).getName();
+                // pick hashes that have same name as queried hash
+                for(UniqueKey uniqueKey : candidateSet){
+                    if(uniqueKey.getName().equals(keyName)){
+                        stringHashSet.add(uniqueKey.getHash());
+                    }
+                }
+                // is same key are added, add rest of key with same name
+                if(!stringHashSet.isEmpty()){
+                    for(String uniqueKeyHash : hashSet){
+                        UniqueKey uniqueKey = uniqueKeyMap.get(uniqueKeyHash);
+                        if(uniqueKey.getName().equals(keyName)){
+                            stringHashSet.add(uniqueKey.getHash());
+                        }
+                    }
+                }
+            }
+        }
+        return stringHashSet;
+    }
+
     private void fetchPrimaryKeys(String catalog, String schema) throws SQLException {
 
         primaryKeyMap.clear();
@@ -260,12 +297,17 @@ public class DatabaseTools {
                 columnInfo.setIsForeignKey(foreignKeyHashSet.contains(columnInfo.getHash()));
                 boolean isCompositeForeignKey = !getCompositeForeignKeySet(foreignKeyHashSet, columnInfo.getHash()).isEmpty();
                 if(isCompositeForeignKey){
-                    columnInfo.setCompositeForeignKeySet(getCompositePrimaryKeySet(foreignKeyHashSet, columnInfo.getHash()));
+                    columnInfo.setCompositeForeignKeySet(getCompositeForeignKeySet(foreignKeyHashSet, columnInfo.getHash()));
                 }
                 columnInfo.setIsCompositeForeignKey(isCompositeForeignKey);
 
                 // unique key check
                 columnInfo.setIsUniqueKey(uniqueKeyHashSet.contains(columnInfo.getHash()));
+                boolean isCompositeUniqueKey = !getCompositeUniqueKeySet(uniqueKeyHashSet, columnInfo.getHash()).isEmpty();
+                if(isCompositeUniqueKey){
+                    columnInfo.setCompositeUniqueKeySet(getCompositeUniqueKeySet(uniqueKeyHashSet, columnInfo.getHash()));
+                }
+                columnInfo.setIsCompositeUniqueKey(isCompositeUniqueKey);
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":

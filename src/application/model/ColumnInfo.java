@@ -28,9 +28,11 @@ public class ColumnInfo {
     private BooleanProperty isForeignKey;
     private BooleanProperty isCompositeForeignKey;
     private BooleanProperty isUniqueKey;
+    private BooleanProperty isCompositeUniqueKey;
 
     private final ObservableSet<String> compositePrimaryKeySet = FXCollections.observableSet();
     private final ObservableSet<String> compositeForeignKeySet = FXCollections.observableSet();
+    private final ObservableSet<String> compositeUniqueKeySet = FXCollections.observableSet();
 
     private String hash;
     private Generator generator;
@@ -287,6 +289,22 @@ public class ColumnInfo {
         }
     }
 
+    // Is Composite Unique Key
+
+    public boolean getIsCompositeUniqueKey() {
+        return isCompositeUniqueKey.get();
+    }
+
+    public BooleanProperty isCompositeUniqueKeyProperty() {
+        return isCompositeUniqueKey;
+    }
+
+    public void setIsCompositeUniqueKey(boolean isCompositeUniqueKey) {
+        if(this.isCompositeUniqueKey == null){
+            this.isCompositeUniqueKey = new ReadOnlyBooleanWrapper(isCompositeUniqueKey);
+        }
+    }
+
     // Composite Sets Part
 
     //Primary key Composite Set
@@ -309,6 +327,17 @@ public class ColumnInfo {
     public void setCompositeForeignKeySet(Set<String> hashSet){
         compositeForeignKeySet.clear();
         compositeForeignKeySet.addAll(hashSet);
+    }
+
+    // Unique Key Composite Set
+
+    public ObservableSet<String> getCompositeUniqueKeySet() {
+        return compositeUniqueKeySet;
+    }
+
+    public void setCompositeUniqueKeySet(Set<String> hashSet){
+        compositeUniqueKeySet.clear();
+        compositeUniqueKeySet.addAll(hashSet);
     }
 
     // Hash
