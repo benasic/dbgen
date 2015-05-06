@@ -5,6 +5,7 @@ import application.DbGen;
 import application.JDBC_Repository;
 import application.generator.Generator;
 import application.model.ColumnInfo;
+import application.model.helper.ForeignKey;
 import application.utils.XML;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -267,32 +268,61 @@ public class MainAppController {
                 }
 
                 // calling generator for each of selected item
-                // TODO for now 1000 times, must be replaced with user option for each table
                 // TODO add different collection type support
                 JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
-
-                // TODO obristati blok ispod
-                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
-                List<Object[]> test;
-                List<Object> testObjects;
-                try {
-                    test = dt.fetchData(selectedColumnInfoList);
-                    testObjects = test.stream().map(objects -> objects[1]).collect(Collectors.toList());
-                    int a = 5;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
 
                 for (ColumnInfo columnInfo : selectedColumnInfoList) {
                     String hash = columnInfo.getHash();
                     Generator generator = columnInfo.getGenerator();
-                    jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
-                    for (int i = 0; i < 1000; i++) {
-                        if(columnInfo.getAutoIncrement()){
-                            jdbc_repository.insertIntoCollection(hash, "Auto generated in DB");
+                    boolean referenceGeneration = false;
+                    // case one
+                    if(columnInfo.getIsForeignKey() && !columnInfo.getIsCompositeForeignKey() && !columnInfo.getIsCompositePrimaryKey()){
+                        // fetch all referenced primary key data
+                        referenceGeneration = true;
+                        ForeignKey foreignKey = DatabaseTools.foreignKeyMap.get(columnInfo.getHash());
+                        String primaryKeyHash = foreignKey.getPrimaryKey().getHash();
+                        ColumnInfo primaryKeyColumn = columnInfoList.stream().filter(column -> column.getHash().equals(primaryKeyHash)).findFirst().get();
+                        List<ColumnInfo> columnInfoList = new ArrayList<>();
+                        columnInfoList.add(primaryKeyColumn);
+                        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                        List<Object[]> primaryKeyReferenceList;
+                        List<Object> primaryKeyList;
+                        try {
+                            primaryKeyReferenceList = dt.fetchData(columnInfoList);
+                            primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
+
+                            // break generation of data if reference are not satisfied
+                            if(primaryKeyList.isEmpty()){
+                                Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
+                                referenceMissing.setTitle("Preparation warning");
+                                referenceMissing.setContentText("First generate data for reference table: " + primaryKeyColumn.getTableName());
+                                referenceMissing.showAndWait();
+                                return;
+                            }
+
+                            jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
+                            // pick random value
+                            Random random = new Random();
+                            random.setSeed(System.currentTimeMillis());
+                            for(int i = 0; i < 1000; i++){
+                                Object object = primaryKeyList.get(random.nextInt(1000));
+                                jdbc_repository.insertIntoCollection(hash, object);
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
                         }
-                        else{
-                            jdbc_repository.insertIntoCollection(hash, generator.generate());
+
+                    }
+
+                    if(!referenceGeneration){
+                        jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
+                        for (int i = 0; i < 1000; i++) {
+                            if(columnInfo.getAutoIncrement()){
+                                jdbc_repository.insertIntoCollection(hash, "Auto generated in DB");
+                            }
+                            else{
+                                jdbc_repository.insertIntoCollection(hash, generator.generate());
+                            }
                         }
                     }
                 }
