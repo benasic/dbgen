@@ -391,4 +391,38 @@ public class DatabaseTools {
         }
     }
 
+    public List<Object[]> fetchData(List<ColumnInfo> columnInfoList) throws SQLException {
+        List<Object[]> fetchedDataList = new ArrayList<>();
+        int inputSize = columnInfoList.size();
+        if(!columnInfoList.isEmpty()){
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("select ");
+            Iterator<ColumnInfo> columnInfoIterator = columnInfoList.listIterator();
+            while (columnInfoIterator.hasNext()){
+                ColumnInfo columnInfo = columnInfoIterator.next();
+                stringBuilder.append(columnInfo.getColumnName());
+                if (columnInfoIterator.hasNext()) {
+                    stringBuilder.append(", ");
+                }
+            }
+            stringBuilder.append(" from ");
+            stringBuilder.append(columnInfoList.get(0).getTableName());
+            String sql = stringBuilder.toString();
+
+            OpenConnection();
+
+            Statement statement = DBConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            while ((resultSet.next())){
+                Object[] objects = new Object[inputSize];
+                for(int i = 1; i <= inputSize; i++){
+                    objects[i-1] = resultSet.getObject(i);
+                }
+                fetchedDataList.add(objects);
+            }
+
+            CloseConnection();
+        }
+        return fetchedDataList;
+    }
 }

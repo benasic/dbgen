@@ -271,6 +271,18 @@ public class MainAppController {
                 // TODO add different collection type support
                 JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
 
+                // TODO obristati blok ispod
+                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                List<Object[]> test;
+                List<Object> testObjects;
+                try {
+                    test = dt.fetchData(selectedColumnInfoList);
+                    testObjects = test.stream().map(objects -> objects[1]).collect(Collectors.toList());
+                    int a = 5;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 for (ColumnInfo columnInfo : selectedColumnInfoList) {
                     String hash = columnInfo.getHash();
                     Generator generator = columnInfo.getGenerator();
