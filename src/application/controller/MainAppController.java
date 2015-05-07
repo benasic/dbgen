@@ -7,6 +7,7 @@ import application.generator.Generator;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
 import application.utils.XML;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,6 +61,8 @@ public class MainAppController {
     private Image primaryKeyIcon;
     private Image foreignKeyIcon;
     private Image primaryForeignKeyIcon;
+
+    private int index = 0;
 
     private String lastGeneratorType;
     private Generator lastActiveGenerator;
@@ -212,10 +215,20 @@ public class MainAppController {
     private void addTableViewSynchronizationWithColumnInfo() {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener(((observable, oldValue, newValue) -> {
+
+                tableView.getColumns().clear();
+                tableView.getItems().clear();
+
+                TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
+                indexColumn.setPrefWidth(40);
+                // TODO this line will only work correctly if row is unique
+                indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
+
+                indexColumn.setSortable(false);
+                tableView.getColumns().add(indexColumn);
+
                 // in case root is selected
                 if (newValue.getValue().getIsRoot()) {
-                    tableView.getColumns().clear();
-                    tableView.getItems().clear();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
                         int column = newValue.getChildren().indexOf(columnInfoTreeItem);
                         TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
@@ -226,8 +239,6 @@ public class MainAppController {
                 // in case internal element is selected, but only if it
                 // has different root element then previous one
                 else if (oldValue == null || !newValue.getParent().equals(oldValue.getParent())) {
-                    tableView.getColumns().clear();
-                    tableView.getItems().clear();
                     TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
                         int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
