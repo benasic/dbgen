@@ -6,6 +6,7 @@ import application.JDBC_Repository;
 import application.generator.Generator;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
+import application.utils.ObjectCollection;
 import application.utils.XML;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -282,11 +283,21 @@ public class MainAppController {
                 // TODO add different collection type support
                 JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
 
+
+                Set<String> finishedColumn = new HashSet<>();
                 for (ColumnInfo columnInfo : selectedColumnInfoList) {
+
+                    // skip multiple generation of columns
+                    if(finishedColumn.contains(columnInfo.getHash())){
+                        continue;
+                    }
+
                     String hash = columnInfo.getHash();
                     Generator generator = columnInfo.getGenerator();
                     boolean referenceGeneration = false;
+
                     // case one
+
                     if(columnInfo.getIsForeignKey() && !columnInfo.getIsCompositeForeignKey() && !columnInfo.getIsCompositePrimaryKey()){
                         // fetch all referenced primary key data
                         referenceGeneration = true;
@@ -323,8 +334,98 @@ public class MainAppController {
                             e.printStackTrace();
                         }
 
+                        finishedColumn.add(columnInfo.getHash());
                     }
 
+                    // case two
+
+                    else if(columnInfo.getIsPrimaryKey() && columnInfo.getIsCompositePrimaryKey()){
+                        // determine is all composite key value reference to regular foreign keys
+                        boolean regularForeignKeys = true;
+                        boolean allKeysAreForeign = true;
+                        List<String> regularForeignKeysSet = new LinkedList<>();
+                        for(String primaryKeyHash : columnInfo.getCompositePrimaryKeySet()){
+                            // stream through all composite key
+                            ColumnInfo foreignKeyColumnInfo = columnInfoList.stream()
+                                    .filter(column -> column.getHash().equals(primaryKeyHash))
+                                    .findFirst().get();
+                            if(foreignKeyColumnInfo.getIsForeignKey() && !foreignKeyColumnInfo.getIsCompositeForeignKey()){
+                                regularForeignKeysSet.add(foreignKeyColumnInfo.getHash());
+                            }
+                            else if(foreignKeyColumnInfo.getIsForeignKey() && foreignKeyColumnInfo.getIsCompositeForeignKey()){
+                                regularForeignKeys = false;
+                            }
+                            else if(!foreignKeyColumnInfo.getIsForeignKey()){
+                                allKeysAreForeign = false;
+                            }
+                        }
+                        // subcase one: all composite keys are regular foreign
+
+                        if(regularForeignKeys && allKeysAreForeign){
+                            // steps: fetch data and generate random pair of object that are not equal
+                            List<List<Object>> fetchedData = new LinkedList<>();
+                            for(String regularForeignKey : regularForeignKeysSet){
+                                ForeignKey foreignKey = DatabaseTools.foreignKeyMap.get(regularForeignKey);
+                                String primaryKeyHash = foreignKey.getPrimaryKey().getHash();
+                                ColumnInfo primaryKeyColumn = columnInfoList.stream().filter(column -> column.getHash().equals(primaryKeyHash)).findFirst().get();
+                                List<ColumnInfo> columnInfoList = new ArrayList<>();
+                                columnInfoList.add(primaryKeyColumn);
+                                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                                List<Object[]> primaryKeyReferenceList;
+                                List<Object> primaryKeyList;
+                                try {
+                                    primaryKeyReferenceList = dt.fetchData(columnInfoList);
+                                    primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
+
+                                    // break generation of data if reference are not satisfied
+                                    if(primaryKeyList.isEmpty()){
+                                        Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
+                                        referenceMissing.setTitle("Preparation warning");
+                                        referenceMissing.setContentText("First generate data for reference table: " + primaryKeyColumn.getTableName());
+                                        referenceMissing.showAndWait();
+                                        return;
+                                    }
+
+                                    fetchedData.add(primaryKeyList);
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+                                finishedColumn.add(regularForeignKey);
+                            }
+
+                            // generate unique pairs
+                            Set<ObjectCollection> objects = new HashSet<>();
+                            int size = regularForeignKeysSet.size();
+                            Random random = new Random();
+                            random.setSeed(System.currentTimeMillis());
+                            while(objects.size() < 1000){
+                                ObjectCollection objectCollection = new ObjectCollection(size);
+                                for(int i = 0; i < size; i++){
+                                    objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(1000));
+                                }
+                                objects.add(objectCollection);
+                            }
+
+                            // return pairs into regular format
+                            for(int i = 0;  i < regularForeignKeysSet.size(); i++){
+                                final int finalI = i;
+                                List<Object> objectList = objects.stream()
+                                        .map(objectCollection -> objectCollection.objects[finalI])
+                                        .collect(Collectors.toList());
+                                jdbc_repository.addCollectionToMap(regularForeignKeysSet.get(i), objectList);
+                            }
+                        }
+                        else{
+                            // for now
+                            return;
+                        }
+                    }
+                    // skip normal generation of data for composite or referenced columns
+                    if(finishedColumn.contains(hash)){
+                        continue;
+                    }
                     if(!referenceGeneration){
                         jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
                         for (int i = 0; i < 1000; i++) {
@@ -334,6 +435,7 @@ public class MainAppController {
                             else{
                                 jdbc_repository.insertIntoCollection(hash, generator.generate());
                             }
+                            finishedColumn.add(columnInfo.getHash());
                         }
                     }
                 }
