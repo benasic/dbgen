@@ -217,19 +217,19 @@ public class MainAppController {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener(((observable, oldValue, newValue) -> {
 
-                tableView.getColumns().clear();
-                tableView.getItems().clear();
-
-                TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
-                indexColumn.setPrefWidth(40);
-                // TODO this line will only work correctly if row is unique
-                indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
-
-                indexColumn.setSortable(false);
-                tableView.getColumns().add(indexColumn);
-
                 // in case root is selected
-                if (newValue.getValue().getIsRoot()) {
+                if ((oldValue == null && newValue.getValue().getIsRoot())
+                        || (oldValue != null && newValue.getValue().getIsRoot() && !oldValue.getParent().equals(newValue))) {
+                    tableView.getColumns().clear();
+                    tableView.getItems().clear();
+
+                    TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
+                    indexColumn.setPrefWidth(40);
+                    // TODO this line will only work correctly if row is unique
+                    indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
+                    indexColumn.setSortable(false);
+                    tableView.getColumns().add(indexColumn);
+
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
                         int column = newValue.getChildren().indexOf(columnInfoTreeItem);
                         TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
@@ -239,7 +239,17 @@ public class MainAppController {
                 }
                 // in case internal element is selected, but only if it
                 // has different root element then previous one
-                else if (oldValue == null || !newValue.getParent().equals(oldValue.getParent())) {
+                else if (oldValue == null || (!oldValue.getParent().equals(newValue.getParent()) && !newValue.getValue().getIsRoot() && !newValue.getParent().equals(oldValue))) {
+                    tableView.getColumns().clear();
+                    tableView.getItems().clear();
+
+                    TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
+                    indexColumn.setPrefWidth(40);
+                    // TODO this line will only work correctly if row is unique
+                    indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
+                    indexColumn.setSortable(false);
+                    tableView.getColumns().add(indexColumn);
+
                     TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
                     for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
                         int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
