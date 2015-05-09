@@ -54,10 +54,13 @@ public class MainAppController {
 
     private final FXMLLoader stringLoader = new FXMLLoader();
     private final FXMLLoader integerLoader = new FXMLLoader();
+    private final FXMLLoader dateLoader = new FXMLLoader();
     private AnchorPane stringGeneratorSubScene;
     private AnchorPane integerGeneratorSubScene;
+    private AnchorPane dateGeneratorSubScene;
     private StringGeneratorController stringGeneratorController;
     private IntegerGeneratorController integerGeneratorController;
+    private DateGeneratorController dateGeneratorController;
     private Image tableIcon;
     private Image primaryKeyIcon;
     private Image foreignKeyIcon;
@@ -78,11 +81,15 @@ public class MainAppController {
 
         stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
         integerLoader.setLocation(DbGen.class.getResource("view/IntegerGenerator.fxml"));
+        dateLoader.setLocation(DbGen.class.getResource("view/DateGenerator.fxml"));
+
         try {
             stringGeneratorSubScene = stringLoader.load();
             integerGeneratorSubScene = integerLoader.load();
+            dateGeneratorSubScene = dateLoader.load();
             stringGeneratorController = stringLoader.getController();
             integerGeneratorController = integerLoader.getController();
+            dateGeneratorController = dateLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -191,6 +198,13 @@ public class MainAppController {
                         case "INTEGER":
                             integerGeneratorController.unbindValues(lastActiveGenerator);
                             lastActiveGenerator = null;
+                            break;
+                        case "TIMESTAMP":
+                            dateGeneratorController.unbindValues(lastActiveGenerator);
+                            lastActiveGenerator = null;
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -207,6 +221,11 @@ public class MainAppController {
                         integerGeneratorController.setGenerator(newValue.getValue().getGenerator());
                         mainBorderPane.setCenter(integerGeneratorSubScene);
                         break;
+                    case "TIMESTAMP":
+                        lastGeneratorType = "TIMESTAMP";
+                        lastActiveGenerator = newValue.getValue().getGenerator();
+                        dateGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                        mainBorderPane.setCenter(dateGeneratorSubScene);
                     default:
                         break;
                 }
