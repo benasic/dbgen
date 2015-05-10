@@ -1,7 +1,7 @@
 package application.controller;
 
 import application.generator.Generator;
-import application.generator.IntegerGenerator;
+import application.generator.NumberGenerator;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.util.converter.NumberStringConverter;
@@ -10,12 +10,12 @@ import java.text.NumberFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class IntegerGeneratorController {
+public class NumberGeneratorController {
 
     @FXML
     private TextField generatorTextField;
 
-    private IntegerGenerator integerGenerator;
+    private NumberGenerator numberGenerator;
 
     @FXML
     private void initialize(){
@@ -30,18 +30,18 @@ public class IntegerGeneratorController {
     }
 
     public void unbindValues(Generator generator){
-        integerGenerator = (IntegerGenerator)generator;
-        generatorTextField.textProperty().unbindBidirectional(integerGenerator.getGeneratorIntegerProperty());
+        numberGenerator = (NumberGenerator)generator;
+        generatorTextField.textProperty().unbindBidirectional(numberGenerator.getGeneratorNumberProperty());
     }
 
     public void setGenerator(Generator generator){
-        integerGenerator = (IntegerGenerator)generator;
+        numberGenerator = (NumberGenerator)generator;
         NumberStringConverter numberStringConverter = new NumberStringConverter(){
             @Override
             protected NumberFormat getNumberFormat() {
                 return NumberFormat.getIntegerInstance();
             }
         };
-        generatorTextField.textProperty().bindBidirectional(integerGenerator.getGeneratorIntegerProperty(), numberStringConverter);
+        generatorTextField.textProperty().bindBidirectional(numberGenerator.getGeneratorNumberProperty(), numberStringConverter);
     }
 }

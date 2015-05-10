@@ -56,10 +56,10 @@ public class MainAppController {
     private final FXMLLoader integerLoader = new FXMLLoader();
     private final FXMLLoader dateLoader = new FXMLLoader();
     private AnchorPane stringGeneratorSubScene;
-    private AnchorPane integerGeneratorSubScene;
+    private AnchorPane numberGeneratorSubScene;
     private AnchorPane dateGeneratorSubScene;
     private StringGeneratorController stringGeneratorController;
-    private IntegerGeneratorController integerGeneratorController;
+    private NumberGeneratorController numberGeneratorController;
     private DateGeneratorController dateGeneratorController;
     private Image tableIcon;
     private Image primaryKeyIcon;
@@ -80,15 +80,15 @@ public class MainAppController {
         primaryForeignKeyIcon = new Image(DbGen.class.getResourceAsStream("resources/icons/primaryForeignKey.png"));
 
         stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
-        integerLoader.setLocation(DbGen.class.getResource("view/IntegerGenerator.fxml"));
+        integerLoader.setLocation(DbGen.class.getResource("view/NumberGenerator.fxml"));
         dateLoader.setLocation(DbGen.class.getResource("view/DateGenerator.fxml"));
 
         try {
             stringGeneratorSubScene = stringLoader.load();
-            integerGeneratorSubScene = integerLoader.load();
+            numberGeneratorSubScene = integerLoader.load();
             dateGeneratorSubScene = dateLoader.load();
             stringGeneratorController = stringLoader.getController();
-            integerGeneratorController = integerLoader.getController();
+            numberGeneratorController = integerLoader.getController();
             dateGeneratorController = dateLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
@@ -196,7 +196,7 @@ public class MainAppController {
                             lastActiveGenerator = null;
                             break;
                         case "INTEGER":
-                            integerGeneratorController.unbindValues(lastActiveGenerator);
+                            numberGeneratorController.unbindValues(lastActiveGenerator);
                             lastActiveGenerator = null;
                             break;
                         case "TIMESTAMP":
@@ -218,8 +218,8 @@ public class MainAppController {
                     case "INTEGER":
                         lastGeneratorType = "INTEGER";
                         lastActiveGenerator = newValue.getValue().getGenerator();
-                        integerGeneratorController.setGenerator(newValue.getValue().getGenerator());
-                        mainBorderPane.setCenter(integerGeneratorSubScene);
+                        numberGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                        mainBorderPane.setCenter(numberGeneratorSubScene);
                         break;
                     case "TIMESTAMP":
                         lastGeneratorType = "TIMESTAMP";
