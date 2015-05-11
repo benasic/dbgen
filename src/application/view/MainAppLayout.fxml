@@ -28,7 +28,7 @@
       </MenuBar>
       <BorderPane fx:id="mainBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
          <left>
-            <TreeTableView fx:id="columnInfoTreeTableView" prefHeight="350.0" prefWidth="300.0" BorderPane.alignment="CENTER" />
+            <TreeTableView fx:id="columnInfoTreeTableView" prefHeight="350.0" prefWidth="500.0" BorderPane.alignment="CENTER" />
          </left>
          <bottom>
             <TableView fx:id="tableView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />

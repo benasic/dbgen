@@ -156,8 +156,8 @@ public class MainAppController {
 
         TreeTableColumn<ColumnInfo, String> columnName = new TreeTableColumn<>("Column Name");
         TreeTableColumn<ColumnInfo, String> columnType = new TreeTableColumn<>("Column Type");
-        columnName.setPrefWidth(150);
-        columnType.setPrefWidth(150);
+        columnName.setPrefWidth(250);
+        columnType.setPrefWidth(250);
         columnInfoTreeTableView.getColumns().add(columnName);
         columnInfoTreeTableView.getColumns().add(columnType);
 
@@ -196,7 +196,9 @@ public class MainAppController {
                             lastActiveGenerator = null;
                             break;
                         case "INTEGER":
-                            numberGeneratorController.unbindValues(lastActiveGenerator);
+                        case "SMALLINT":
+                        case "TINYINT":
+                            numberGeneratorController.unbindValues(lastActiveGenerator, lastGeneratorType);
                             lastActiveGenerator = null;
                             break;
                         case "TIMESTAMP":
@@ -216,9 +218,11 @@ public class MainAppController {
                         mainBorderPane.setCenter(stringGeneratorSubScene);
                         break;
                     case "INTEGER":
+                    case "SMALLINT":
+                    case "TINYINT":
                         lastGeneratorType = "INTEGER";
                         lastActiveGenerator = newValue.getValue().getGenerator();
-                        numberGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                        numberGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
                         mainBorderPane.setCenter(numberGeneratorSubScene);
                         break;
                     case "TIMESTAMP":
