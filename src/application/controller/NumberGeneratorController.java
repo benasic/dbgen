@@ -6,16 +6,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.converter.NumberStringConverter;
+import javafx.scene.layout.Pane;
 
-import java.text.NumberFormat;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 public class NumberGeneratorController {
 
@@ -34,39 +29,100 @@ public class NumberGeneratorController {
     @FXML
     private Tab tinyIntTab;
 
+    // 1. integer part
+
+    @FXML
+    private ToggleGroup toggleGroup1;
+
+    // 1.1 integer discrete uniform part
+
+    @FXML
+    private Pane paneIntegerTabDiscreteUniform;
+
+    @FXML
+    private TextField integerMinNumberDiscreteUniformTextField;
+    private Tooltip minIntegerDiscreteUniformTooltip;
+
+    @FXML
+    private TextField integerMaxNumberDiscreteUniformTextField;
+    private Tooltip maxIntegerDiscreteUniformTooltip;
+
+
     private String activeGeneratorType;
 
     private IntegerGenerator integerGenerator;
 
-    private Tooltip minIntegerTooltip;
+    private MainAppController mainAppController;
 
-    // integer part
-    @FXML
-    private TextField integerMinNumberTextField;
+
+    private Set<String> blockedSet = new HashSet<>();
 
     private ChangeListener<String> integerMinNumberListener = new ChangeListener<String>() {
 
-        Pattern p = Pattern.compile("\\D");
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            if(newValue != null){
+                boolean valid = false;
+                try{
+                    Integer.parseInt(newValue);
+                    valid = true;
+                } catch (NumberFormatException e){
+                    System.err.println(e.getMessage());
+                    blockedSet.add(integerMinNumberDiscreteUniformTextField.getId());
+                    mainAppController.blockAll = true;
+                    Point2D point2D = integerMinNumberDiscreteUniformTextField.localToScreen(integerMinNumberDiscreteUniformTextField.getLayoutBounds().getMaxX(), integerMinNumberDiscreteUniformTextField.getLayoutBounds().getMinY());
+                    minIntegerDiscreteUniformTooltip.show(integerMinNumberDiscreteUniformTextField, point2D.getX() + 5, point2D.getY());
+                }
+                if(valid){
+                    minIntegerDiscreteUniformTooltip.hide();
+                    blockedSet.remove(integerMinNumberDiscreteUniformTextField.getId());
+                    if(blockedSet.isEmpty()){
+                        mainAppController.blockAll = false;
+                    }
+                }
+            }
+        }
+    };
+
+    private ChangeListener<String> integerMaxNumberListener = new ChangeListener<String>() {
 
         @Override
         public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-            Matcher m = p.matcher(newValue);
-            if (m.find()) {
-                //integerMinNumberTextField.textProperty().setValue(m.replaceAll(""));
-                Point2D point2D = integerMinNumberTextField.localToScreen(integerMinNumberTextField.getLayoutBounds().getMaxX(), integerMinNumberTextField.getLayoutBounds().getMaxY());
-                minIntegerTooltip.show(integerMinNumberTextField, point2D.getX(), point2D.getY());
-            }
-            else{
-                minIntegerTooltip.hide();
+            if(newValue != null){
+                boolean valid = false;
+                try{
+                    Integer.parseInt(newValue);
+                    valid = true;
+                } catch (NumberFormatException e){
+                    System.err.println(e.getMessage());
+                    blockedSet.add(integerMaxNumberDiscreteUniformTextField.getId());
+                    mainAppController.blockAll = true;
+                    Point2D point2D = integerMaxNumberDiscreteUniformTextField.localToScreen(integerMaxNumberDiscreteUniformTextField.getLayoutBounds().getMaxX(), integerMaxNumberDiscreteUniformTextField.getLayoutBounds().getMinY());
+                    maxIntegerDiscreteUniformTooltip.show(integerMaxNumberDiscreteUniformTextField, point2D.getX() + 5, point2D.getY());
+                }
+                if(valid){
+                    maxIntegerDiscreteUniformTooltip.hide();
+                    blockedSet.remove(integerMaxNumberDiscreteUniformTextField.getId());
+                    if(blockedSet.isEmpty()){
+                        mainAppController.blockAll = false;
+                    }
+                }
             }
         }
     };
 
     @FXML
     private void initialize(){
-        minIntegerTooltip = new Tooltip("Invalid integer value");
-        minIntegerTooltip.setAutoHide(false);
-        minIntegerTooltip.getStyleClass().add("ttip");
+        minIntegerDiscreteUniformTooltip = new Tooltip("Invalid integer value");
+        minIntegerDiscreteUniformTooltip.setAutoHide(false);
+        minIntegerDiscreteUniformTooltip.getStyleClass().add("tooltip");
+        maxIntegerDiscreteUniformTooltip = new Tooltip("Invalid integer value");
+        maxIntegerDiscreteUniformTooltip.setAutoHide(false);
+        maxIntegerDiscreteUniformTooltip.getStyleClass().add("tooltip");
+    }
+
+    public void setMainController(MainAppController mainController){
+        mainAppController = mainController;
     }
 
     public void unbindValues(Generator generator, String type){
@@ -105,15 +161,11 @@ public class NumberGeneratorController {
     private void bindFields(Generator generator, String type){
         switch (type){
             case "INTEGER":
-                integerMinNumberTextField.textProperty().addListener(integerMinNumberListener);
+                integerMinNumberDiscreteUniformTextField.textProperty().addListener(integerMinNumberListener);
+                integerMaxNumberDiscreteUniformTextField.textProperty().addListener(integerMaxNumberListener);
                 integerGenerator = (IntegerGenerator)generator;
-                NumberStringConverter numberStringConverter = new NumberStringConverter(){
-                    @Override
-                    protected NumberFormat getNumberFormat() {
-                        return NumberFormat.getIntegerInstance();
-                    }
-                };
-                integerMinNumberTextField.textProperty().bindBidirectional(integerGenerator.minNumberPropertyProperty(), numberStringConverter);
+                integerMinNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
+                integerMaxNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
                 break;
             case "SMALLINT":
 
@@ -127,9 +179,11 @@ public class NumberGeneratorController {
     private void unbindFields(Generator generator, String type){
         switch (type){
             case "INTEGER":
-                integerMinNumberTextField.textProperty().removeListener(integerMinNumberListener);
+                integerMinNumberDiscreteUniformTextField.textProperty().removeListener(integerMinNumberListener);
+                integerMaxNumberDiscreteUniformTextField.textProperty().removeListener(integerMaxNumberListener);
                 integerGenerator = (IntegerGenerator)generator;
-                integerMinNumberTextField.textProperty().unbindBidirectional(integerGenerator.minNumberPropertyProperty());
+                integerMinNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
+                integerMaxNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
                 integerGenerator = null;
                 break;
             case "SMALLINT":

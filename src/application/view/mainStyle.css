@@ -1,3 +1,6 @@
-.ttip{
-    -fx-background-radius: 0 0 0 0;
+.tooltip{
+    -fx-background-radius: 0 10 10 10;
+    -fx-background-color: crimson;
+    -fx-border-color: black;
+    -fx-border-radius: 0 10 10 10;
 }

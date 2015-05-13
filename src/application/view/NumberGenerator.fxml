@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -15,9 +16,29 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                          <Label layoutX="14.0" layoutY="77.0" text="Min value:" />
-                          <TextField fx:id="integerMinNumberTextField" layoutX="84.0" layoutY="73.0" prefHeight="25.0" prefWidth="255.0" />
-                        <TextField layoutX="137.0" layoutY="179.0" />
+                        <Pane fx:id="paneIntegerTabDiscreteUniform" layoutX="31.0" layoutY="60.0" prefHeight="236.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+                           <children>
+                                <Label layoutX="14.0" layoutY="18.0" text="Min value:" />
+                                <TextField fx:id="integerMinNumberDiscreteUniformTextField" layoutX="83.0" layoutY="14.0" prefHeight="25.0" prefWidth="250.0" />
+                              <Label layoutX="14.0" layoutY="60.0" text="Max Value:" />
+                              <TextField fx:id="integerMaxNumberDiscreteUniformTextField" layoutX="83.0" layoutY="56.0" prefHeight="25.0" prefWidth="250.0" />
+                           </children>
+                        </Pane>
+                        <HBox layoutX="35.0" prefHeight="35.0" prefWidth="600.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <RadioButton mnemonicParsing="false" selected="true" text="RadioButton">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="toggleGroup1" />
+                                 </toggleGroup></RadioButton>
+                              <RadioButton mnemonicParsing="false" text="RadioButton" toggleGroup="$toggleGroup1">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin></RadioButton>
+                           </children>
+                           <padding>
+                              <Insets left="20.0" top="9.0" />
+                           </padding>
+                        </HBox>
                      </children>
                   </AnchorPane>
             </content>
