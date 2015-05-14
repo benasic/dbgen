@@ -471,6 +471,11 @@ public class MainAppController {
                             continue;
                         }
                         if (!referenceGeneration) {
+
+                            if(!columnInfo.getAutoIncrement()){
+                                generator.initiateGenerator();
+                            }
+
                             jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
                             for (int i = 0; i < 1000; i++) {
                                 if (columnInfo.getAutoIncrement()) {

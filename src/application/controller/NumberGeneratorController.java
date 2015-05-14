@@ -34,6 +34,12 @@ public class NumberGeneratorController {
     @FXML
     private ToggleGroup toggleGroup1;
 
+    @FXML
+    private RadioButton integer_DUD_RadioButton;
+
+    @FXML
+    private RadioButton integer_BD_RadioButton;
+
     // 1.1 integer discrete uniform part
 
     @FXML
@@ -46,6 +52,11 @@ public class NumberGeneratorController {
     @FXML
     private TextField integerMaxNumberDiscreteUniformTextField;
     private Tooltip maxIntegerDiscreteUniformTooltip;
+
+    // 1.2 integer binomial part
+
+    @FXML
+    private Pane paneIntegerTabBinomial;
 
 
     private String activeGeneratorType;
@@ -111,14 +122,33 @@ public class NumberGeneratorController {
         }
     };
 
+    private ChangeListener<Toggle> toggleChangeListener = new ChangeListener<Toggle>() {
+        @Override
+        public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+            for(Toggle toggle : toggleGroup1.getToggles()){
+                if(toggle.isSelected() && toggle.getUserData().equals("DUD")){
+                    paneIntegerTabDiscreteUniform.visibleProperty().setValue(true);
+                    paneIntegerTabBinomial.visibleProperty().set(false);
+                }
+                else if(toggle.isSelected() && toggle.getUserData().equals("BD")){
+                    paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
+                    paneIntegerTabBinomial.visibleProperty().set(true);
+                }
+            }
+        }
+    };
+
     @FXML
-    private void initialize(){
+    private void initialize() {
         minIntegerDiscreteUniformTooltip = new Tooltip("Invalid integer value");
         minIntegerDiscreteUniformTooltip.setAutoHide(false);
         minIntegerDiscreteUniformTooltip.getStyleClass().add("tooltip");
         maxIntegerDiscreteUniformTooltip = new Tooltip("Invalid integer value");
         maxIntegerDiscreteUniformTooltip.setAutoHide(false);
         maxIntegerDiscreteUniformTooltip.getStyleClass().add("tooltip");
+
+        integer_BD_RadioButton.setUserData("BD");
+        integer_DUD_RadioButton.setUserData("DUD");
     }
 
     public void setMainController(MainAppController mainController){
@@ -163,6 +193,7 @@ public class NumberGeneratorController {
             case "INTEGER":
                 integerMinNumberDiscreteUniformTextField.textProperty().addListener(integerMinNumberListener);
                 integerMaxNumberDiscreteUniformTextField.textProperty().addListener(integerMaxNumberListener);
+                toggleGroup1.selectedToggleProperty().addListener(toggleChangeListener);
                 integerGenerator = (IntegerGenerator)generator;
                 integerMinNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
                 integerMaxNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
@@ -181,6 +212,7 @@ public class NumberGeneratorController {
             case "INTEGER":
                 integerMinNumberDiscreteUniformTextField.textProperty().removeListener(integerMinNumberListener);
                 integerMaxNumberDiscreteUniformTextField.textProperty().removeListener(integerMaxNumberListener);
+                toggleGroup1.selectedToggleProperty().removeListener(toggleChangeListener);
                 integerGenerator = (IntegerGenerator)generator;
                 integerMinNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
                 integerMaxNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());

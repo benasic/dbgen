@@ -16,6 +16,11 @@ public class NumberGenerator implements Generator {
 
     private org.uncommons.maths.number.NumberGenerator<Integer> a;
 
+    @Override
+    public void initiateGenerator() {
+
+    }
+
     public NumberGenerator(){
         generatorNumberProperty = new SimpleIntegerProperty(65);
         random.setSeed(generatorNumberProperty.getValue());

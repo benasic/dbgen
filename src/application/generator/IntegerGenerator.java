@@ -2,8 +2,7 @@ package application.generator;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.uncommons.maths.random.DefaultSeedGenerator;
-import org.uncommons.maths.random.SeedGenerator;
+import org.uncommons.maths.random.*;
 
 import java.util.Random;
 
@@ -17,21 +16,28 @@ public class IntegerGenerator implements Generator {
 
 
     SeedGenerator seedGenerator = DefaultSeedGenerator.getInstance();
+    private DiscreteUniformGenerator discreteUniformGenerator = null;
     private Random random = new Random();
 
     public IntegerGenerator(){
-        minNumberDiscreteUniform = new SimpleStringProperty();
-        maxNumberDiscreteUniform = new SimpleStringProperty();
+        minNumberDiscreteUniform = new SimpleStringProperty("0");
+        maxNumberDiscreteUniform = new SimpleStringProperty("10000");
         seedString = new SimpleStringProperty();
     }
 
     public void initiateGenerator(){
         minNumberDiscreteUniformInt = Integer.parseInt(minNumberDiscreteUniform.get());
         maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberDiscreteUniform.get());
+        try {
+            MersenneTwisterRNG mersenneTwisterRNG = new MersenneTwisterRNG(seedGenerator);
+            discreteUniformGenerator = new DiscreteUniformGenerator(minNumberDiscreteUniformInt, maxNumberDiscreteUniformInt, mersenneTwisterRNG);
+        } catch (SeedException e) {
+            e.printStackTrace();
+        }
     }
 
     public Integer generate(){
-        return random.nextInt();
+        return discreteUniformGenerator.nextValue();
     }
 
     // Getters and setters
