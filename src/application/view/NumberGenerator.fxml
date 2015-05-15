@@ -41,7 +41,10 @@
                         </Pane>
                         <Pane fx:id="paneIntegerTabBinomial" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
                            <children>
-                              <TextField layoutX="167.0" layoutY="111.0" />
+                              <Label layoutX="22.0" layoutY="18.0" text="Number of trials (n):" />
+                              <TextField fx:id="integerTrailsBinomialTextField" layoutX="153.0" layoutY="14.0" prefHeight="25.0" prefWidth="181.0" />
+                              <Label layoutX="22.0" layoutY="60.0" text="Probability (p):" />
+                              <TextField fx:id="integerProbabilityBinomialTextField" layoutX="154.0" layoutY="56.0" prefHeight="25.0" prefWidth="180.0" />
                            </children>
                         </Pane>
                      </children>

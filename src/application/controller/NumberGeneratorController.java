@@ -1,5 +1,6 @@
 package application.controller;
 
+import application.generator.DistributionType;
 import application.generator.Generator;
 import application.generator.IntegerGenerator;
 import javafx.beans.value.ChangeListener;
@@ -57,6 +58,13 @@ public class NumberGeneratorController {
 
     @FXML
     private Pane paneIntegerTabBinomial;
+
+    @FXML
+    private TextField integerTrailsBinomialTextField;
+
+    @FXML
+    private TextField integerProbabilityBinomialTextField;
+
 
 
     private String activeGeneratorType;
@@ -127,10 +135,12 @@ public class NumberGeneratorController {
         public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
             for(Toggle toggle : toggleGroup1.getToggles()){
                 if(toggle.isSelected() && toggle.getUserData().equals("DUD")){
+                    integerGenerator.setDistributionType(DistributionType.UNIFORM);
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(true);
                     paneIntegerTabBinomial.visibleProperty().set(false);
                 }
                 else if(toggle.isSelected() && toggle.getUserData().equals("BD")){
+                    integerGenerator.setDistributionType(DistributionType.BINOMIAL);
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
                     paneIntegerTabBinomial.visibleProperty().set(true);
                 }
@@ -191,12 +201,14 @@ public class NumberGeneratorController {
     private void bindFields(Generator generator, String type){
         switch (type){
             case "INTEGER":
+                integerGenerator = (IntegerGenerator)generator;
                 integerMinNumberDiscreteUniformTextField.textProperty().addListener(integerMinNumberListener);
                 integerMaxNumberDiscreteUniformTextField.textProperty().addListener(integerMaxNumberListener);
                 toggleGroup1.selectedToggleProperty().addListener(toggleChangeListener);
-                integerGenerator = (IntegerGenerator)generator;
                 integerMinNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
                 integerMaxNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
+                integerTrailsBinomialTextField.textProperty().bindBidirectional(integerGenerator.numberOfTrailsBinomialProperty());
+                integerProbabilityBinomialTextField.textProperty().bindBidirectional(integerGenerator.probabilityBinomialProperty());
                 break;
             case "SMALLINT":
 
@@ -216,6 +228,8 @@ public class NumberGeneratorController {
                 integerGenerator = (IntegerGenerator)generator;
                 integerMinNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
                 integerMaxNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
+                integerTrailsBinomialTextField.textProperty().unbindBidirectional(integerGenerator.numberOfTrailsBinomialProperty());
+                integerProbabilityBinomialTextField.textProperty().unbindBidirectional(integerGenerator.probabilityBinomialProperty());
                 integerGenerator = null;
                 break;
             case "SMALLINT":
