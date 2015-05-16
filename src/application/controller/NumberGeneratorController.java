@@ -19,20 +19,6 @@ public class NumberGeneratorController {
     private AnchorPane anchorPane;
 
     @FXML
-    private TabPane numberTabPane;
-
-    @FXML
-    private Tab integerTab;
-
-    @FXML
-    private Tab smallIntTab;
-
-    @FXML
-    private Tab tinyIntTab;
-
-    // 1. integer part
-
-    @FXML
     private ToggleGroup toggleGroup1;
 
     @FXML
@@ -176,26 +162,6 @@ public class NumberGeneratorController {
 
     private void setupActiveGenerator(String type){
         activeGeneratorType = type;
-        switch (type){
-            case "INTEGER":
-                numberTabPane.selectionModelProperty().get().select(integerTab);
-                integerTab.disableProperty().setValue(false);
-                smallIntTab.disableProperty().setValue(true);
-                tinyIntTab.disableProperty().setValue(true);
-                break;
-            case "SMALLINT":
-                numberTabPane.selectionModelProperty().get().select(smallIntTab);
-                integerTab.disableProperty().setValue(true);
-                smallIntTab.disableProperty().setValue(false);
-                tinyIntTab.disableProperty().setValue(true);
-                break;
-            case "TINYINT":
-                numberTabPane.selectionModelProperty().get().select(tinyIntTab);
-                integerTab.disableProperty().setValue(true);
-                smallIntTab.disableProperty().setValue(true);
-                tinyIntTab.disableProperty().setValue(false);
-                break;
-        }
     }
 
     private void bindFields(Generator generator, String type){

@@ -10,63 +10,38 @@
 
 <AnchorPane fx:id="anchorPane" minHeight="400.0" minWidth="600.0" stylesheets="@mainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.NumberGeneratorController">
     <children>
-      <TabPane fx:id="numberTabPane" layoutX="14.0" layoutY="44.0" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <tabs>
-          <Tab fx:id="integerTab" text="Integer Generator">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <HBox layoutX="35.0" prefHeight="35.0" prefWidth="600.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <RadioButton fx:id="integer_DUD_RadioButton" mnemonicParsing="false" selected="true" text="Discrete Uniform Distribution">
-                                 <toggleGroup>
-                                    <ToggleGroup fx:id="toggleGroup1" />
-                                 </toggleGroup></RadioButton>
-                              <RadioButton fx:id="integer_BD_RadioButton" mnemonicParsing="false" text="Binomial Distribution" toggleGroup="$toggleGroup1">
-                                 <HBox.margin>
-                                    <Insets />
-                                 </HBox.margin></RadioButton>
-                           </children>
-                           <padding>
-                              <Insets left="20.0" top="9.0" />
-                           </padding>
-                        </HBox>
-                        <Pane fx:id="paneIntegerTabDiscreteUniform" layoutX="31.0" layoutY="60.0" prefHeight="236.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
-                           <children>
-                                <Label layoutX="14.0" layoutY="18.0" text="Min value:" />
-                                <TextField fx:id="integerMinNumberDiscreteUniformTextField" layoutX="83.0" layoutY="14.0" prefHeight="25.0" prefWidth="250.0" />
-                              <Label layoutX="14.0" layoutY="60.0" text="Max Value:" />
-                              <TextField fx:id="integerMaxNumberDiscreteUniformTextField" layoutX="83.0" layoutY="56.0" prefHeight="25.0" prefWidth="250.0" />
-                           </children>
-                        </Pane>
-                        <Pane fx:id="paneIntegerTabBinomial" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
-                           <children>
-                              <Label layoutX="22.0" layoutY="18.0" text="Number of trials (n):" />
-                              <TextField fx:id="integerTrailsBinomialTextField" layoutX="153.0" layoutY="14.0" prefHeight="25.0" prefWidth="181.0" />
-                              <Label layoutX="22.0" layoutY="60.0" text="Probability (p):" />
-                              <TextField fx:id="integerProbabilityBinomialTextField" layoutX="154.0" layoutY="56.0" prefHeight="25.0" prefWidth="180.0" />
-                           </children>
-                        </Pane>
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab fx:id="smallIntTab" text="Small Int Generator">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
-            <Tab fx:id="tinyIntTab" text="Tiny Int Generator">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <Label layoutX="14.0" layoutY="14.0" text="String:" />
-                        <TextField fx:id="generatorTextField1" layoutX="68.0" layoutY="10.0" prefHeight="25.0" prefWidth="255.0" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-        </tabs>
-      </TabPane>
+      <HBox prefHeight="35.0" prefWidth="600.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <RadioButton fx:id="integer_DUD_RadioButton" mnemonicParsing="false" selected="true" text="Discrete Uniform Distribution">
+               <toggleGroup>
+                  <ToggleGroup fx:id="toggleGroup1" />
+               </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="integer_BD_RadioButton" mnemonicParsing="false" text="Binomial Distribution" toggleGroup="$toggleGroup1">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </RadioButton>
+         </children>
+         <padding>
+            <Insets left="20.0" top="9.0" />
+         </padding>
+      </HBox>
+      <Pane fx:id="paneIntegerTabDiscreteUniform" prefHeight="236.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+         <children>
+              <Label layoutX="14.0" layoutY="18.0" text="Min value:" />
+              <TextField fx:id="integerMinNumberDiscreteUniformTextField" layoutX="83.0" layoutY="14.0" prefHeight="25.0" prefWidth="250.0" />
+            <Label layoutX="14.0" layoutY="60.0" text="Max Value:" />
+            <TextField fx:id="integerMaxNumberDiscreteUniformTextField" layoutX="83.0" layoutY="56.0" prefHeight="25.0" prefWidth="250.0" />
+         </children>
+      </Pane>
+      <Pane fx:id="paneIntegerTabBinomial" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+         <children>
+            <Label layoutX="22.0" layoutY="18.0" text="Number of trials (n):" />
+            <TextField fx:id="integerTrailsBinomialTextField" layoutX="153.0" layoutY="14.0" prefHeight="25.0" prefWidth="181.0" />
+            <Label layoutX="22.0" layoutY="60.0" text="Probability (p):" />
+            <TextField fx:id="integerProbabilityBinomialTextField" layoutX="154.0" layoutY="56.0" prefHeight="25.0" prefWidth="180.0" />
+         </children>
+      </Pane>
     </children>
 </AnchorPane>
