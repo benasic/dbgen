@@ -69,8 +69,6 @@ public class MainAppController {
     private Image foreignKeyIcon;
     private Image primaryForeignKeyIcon;
 
-    private int index = 0;
-
     private String lastGeneratorType;
     private Generator lastActiveGenerator;
 
@@ -208,9 +206,7 @@ public class MainAppController {
                             stringGeneratorController.unbindValues(lastActiveGenerator);
                             lastActiveGenerator = null;
                             break;
-                        case "INTEGER":
-                        case "SMALLINT":
-                        case "TINYINT":
+                        case "NUMBER":
                             numberGeneratorController.unbindValues(lastActiveGenerator, lastGeneratorType);
                             lastActiveGenerator = null;
                             break;
@@ -233,7 +229,7 @@ public class MainAppController {
                     case "INTEGER":
                     case "SMALLINT":
                     case "TINYINT":
-                        lastGeneratorType = "INTEGER";
+                        lastGeneratorType = "NUMBER";
                         lastActiveGenerator = newValue.getValue().getGenerator();
                         numberGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
                         mainBorderPane.setCenter(numberGeneratorSubScene);

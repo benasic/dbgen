@@ -7,32 +7,30 @@ import org.uncommons.maths.random.*;
 public class IntegerGenerator implements Generator {
 
     private StringProperty minNumberDiscreteUniform;
-    private int minNumberDiscreteUniformInt;
     private StringProperty maxNumberDiscreteUniform;
-    private int maxNumberDiscreteUniformInt;
 
     private StringProperty numberOfTrailsBinomial;
-    private int numberOfTrailsBinominalInt;
-
-
     private StringProperty probabilityBinomial;
-    private double probabilityBinomialDouble;
 
-    private StringProperty seedString;
+    private StringProperty meanPoisson;
 
-    private DistributionType distributionType;
+    // default value
+    private DistributionType distributionType = DistributionType.UNIFORM;
 
+    private NumberType numberType;
 
     SeedGenerator seedGenerator = DefaultSeedGenerator.getInstance();
+
     private DiscreteUniformGenerator discreteUniformGenerator = null;
     private BinomialGenerator binomialGenerator = null;
+    private PoissonGenerator poissonGenerator = null;
 
     public IntegerGenerator(){
         minNumberDiscreteUniform = new SimpleStringProperty("0");
         maxNumberDiscreteUniform = new SimpleStringProperty("10000");
         numberOfTrailsBinomial = new SimpleStringProperty("10");
         probabilityBinomial = new SimpleStringProperty("0.248");
-        seedString = new SimpleStringProperty();
+        meanPoisson = new SimpleStringProperty("56.8");
     }
 
     public void initiateGenerator(){
@@ -45,15 +43,18 @@ public class IntegerGenerator implements Generator {
         }
 
         if(distributionType == DistributionType.UNIFORM){
-            minNumberDiscreteUniformInt = Integer.parseInt(minNumberDiscreteUniform.get());
-            maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberDiscreteUniform.get());
+            int minNumberDiscreteUniformInt = Integer.parseInt(minNumberDiscreteUniform.get());
+            int  maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberDiscreteUniform.get());
             discreteUniformGenerator = new DiscreteUniformGenerator(minNumberDiscreteUniformInt, maxNumberDiscreteUniformInt, mersenneTwisterRNG);
-
         }
         else if(distributionType == DistributionType.BINOMIAL){
-            numberOfTrailsBinominalInt = Integer.parseInt(numberOfTrailsBinomial.get());
-            probabilityBinomialDouble = Double.parseDouble(probabilityBinomial.get());
-            binomialGenerator = new BinomialGenerator(numberOfTrailsBinominalInt, probabilityBinomialDouble, mersenneTwisterRNG);
+            int numberOfTrailsBinomialInt = Integer.parseInt(numberOfTrailsBinomial.get());
+            double probabilityBinomialDouble = Double.parseDouble(probabilityBinomial.get());
+            binomialGenerator = new BinomialGenerator(numberOfTrailsBinomialInt, probabilityBinomialDouble, mersenneTwisterRNG);
+        }
+        else if(distributionType == DistributionType.POISSON){
+            double meanPoissonDouble = Double.parseDouble(meanPoisson.get());
+            poissonGenerator = new PoissonGenerator(meanPoissonDouble, mersenneTwisterRNG);
         }
     }
 
@@ -64,7 +65,10 @@ public class IntegerGenerator implements Generator {
         else if(distributionType == DistributionType.BINOMIAL){
             return binomialGenerator.nextValue();
         }
-        return null;
+        else if(distributionType == DistributionType.POISSON){
+            return poissonGenerator.nextValue();
+        }
+        return 1;
     }
 
     // Getters and setters
@@ -77,6 +81,16 @@ public class IntegerGenerator implements Generator {
 
     public void setDistributionType(DistributionType distributionType) {
         this.distributionType = distributionType;
+    }
+
+    // Number type
+
+    public NumberType getNumberType() {
+        return numberType;
+    }
+
+    public void setNumberType(NumberType numberType) {
+        this.numberType = numberType;
     }
 
     // min Number Discrete Uniform
@@ -134,6 +148,21 @@ public class IntegerGenerator implements Generator {
     public void setProbabilityBinomial(String probabilityBinomial) {
         this.probabilityBinomial.set(probabilityBinomial);
     }
+
+    // Mean Poisson
+
+    public String getMeanPoisson() {
+        return meanPoisson.get();
+    }
+
+    public StringProperty meanPoissonProperty() {
+        return meanPoisson;
+    }
+
+    public void setMeanPoisson(String meanPoisson) {
+        this.meanPoisson.set(meanPoisson);
+    }
+
 
 
 

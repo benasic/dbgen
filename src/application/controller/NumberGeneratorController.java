@@ -19,6 +19,9 @@ public class NumberGeneratorController {
     private AnchorPane anchorPane;
 
     @FXML
+    private Label numberType;
+
+    @FXML
     private ToggleGroup toggleGroup1;
 
     @FXML
@@ -26,6 +29,9 @@ public class NumberGeneratorController {
 
     @FXML
     private RadioButton integer_BD_RadioButton;
+
+    @FXML
+    private RadioButton poissonRadioButton;
 
     // 1.1 integer discrete uniform part
 
@@ -51,6 +57,13 @@ public class NumberGeneratorController {
     @FXML
     private TextField integerProbabilityBinomialTextField;
 
+    // Poisson Distribution part
+
+    @FXML
+    private Pane poissonPane;
+
+    @FXML
+    private TextField meanPoissonTextBox;
 
 
     private String activeGeneratorType;
@@ -120,22 +133,30 @@ public class NumberGeneratorController {
         @Override
         public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
             for(Toggle toggle : toggleGroup1.getToggles()){
-                if(toggle.isSelected() && toggle.getUserData().equals("DUD")){
+                if(toggle.isSelected() && toggle.getUserData() == DistributionType.UNIFORM){
                     integerGenerator.setDistributionType(DistributionType.UNIFORM);
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(true);
                     paneIntegerTabBinomial.visibleProperty().set(false);
+                    poissonPane.visibleProperty().set(false);
                 }
-                else if(toggle.isSelected() && toggle.getUserData().equals("BD")){
+                else if(toggle.isSelected() && toggle.getUserData() == DistributionType.BINOMIAL){
                     integerGenerator.setDistributionType(DistributionType.BINOMIAL);
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
                     paneIntegerTabBinomial.visibleProperty().set(true);
+                    poissonPane.visibleProperty().set(false);
+                }
+                else if(toggle.isSelected() && toggle.getUserData() == DistributionType.POISSON){
+                    integerGenerator.setDistributionType(DistributionType.POISSON);
+                    paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
+                    paneIntegerTabBinomial.visibleProperty().set(false);
+                    poissonPane.visibleProperty().set(true);
                 }
             }
         }
     };
 
     @FXML
-    private void initialize() {
+    private void initialize(){
         minIntegerDiscreteUniformTooltip = new Tooltip("Invalid integer value");
         minIntegerDiscreteUniformTooltip.setAutoHide(false);
         minIntegerDiscreteUniformTooltip.getStyleClass().add("tooltip");
@@ -143,8 +164,9 @@ public class NumberGeneratorController {
         maxIntegerDiscreteUniformTooltip.setAutoHide(false);
         maxIntegerDiscreteUniformTooltip.getStyleClass().add("tooltip");
 
-        integer_BD_RadioButton.setUserData("BD");
-        integer_DUD_RadioButton.setUserData("DUD");
+        integer_BD_RadioButton.setUserData(DistributionType.BINOMIAL);
+        integer_DUD_RadioButton.setUserData(DistributionType.UNIFORM);
+        poissonRadioButton.setUserData(DistributionType.POISSON);
     }
 
     public void setMainController(MainAppController mainController){
@@ -162,19 +184,31 @@ public class NumberGeneratorController {
 
     private void setupActiveGenerator(String type){
         activeGeneratorType = type;
+
     }
 
     private void bindFields(Generator generator, String type){
+        numberType.setText(type.toLowerCase());
         switch (type){
             case "INTEGER":
                 integerGenerator = (IntegerGenerator)generator;
+
                 integerMinNumberDiscreteUniformTextField.textProperty().addListener(integerMinNumberListener);
                 integerMaxNumberDiscreteUniformTextField.textProperty().addListener(integerMaxNumberListener);
                 toggleGroup1.selectedToggleProperty().addListener(toggleChangeListener);
+
+                for(Toggle radioButton : toggleGroup1.getToggles()){
+                    if(radioButton.getUserData() == integerGenerator.getDistributionType()){
+                        radioButton.selectedProperty().setValue(true);
+                        break;
+                    }
+                }
+
                 integerMinNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
                 integerMaxNumberDiscreteUniformTextField.textProperty().bindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
                 integerTrailsBinomialTextField.textProperty().bindBidirectional(integerGenerator.numberOfTrailsBinomialProperty());
                 integerProbabilityBinomialTextField.textProperty().bindBidirectional(integerGenerator.probabilityBinomialProperty());
+                meanPoissonTextBox.textProperty().bindBidirectional(integerGenerator.meanPoissonProperty());
                 break;
             case "SMALLINT":
 
@@ -187,15 +221,17 @@ public class NumberGeneratorController {
 
     private void unbindFields(Generator generator, String type){
         switch (type){
-            case "INTEGER":
+            case "NUMBER":
                 integerMinNumberDiscreteUniformTextField.textProperty().removeListener(integerMinNumberListener);
                 integerMaxNumberDiscreteUniformTextField.textProperty().removeListener(integerMaxNumberListener);
                 toggleGroup1.selectedToggleProperty().removeListener(toggleChangeListener);
+
                 integerGenerator = (IntegerGenerator)generator;
                 integerMinNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.minNumberDiscreteUniformProperty());
                 integerMaxNumberDiscreteUniformTextField.textProperty().unbindBidirectional(integerGenerator.maxNumberDiscreteUniformProperty());
                 integerTrailsBinomialTextField.textProperty().unbindBidirectional(integerGenerator.numberOfTrailsBinomialProperty());
                 integerProbabilityBinomialTextField.textProperty().unbindBidirectional(integerGenerator.probabilityBinomialProperty());
+                meanPoissonTextBox.textProperty().unbindBidirectional(integerGenerator.meanPoissonProperty());
                 integerGenerator = null;
                 break;
             case "SMALLINT":
