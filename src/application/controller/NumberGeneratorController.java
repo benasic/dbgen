@@ -33,6 +33,9 @@ public class NumberGeneratorController {
     @FXML
     private RadioButton poissonRadioButton;
 
+    @FXML
+    private RadioButton normallyRadioButton;
+
     // 1.1 integer discrete uniform part
 
     @FXML
@@ -64,6 +67,18 @@ public class NumberGeneratorController {
 
     @FXML
     private TextField meanPoissonTextBox;
+
+    // Normally Distribution part
+
+    @FXML
+    private Pane normallyPane;
+
+    @FXML
+    private TextField meanNormallyTextField;
+
+    @FXML
+    private TextField standardDeviationTextField;
+
 
 
     private String activeGeneratorType;
@@ -138,18 +153,31 @@ public class NumberGeneratorController {
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(true);
                     paneIntegerTabBinomial.visibleProperty().set(false);
                     poissonPane.visibleProperty().set(false);
+                    normallyPane.visibleProperty().set(false);
+                    break;
                 }
                 else if(toggle.isSelected() && toggle.getUserData() == DistributionType.BINOMIAL){
                     integerGenerator.setDistributionType(DistributionType.BINOMIAL);
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
                     paneIntegerTabBinomial.visibleProperty().set(true);
                     poissonPane.visibleProperty().set(false);
+                    normallyPane.visibleProperty().set(false);
+                    break;
                 }
                 else if(toggle.isSelected() && toggle.getUserData() == DistributionType.POISSON){
                     integerGenerator.setDistributionType(DistributionType.POISSON);
                     paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
                     paneIntegerTabBinomial.visibleProperty().set(false);
                     poissonPane.visibleProperty().set(true);
+                    normallyPane.visibleProperty().set(false);
+                    break;
+                }
+                else if(toggle.isSelected() && toggle.getUserData() == DistributionType.NORMALLY){
+                    integerGenerator.setDistributionType(DistributionType.NORMALLY);
+                    paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
+                    paneIntegerTabBinomial.visibleProperty().set(false);
+                    poissonPane.visibleProperty().set(false);
+                    normallyPane.visibleProperty().set(true);
                 }
             }
         }
@@ -167,6 +195,7 @@ public class NumberGeneratorController {
         integer_BD_RadioButton.setUserData(DistributionType.BINOMIAL);
         integer_DUD_RadioButton.setUserData(DistributionType.UNIFORM);
         poissonRadioButton.setUserData(DistributionType.POISSON);
+        normallyRadioButton.setUserData(DistributionType.NORMALLY);
     }
 
     public void setMainController(MainAppController mainController){
@@ -209,6 +238,8 @@ public class NumberGeneratorController {
                 integerTrailsBinomialTextField.textProperty().bindBidirectional(integerGenerator.numberOfTrailsBinomialProperty());
                 integerProbabilityBinomialTextField.textProperty().bindBidirectional(integerGenerator.probabilityBinomialProperty());
                 meanPoissonTextBox.textProperty().bindBidirectional(integerGenerator.meanPoissonProperty());
+                meanNormallyTextField.textProperty().bindBidirectional(integerGenerator.meanNormallyProperty());
+                standardDeviationTextField.textProperty().bindBidirectional(integerGenerator.standardDeviationNormallyProperty());
                 break;
             case "SMALLINT":
 
@@ -232,6 +263,8 @@ public class NumberGeneratorController {
                 integerTrailsBinomialTextField.textProperty().unbindBidirectional(integerGenerator.numberOfTrailsBinomialProperty());
                 integerProbabilityBinomialTextField.textProperty().unbindBidirectional(integerGenerator.probabilityBinomialProperty());
                 meanPoissonTextBox.textProperty().unbindBidirectional(integerGenerator.meanPoissonProperty());
+                meanNormallyTextField.textProperty().unbindBidirectional(integerGenerator.meanNormallyProperty());
+                standardDeviationTextField.textProperty().unbindBidirectional(integerGenerator.standardDeviationNormallyProperty());
                 integerGenerator = null;
                 break;
             case "SMALLINT":

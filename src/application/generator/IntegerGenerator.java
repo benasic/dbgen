@@ -14,6 +14,9 @@ public class IntegerGenerator implements Generator {
 
     private StringProperty meanPoisson;
 
+    private StringProperty meanNormally;
+    private StringProperty standardDeviationNormally;
+
     // default value
     private DistributionType distributionType = DistributionType.UNIFORM;
 
@@ -24,13 +27,19 @@ public class IntegerGenerator implements Generator {
     private DiscreteUniformGenerator discreteUniformGenerator = null;
     private BinomialGenerator binomialGenerator = null;
     private PoissonGenerator poissonGenerator = null;
+    private GaussianGenerator gaussianGenerator = null;
 
     public IntegerGenerator(){
         minNumberDiscreteUniform = new SimpleStringProperty("0");
         maxNumberDiscreteUniform = new SimpleStringProperty("10000");
+
         numberOfTrailsBinomial = new SimpleStringProperty("10");
         probabilityBinomial = new SimpleStringProperty("0.248");
+
         meanPoisson = new SimpleStringProperty("56.8");
+
+        meanNormally = new SimpleStringProperty("25.7");
+        standardDeviationNormally = new SimpleStringProperty("15.58");
     }
 
     public void initiateGenerator(){
@@ -56,9 +65,14 @@ public class IntegerGenerator implements Generator {
             double meanPoissonDouble = Double.parseDouble(meanPoisson.get());
             poissonGenerator = new PoissonGenerator(meanPoissonDouble, mersenneTwisterRNG);
         }
+        else if(distributionType == DistributionType.NORMALLY){
+            double meanNormallyDouble = Double.parseDouble(meanNormally.get());
+            double standardDeviationNormallyDouble = Double.parseDouble(standardDeviationNormally.get());
+            gaussianGenerator = new GaussianGenerator(meanNormallyDouble, standardDeviationNormallyDouble, mersenneTwisterRNG);
+        }
     }
 
-    public Integer generate(){
+    public Number generate(){
         if(distributionType == DistributionType.UNIFORM){
             return discreteUniformGenerator.nextValue();
         }
@@ -67,6 +81,9 @@ public class IntegerGenerator implements Generator {
         }
         else if(distributionType == DistributionType.POISSON){
             return poissonGenerator.nextValue();
+        }
+        else if(distributionType == DistributionType.NORMALLY){
+            return gaussianGenerator.nextValue();
         }
         return 1;
     }
@@ -163,7 +180,32 @@ public class IntegerGenerator implements Generator {
         this.meanPoisson.set(meanPoisson);
     }
 
+    // Mean Normally
 
+    public String getMeanNormally() {
+        return meanNormally.get();
+    }
 
+    public StringProperty meanNormallyProperty() {
+        return meanNormally;
+    }
+
+    public void setMeanNormally(String meanNormally) {
+        this.meanNormally.set(meanNormally);
+    }
+
+    // Standard Deviation Normally
+
+    public String getStandardDeviationNormally() {
+        return standardDeviationNormally.get();
+    }
+
+    public StringProperty standardDeviationNormallyProperty() {
+        return standardDeviationNormally;
+    }
+
+    public void setStandardDeviationNormally(String standardDeviationNormally) {
+        this.standardDeviationNormally.set(standardDeviationNormally);
+    }
 
 }

@@ -3,5 +3,6 @@ package application.generator;
 public enum DistributionType {
     UNIFORM,
     BINOMIAL,
-    POISSON
+    POISSON,
+    NORMALLY
 }
