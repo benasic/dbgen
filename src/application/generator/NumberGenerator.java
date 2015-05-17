@@ -4,10 +4,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.uncommons.maths.random.*;
 
-public class IntegerGenerator implements Generator {
+public class NumberGenerator implements Generator {
 
-    private StringProperty minNumberDiscreteUniform;
-    private StringProperty maxNumberDiscreteUniform;
+    private StringProperty minNumberUniform;
+    private StringProperty maxNumberUniform;
 
     private StringProperty numberOfTrailsBinomial;
     private StringProperty probabilityBinomial;
@@ -32,9 +32,9 @@ public class IntegerGenerator implements Generator {
     private GaussianGenerator gaussianGenerator = null;
     private ExponentialGenerator exponentialGenerator = null;
 
-    public IntegerGenerator(){
-        minNumberDiscreteUniform = new SimpleStringProperty("0");
-        maxNumberDiscreteUniform = new SimpleStringProperty("10000");
+    public NumberGenerator(){
+        minNumberUniform = new SimpleStringProperty("0");
+        maxNumberUniform = new SimpleStringProperty("10000");
 
         numberOfTrailsBinomial = new SimpleStringProperty("10");
         probabilityBinomial = new SimpleStringProperty("0.248");
@@ -57,8 +57,8 @@ public class IntegerGenerator implements Generator {
         }
 
         if(distributionType == DistributionType.UNIFORM){
-            int minNumberDiscreteUniformInt = Integer.parseInt(minNumberDiscreteUniform.get());
-            int  maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberDiscreteUniform.get());
+            int minNumberDiscreteUniformInt = Integer.parseInt(minNumberUniform.get());
+            int  maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberUniform.get());
             discreteUniformGenerator = new DiscreteUniformGenerator(minNumberDiscreteUniformInt, maxNumberDiscreteUniformInt, mersenneTwisterRNG);
         }
         else if(distributionType == DistributionType.BINOMIAL){
@@ -124,30 +124,30 @@ public class IntegerGenerator implements Generator {
 
     // min Number Discrete Uniform
 
-    public String getMinNumberDiscreteUniform() {
-        return minNumberDiscreteUniform.get();
+    public String getMinNumberUniform() {
+        return minNumberUniform.get();
     }
 
-    public StringProperty minNumberDiscreteUniformProperty() {
-        return minNumberDiscreteUniform;
+    public StringProperty minNumberUniformProperty() {
+        return minNumberUniform;
     }
 
-    public void setMinNumberDiscreteUniform(String minNumberDiscreteUniform) {
-        this.minNumberDiscreteUniform.set(minNumberDiscreteUniform);
+    public void setMinNumberUniform(String minNumberUniform) {
+        this.minNumberUniform.set(minNumberUniform);
     }
 
     // max Number Discrete Uniform
 
-    public String getMaxNumberDiscreteUniform() {
-        return maxNumberDiscreteUniform.get();
+    public String getMaxNumberUniform() {
+        return maxNumberUniform.get();
     }
 
-    public StringProperty maxNumberDiscreteUniformProperty() {
-        return maxNumberDiscreteUniform;
+    public StringProperty maxNumberUniformProperty() {
+        return maxNumberUniform;
     }
 
-    public void setMaxNumberDiscreteUniform(String maxNumberDiscreteUniform) {
-        this.maxNumberDiscreteUniform.set(maxNumberDiscreteUniform);
+    public void setMaxNumberUniform(String maxNumberUniform) {
+        this.maxNumberUniform.set(maxNumberUniform);
     }
 
     // Number Of Trails Binomial Property
