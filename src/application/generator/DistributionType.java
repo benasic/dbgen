@@ -4,5 +4,6 @@ public enum DistributionType {
     UNIFORM,
     BINOMIAL,
     POISSON,
-    NORMALLY
+    NORMALLY,
+    EXPONENTIAL
 }

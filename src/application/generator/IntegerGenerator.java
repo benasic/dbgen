@@ -17,6 +17,8 @@ public class IntegerGenerator implements Generator {
     private StringProperty meanNormally;
     private StringProperty standardDeviationNormally;
 
+    private StringProperty rateExponential;
+
     // default value
     private DistributionType distributionType = DistributionType.UNIFORM;
 
@@ -28,6 +30,7 @@ public class IntegerGenerator implements Generator {
     private BinomialGenerator binomialGenerator = null;
     private PoissonGenerator poissonGenerator = null;
     private GaussianGenerator gaussianGenerator = null;
+    private ExponentialGenerator exponentialGenerator = null;
 
     public IntegerGenerator(){
         minNumberDiscreteUniform = new SimpleStringProperty("0");
@@ -40,6 +43,8 @@ public class IntegerGenerator implements Generator {
 
         meanNormally = new SimpleStringProperty("25.7");
         standardDeviationNormally = new SimpleStringProperty("15.58");
+
+        rateExponential = new SimpleStringProperty("0.5");
     }
 
     public void initiateGenerator(){
@@ -70,6 +75,10 @@ public class IntegerGenerator implements Generator {
             double standardDeviationNormallyDouble = Double.parseDouble(standardDeviationNormally.get());
             gaussianGenerator = new GaussianGenerator(meanNormallyDouble, standardDeviationNormallyDouble, mersenneTwisterRNG);
         }
+        else if(distributionType == DistributionType.EXPONENTIAL){
+            double rateExponentialDouble = Double.parseDouble(rateExponential.get());
+            exponentialGenerator = new ExponentialGenerator(rateExponentialDouble, mersenneTwisterRNG);
+        }
     }
 
     public Number generate(){
@@ -84,6 +93,9 @@ public class IntegerGenerator implements Generator {
         }
         else if(distributionType == DistributionType.NORMALLY){
             return gaussianGenerator.nextValue();
+        }
+        else if(distributionType == DistributionType.EXPONENTIAL){
+            return exponentialGenerator.nextValue();
         }
         return 1;
     }
@@ -207,5 +219,20 @@ public class IntegerGenerator implements Generator {
     public void setStandardDeviationNormally(String standardDeviationNormally) {
         this.standardDeviationNormally.set(standardDeviationNormally);
     }
+
+    // Rate Exponential
+
+    public String getRateExponential() {
+        return rateExponential.get();
+    }
+
+    public StringProperty rateExponentialProperty() {
+        return rateExponential;
+    }
+
+    public void setRateExponential(String rateExponential) {
+        this.rateExponential.set(rateExponential);
+    }
+
 
 }

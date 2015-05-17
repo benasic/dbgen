@@ -36,6 +36,9 @@ public class NumberGeneratorController {
     @FXML
     private RadioButton normallyRadioButton;
 
+    @FXML
+    private RadioButton exponentialRadioButton;
+
     // 1.1 integer discrete uniform part
 
     @FXML
@@ -78,6 +81,14 @@ public class NumberGeneratorController {
 
     @FXML
     private TextField standardDeviationTextField;
+
+    // exponential Distribution part
+
+    @FXML
+    private Pane exponentialPane;
+
+    @FXML
+    private TextField rateExponentialTextField;
 
 
 
@@ -162,6 +173,7 @@ public class NumberGeneratorController {
                     paneIntegerTabBinomial.visibleProperty().set(true);
                     poissonPane.visibleProperty().set(false);
                     normallyPane.visibleProperty().set(false);
+                    exponentialPane.visibleProperty().set(false);
                     break;
                 }
                 else if(toggle.isSelected() && toggle.getUserData() == DistributionType.POISSON){
@@ -170,6 +182,7 @@ public class NumberGeneratorController {
                     paneIntegerTabBinomial.visibleProperty().set(false);
                     poissonPane.visibleProperty().set(true);
                     normallyPane.visibleProperty().set(false);
+                    exponentialPane.visibleProperty().set(false);
                     break;
                 }
                 else if(toggle.isSelected() && toggle.getUserData() == DistributionType.NORMALLY){
@@ -178,6 +191,15 @@ public class NumberGeneratorController {
                     paneIntegerTabBinomial.visibleProperty().set(false);
                     poissonPane.visibleProperty().set(false);
                     normallyPane.visibleProperty().set(true);
+                    exponentialPane.visibleProperty().set(false);
+                }
+                else if(toggle.isSelected() && toggle.getUserData() == DistributionType.EXPONENTIAL){
+                    integerGenerator.setDistributionType(DistributionType.EXPONENTIAL);
+                    paneIntegerTabDiscreteUniform.visibleProperty().setValue(false);
+                    paneIntegerTabBinomial.visibleProperty().set(false);
+                    poissonPane.visibleProperty().set(false);
+                    normallyPane.visibleProperty().set(false);
+                    exponentialPane.visibleProperty().set(true);
                 }
             }
         }
@@ -196,6 +218,7 @@ public class NumberGeneratorController {
         integer_DUD_RadioButton.setUserData(DistributionType.UNIFORM);
         poissonRadioButton.setUserData(DistributionType.POISSON);
         normallyRadioButton.setUserData(DistributionType.NORMALLY);
+        exponentialRadioButton.setUserData(DistributionType.EXPONENTIAL);
     }
 
     public void setMainController(MainAppController mainController){
@@ -240,6 +263,7 @@ public class NumberGeneratorController {
                 meanPoissonTextBox.textProperty().bindBidirectional(integerGenerator.meanPoissonProperty());
                 meanNormallyTextField.textProperty().bindBidirectional(integerGenerator.meanNormallyProperty());
                 standardDeviationTextField.textProperty().bindBidirectional(integerGenerator.standardDeviationNormallyProperty());
+                rateExponentialTextField.textProperty().bindBidirectional(integerGenerator.rateExponentialProperty());
                 break;
             case "SMALLINT":
 
@@ -265,6 +289,7 @@ public class NumberGeneratorController {
                 meanPoissonTextBox.textProperty().unbindBidirectional(integerGenerator.meanPoissonProperty());
                 meanNormallyTextField.textProperty().unbindBidirectional(integerGenerator.meanNormallyProperty());
                 standardDeviationTextField.textProperty().unbindBidirectional(integerGenerator.standardDeviationNormallyProperty());
+                rateExponentialTextField.textProperty().unbindBidirectional(integerGenerator.rateExponentialProperty());
                 integerGenerator = null;
                 break;
             case "SMALLINT":
