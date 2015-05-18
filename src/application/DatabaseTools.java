@@ -1,6 +1,7 @@
 package application;
 
 import application.generator.NumberGenerator;
+import application.generator.NumberType;
 import application.generator.StringGenerator;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
@@ -315,7 +316,14 @@ public class DatabaseTools {
                         columnInfo.setGenerator(new StringGenerator());
                         break;
                     case "INTEGER":
-                        columnInfo.setGenerator(new NumberGenerator());
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.INTEGER));
+                        break;
+                    case "SMALLINT":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.SMALLINT));
+                        break;
+                    case "TINYINT":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.TINYINT));
+                        break;
                 }
 
                 columnInfoCollection.add(columnInfo);

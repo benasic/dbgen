@@ -32,7 +32,9 @@ public class NumberGenerator implements Generator {
     private GaussianGenerator gaussianGenerator = null;
     private ExponentialGenerator exponentialGenerator = null;
 
-    public NumberGenerator(){
+    public NumberGenerator(NumberType numberType){
+        this.numberType = numberType;
+
         minNumberUniform = new SimpleStringProperty("0");
         maxNumberUniform = new SimpleStringProperty("10000");
 
@@ -57,9 +59,15 @@ public class NumberGenerator implements Generator {
         }
 
         if(distributionType == DistributionType.UNIFORM){
-            int minNumberDiscreteUniformInt = Integer.parseInt(minNumberUniform.get());
-            int  maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberUniform.get());
-            discreteUniformGenerator = new DiscreteUniformGenerator(minNumberDiscreteUniformInt, maxNumberDiscreteUniformInt, mersenneTwisterRNG);
+            switch (numberType){
+                case INTEGER:
+                case SMALLINT:
+                case TINYINT:
+                    int minNumberDiscreteUniformInt = Integer.parseInt(minNumberUniform.get());
+                    int  maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberUniform.get());
+                    discreteUniformGenerator = new DiscreteUniformGenerator(minNumberDiscreteUniformInt, maxNumberDiscreteUniformInt, mersenneTwisterRNG);
+                    break;
+            }
         }
         else if(distributionType == DistributionType.BINOMIAL){
             int numberOfTrailsBinomialInt = Integer.parseInt(numberOfTrailsBinomial.get());
@@ -83,7 +91,12 @@ public class NumberGenerator implements Generator {
 
     public Number generate(){
         if(distributionType == DistributionType.UNIFORM){
-            return discreteUniformGenerator.nextValue();
+            switch (numberType){
+                case INTEGER:
+                case SMALLINT:
+                case TINYINT:
+                    return discreteUniformGenerator.nextValue();
+            }
         }
         else if(distributionType == DistributionType.BINOMIAL){
             return binomialGenerator.nextValue();
