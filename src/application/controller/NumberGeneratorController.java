@@ -11,7 +11,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NumberGeneratorController {
 
@@ -62,6 +63,7 @@ public class NumberGeneratorController {
 
     @FXML
     private TextField probabilityBinomialTextField;
+    private Tooltip probabilityBinomialTooltip;
 
     // Poisson Distribution part
 
@@ -119,9 +121,28 @@ public class NumberGeneratorController {
                             break;
                         case "TINYINT":
                             short number = Short.parseShort(newValue);
-                            if(number < -128 || number > 127){
+                            // TODO for now: range depends on database implementation, this is safe for all databases
+                            if(number < 0 || number > 127){
                                 throw new NumberFormatException("Invalid tinyint value");
                             }
+                            valid = true;
+                            break;
+                        case "BIGINT":
+                            Long.parseLong(newValue);
+                            valid = true;
+                            break;
+                        case "REAL":
+                            Float.parseFloat(newValue);
+                            valid = true;
+                            break;
+                        case "FLOAT":
+                        case "DOUBLE":
+                            Double.parseDouble(newValue);
+                            valid = true;
+                            break;
+                        case "DECIMAL":
+                        case "NUMERIC":
+                            Double.parseDouble(newValue);
                             valid = true;
                             break;
                     }
@@ -139,6 +160,24 @@ public class NumberGeneratorController {
                             break;
                         case "TINYINT":
                             minNumberUniformTooltip.setText("Invalid tinyint value");
+                            break;
+                        case "BIGINT":
+                            minNumberUniformTooltip.setText("Invalid bigint value");
+                            break;
+                        case "REAL":
+                            minNumberUniformTooltip.setText("Invalid real value");
+                            break;
+                        case "FLOAT":
+                            minNumberUniformTooltip.setText("Invalid float value");
+                            break;
+                        case "DOUBLE":
+                            minNumberUniformTooltip.setText("Invalid double value");
+                            break;
+                        case "DECIMAL":
+                            minNumberUniformTooltip.setText("Invalid decimal value");
+                            break;
+                        case "NUMERIC":
+                            minNumberUniformTooltip.setText("Invalid numeric value");
                             break;
                     }
                     minNumberUniformTooltip.show(minNumberUniformTextField, point2D.getX() + 5, point2D.getY());
@@ -177,6 +216,24 @@ public class NumberGeneratorController {
                             }
                             valid = true;
                             break;
+                        case "BIGINT":
+                            Long.parseLong(newValue);
+                            valid = true;
+                            break;
+                        case "REAL":
+                            Float.parseFloat(newValue);
+                            valid = true;
+                            break;
+                        case "FLOAT":
+                        case "DOUBLE":
+                            Double.parseDouble(newValue);
+                            valid = true;
+                            break;
+                        case "DECIMAL":
+                        case "NUMERIC":
+                            Double.parseDouble(newValue);
+                            valid = true;
+                            break;
                     }
 
                 } catch (NumberFormatException e){
@@ -194,6 +251,24 @@ public class NumberGeneratorController {
                         case "TINYINT":
                             maxNumberUniformTooltip.setText("Invalid tinyint value");
                             break;
+                        case "BIGINT":
+                            maxNumberUniformTooltip.setText("Invalid bigint value");
+                            break;
+                        case "REAL":
+                            maxNumberUniformTooltip.setText("Invalid real value");
+                            break;
+                        case "FLOAT":
+                            maxNumberUniformTooltip.setText("Invalid float value");
+                            break;
+                        case "DOUBLE":
+                            maxNumberUniformTooltip.setText("Invalid double value");
+                            break;
+                        case "DECIMAL":
+                            minNumberUniformTooltip.setText("Invalid decimal value");
+                            break;
+                        case "NUMERIC":
+                            minNumberUniformTooltip.setText("Invalid numeric value");
+                            break;
                     }
 
                     maxNumberUniformTooltip.show(maxNumberUniformTextField, point2D.getX() + 5, point2D.getY());
@@ -201,6 +276,48 @@ public class NumberGeneratorController {
                 if(valid){
                     maxNumberUniformTooltip.hide();
                     blockedSet.remove(maxNumberUniformTextField.getId());
+                    if(blockedSet.isEmpty()){
+                        mainAppController.blockAll = false;
+                    }
+                }
+            }
+        }
+    };
+
+    private ChangeListener<String> probabilityBinomialListener = new ChangeListener<String>() {
+
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            if(newValue != null){
+                boolean valid = false;
+                try{
+                    switch(activeGeneratorType){
+                        case "INTEGER":
+                        case "SMALLINT":
+                        case "TINYINT":
+                            double number = Double.parseDouble(newValue);
+                            if(number < 0 || number > 1){
+                                throw new NumberFormatException("Invalid value for probability");
+                            }
+                            valid = true;
+                            break;
+                    }
+                } catch (NumberFormatException e){
+                    blockedSet.add(probabilityBinomialTextField.getId());
+                    mainAppController.blockAll = true;
+                    Point2D point2D = probabilityBinomialTextField.localToScreen(probabilityBinomialTextField.getLayoutBounds().getMaxX(), probabilityBinomialTextField.getLayoutBounds().getMinY());
+                    switch(activeGeneratorType){
+                        case "INTEGER":
+                        case "SMALLINT":
+                        case "TINYINT":
+                            probabilityBinomialTooltip.setText("Invalid value for probability");
+                            break;
+                    }
+                    probabilityBinomialTooltip.show(probabilityBinomialTextField, point2D.getX() + 5, point2D.getY());
+                }
+                if(valid){
+                    probabilityBinomialTooltip.hide();
+                    blockedSet.remove(probabilityBinomialTextField.getId());
                     if(blockedSet.isEmpty()){
                         mainAppController.blockAll = false;
                     }
@@ -268,6 +385,9 @@ public class NumberGeneratorController {
         maxNumberUniformTooltip = new Tooltip();
         maxNumberUniformTooltip.setAutoHide(false);
         maxNumberUniformTooltip.getStyleClass().add("tooltip");
+        probabilityBinomialTooltip = new Tooltip();
+        probabilityBinomialTooltip.setAutoHide(false);
+        probabilityBinomialTooltip.getStyleClass().add("tooltip");
 
         binomialRadioButton.setUserData(DistributionType.BINOMIAL);
         uniformRadioButton.setUserData(DistributionType.UNIFORM);
@@ -288,11 +408,11 @@ public class NumberGeneratorController {
         activeGeneratorType = type;
         setupActiveGenerator(type);
         bindFields(generator, type);
+        enableGenerators(type);
     }
 
     private void setupActiveGenerator(String type){
         activeGeneratorType = type;
-
     }
 
     private void bindFields(Generator generator, String type){
@@ -302,6 +422,8 @@ public class NumberGeneratorController {
 
         minNumberUniformTextField.textProperty().addListener(uniformMinNumberListener);
         maxNumberUniformTextField.textProperty().addListener(uniformMaxNumberListener);
+        probabilityBinomialTextField.textProperty().addListener(probabilityBinomialListener);
+
         distributionToggleGroup.selectedToggleProperty().addListener(toggleChangeListener);
 
         for(Toggle radioButton : distributionToggleGroup.getToggles()){
@@ -324,6 +446,7 @@ public class NumberGeneratorController {
     private void unbindFields(Generator generator, String type){
         minNumberUniformTextField.textProperty().removeListener(uniformMinNumberListener);
         maxNumberUniformTextField.textProperty().removeListener(uniformMaxNumberListener);
+        probabilityBinomialTextField.textProperty().removeListener(probabilityBinomialListener);
         distributionToggleGroup.selectedToggleProperty().removeListener(toggleChangeListener);
 
         numberGenerator = (NumberGenerator)generator;
@@ -336,5 +459,37 @@ public class NumberGeneratorController {
         standardDeviationTextField.textProperty().unbindBidirectional(numberGenerator.standardDeviationNormallyProperty());
         rateExponentialTextField.textProperty().unbindBidirectional(numberGenerator.rateExponentialProperty());
         numberGenerator = null;
+    }
+
+    private void enableGenerators(String type){
+        switch (type){
+            case "INTEGER":
+            case "SMALLINT":
+            case "TINYINT":
+                uniformRadioButton.disableProperty().set(false);
+                binomialRadioButton.disableProperty().set(false);
+                poissonRadioButton.disableProperty().set(false);
+                normallyRadioButton.disableProperty().set(true);
+                exponentialRadioButton.disableProperty().set(true);
+                break;
+            case "BIGINT":
+                uniformRadioButton.disableProperty().set(false);
+                binomialRadioButton.disableProperty().set(true);
+                poissonRadioButton.disableProperty().set(true);
+                normallyRadioButton.disableProperty().set(true);
+                exponentialRadioButton.disableProperty().set(true);
+                break;
+            case "REAL":
+            case "FLOAT":
+            case "DOUBLE":
+            case "DECIMAL":
+            case "NUMERIC":
+                uniformRadioButton.disableProperty().set(false);
+                binomialRadioButton.disableProperty().set(true);
+                poissonRadioButton.disableProperty().set(true);
+                normallyRadioButton.disableProperty().set(false);
+                exponentialRadioButton.disableProperty().set(false);
+                break;
+        }
     }
 }

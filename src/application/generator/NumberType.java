@@ -3,5 +3,11 @@ package application.generator;
 public enum NumberType {
     INTEGER,
     SMALLINT,
-    TINYINT
+    TINYINT,
+    BIGINT,
+    REAL,
+    DOUBLE,
+    FLOAT,
+    DECIMAL,
+    NUMERIC
 }

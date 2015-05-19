@@ -2,12 +2,18 @@ package application.generator;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.uncommons.maths.random.*;
+
+import java.math.BigDecimal;
 
 public class NumberGenerator implements Generator {
 
     private StringProperty minNumberUniform;
     private StringProperty maxNumberUniform;
+
+    private long minNumberDiscreteUniformLong;
+    private long maxNumberDiscreteUniformLong;
 
     private StringProperty numberOfTrailsBinomial;
     private StringProperty probabilityBinomial;
@@ -27,10 +33,13 @@ public class NumberGenerator implements Generator {
     SeedGenerator seedGenerator = DefaultSeedGenerator.getInstance();
 
     private DiscreteUniformGenerator discreteUniformGenerator = null;
+    private ContinuousUniformGenerator continuousUniformGenerator = null;
     private BinomialGenerator binomialGenerator = null;
     private PoissonGenerator poissonGenerator = null;
     private GaussianGenerator gaussianGenerator = null;
     private ExponentialGenerator exponentialGenerator = null;
+
+    private RandomDataGenerator randomDataGenerator = null;
 
     public NumberGenerator(NumberType numberType){
         this.numberType = numberType;
@@ -67,6 +76,28 @@ public class NumberGenerator implements Generator {
                     int  maxNumberDiscreteUniformInt = Integer.parseInt(maxNumberUniform.get());
                     discreteUniformGenerator = new DiscreteUniformGenerator(minNumberDiscreteUniformInt, maxNumberDiscreteUniformInt, mersenneTwisterRNG);
                     break;
+                case BIGINT:
+                    minNumberDiscreteUniformLong = Long.parseLong(minNumberUniform.get());
+                    maxNumberDiscreteUniformLong = Long.parseLong(maxNumberUniform.get());
+                    randomDataGenerator = new RandomDataGenerator();
+                    break;
+                case REAL:
+                    float minNumberDiscreteUniformFloat = Float.parseFloat(minNumberUniform.get());
+                    float maxNumberDiscreteUniformFloat = Float.parseFloat(maxNumberUniform.get());
+                    continuousUniformGenerator = new ContinuousUniformGenerator(minNumberDiscreteUniformFloat, maxNumberDiscreteUniformFloat, mersenneTwisterRNG);
+                    break;
+                case FLOAT:
+                case DOUBLE:
+                    double minNumberDiscreteUniformDouble = Double.parseDouble(minNumberUniform.get());
+                    double maxNumberDiscreteUniformDouble = Double.parseDouble(maxNumberUniform.get());
+                    continuousUniformGenerator = new ContinuousUniformGenerator(minNumberDiscreteUniformDouble, maxNumberDiscreteUniformDouble, mersenneTwisterRNG);
+                    break;
+                case DECIMAL:
+                case NUMERIC:
+                    double minNumberDiscreteUniformDecimal = Double.parseDouble(minNumberUniform.get());
+                    double maxNumberDiscreteUniformDecimal = Double.parseDouble(maxNumberUniform.get());
+                    continuousUniformGenerator = new ContinuousUniformGenerator(minNumberDiscreteUniformDecimal, maxNumberDiscreteUniformDecimal, mersenneTwisterRNG);
+                    break;
             }
         }
         else if(distributionType == DistributionType.BINOMIAL){
@@ -96,6 +127,16 @@ public class NumberGenerator implements Generator {
                 case SMALLINT:
                 case TINYINT:
                     return discreteUniformGenerator.nextValue();
+                case BIGINT:
+                    return randomDataGenerator.nextLong(minNumberDiscreteUniformLong, maxNumberDiscreteUniformLong);
+                case REAL:
+                    return new Float(continuousUniformGenerator.nextValue());
+                case FLOAT:
+                case DOUBLE:
+                    return  continuousUniformGenerator.nextValue();
+                case DECIMAL:
+                case NUMERIC:
+                    return BigDecimal.valueOf(continuousUniformGenerator.nextValue());
             }
         }
         else if(distributionType == DistributionType.BINOMIAL){

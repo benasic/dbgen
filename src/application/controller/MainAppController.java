@@ -229,6 +229,12 @@ public class MainAppController {
                     case "INTEGER":
                     case "SMALLINT":
                     case "TINYINT":
+                    case "BIGINT":
+                    case "REAL":
+                    case "FLOAT":
+                    case "DOUBLE":
+                    case "DECIMAL":
+                    case "NUMERIC":
                         lastGeneratorType = "NUMBER";
                         lastActiveGenerator = newValue.getValue().getGenerator();
                         numberGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);

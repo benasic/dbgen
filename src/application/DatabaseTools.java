@@ -324,6 +324,24 @@ public class DatabaseTools {
                     case "TINYINT":
                         columnInfo.setGenerator(new NumberGenerator(NumberType.TINYINT));
                         break;
+                    case "BIGINT":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.BIGINT));
+                        break;
+                    case "REAL":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.REAL));
+                        break;
+                    case "FLOAT":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.FLOAT));
+                        break;
+                    case "DOUBLE":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.DOUBLE));
+                        break;
+                    case "DECIMAL":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.DECIMAL));
+                        break;
+                    case "NUMERIC":
+                        columnInfo.setGenerator(new NumberGenerator(NumberType.NUMERIC));
+                        break;
                 }
 
                 columnInfoCollection.add(columnInfo);
@@ -387,6 +405,7 @@ public class DatabaseTools {
                         ps.setObject(j++, observableList.get(i), columnInfos.get(i).getSqlType());
                     }
                 }
+                //System.out.println(ps);
                 ps.addBatch();
                 if(++count % batchSize == 0) {
                     ps.executeBatch();
