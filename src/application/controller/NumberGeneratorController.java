@@ -93,7 +93,6 @@ public class NumberGeneratorController {
     private TextField rateExponentialTextField;
 
 
-
     private String activeGeneratorType;
 
     private NumberGenerator numberGenerator;
@@ -406,13 +405,8 @@ public class NumberGeneratorController {
 
     public void setGenerator(Generator generator, String type){
         activeGeneratorType = type;
-        setupActiveGenerator(type);
         bindFields(generator, type);
         enableGenerators(type);
-    }
-
-    private void setupActiveGenerator(String type){
-        activeGeneratorType = type;
     }
 
     private void bindFields(Generator generator, String type){

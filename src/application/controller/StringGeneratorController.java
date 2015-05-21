@@ -3,6 +3,8 @@ package application.controller;
 import application.generator.Generator;
 import application.generator.StringGenerator;
 import application.model.RegexTemplate;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,24 +21,33 @@ public class StringGeneratorController {
 
     private StringGenerator stringGenerator;
 
+    private ChangeListener<RegexTemplate> templatesChoiceBoxListener = new ChangeListener<RegexTemplate>() {
 
+        @Override
+        public void changed(ObservableValue<? extends RegexTemplate> observable, RegexTemplate oldValue, RegexTemplate newValue) {
+            if(newValue != null){
+                generatorTextField.textProperty().setValue(newValue.getRegex());
+            }
+
+        }
+    };
 
     @FXML
     private void initialize(){
-        templatesChoiceBox.getSelectionModel().selectedItemProperty()
-                .addListener((observable, oldValue, newValue) -> {
-                    generatorTextField.textProperty().setValue(newValue.getRegex());
-                });
+
     }
 
     public void unbindValues(Generator generator){
         stringGenerator = (StringGenerator)generator;
+        templatesChoiceBox.getSelectionModel().selectedItemProperty().removeListener(templatesChoiceBoxListener);
         generatorTextField.textProperty().unbindBidirectional(stringGenerator.getGeneratorStringProperty());
     }
 
     public void setGenerator(Generator generator){
         stringGenerator = (StringGenerator)generator;
+        templatesChoiceBox.getSelectionModel().selectedItemProperty().addListener(templatesChoiceBoxListener);
         generatorTextField.textProperty().bindBidirectional(stringGenerator.getGeneratorStringProperty());
+
 
         ObservableList<RegexTemplate> regexTemplates = FXCollections.observableArrayList();
         regexTemplates.add(new RegexTemplate("email","[a-z]{5,8}\\.[a-z]{5,8}\\@[a-z]{3,4}\\.com"));

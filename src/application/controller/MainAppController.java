@@ -202,7 +202,7 @@ public class MainAppController {
                 // unbind old values
                 if (lastActiveGenerator != null) {
                     switch (lastGeneratorType) {
-                        case "VARCHAR":
+                        case "TEXT":
                             stringGeneratorController.unbindValues(lastActiveGenerator);
                             lastActiveGenerator = null;
                             break;
@@ -210,7 +210,7 @@ public class MainAppController {
                             numberGeneratorController.unbindValues(lastActiveGenerator, lastGeneratorType);
                             lastActiveGenerator = null;
                             break;
-                        case "TIMESTAMP":
+                        case "DATE":
                             dateGeneratorController.unbindValues(lastActiveGenerator);
                             lastActiveGenerator = null;
                             break;
@@ -220,8 +220,10 @@ public class MainAppController {
                 }
 
                 switch (type) {
+                    case "CHAR":
                     case "VARCHAR":
-                        lastGeneratorType = "VARCHAR";
+                    case "LONGVARCHAR":
+                        lastGeneratorType = "TEXT";
                         lastActiveGenerator = newValue.getValue().getGenerator();
                         stringGeneratorController.setGenerator(newValue.getValue().getGenerator());
                         mainBorderPane.setCenter(stringGeneratorSubScene);
@@ -241,9 +243,11 @@ public class MainAppController {
                         mainBorderPane.setCenter(numberGeneratorSubScene);
                         break;
                     case "TIMESTAMP":
-                        lastGeneratorType = "TIMESTAMP";
+                    case "DATE":
+                    case "TIME":
+                        lastGeneratorType = "DATE";
                         lastActiveGenerator = newValue.getValue().getGenerator();
-                        dateGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                        dateGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
                         mainBorderPane.setCenter(dateGeneratorSubScene);
                     default:
                         break;

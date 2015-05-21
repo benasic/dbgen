@@ -1,8 +1,6 @@
 package application;
 
-import application.generator.NumberGenerator;
-import application.generator.NumberType;
-import application.generator.StringGenerator;
+import application.generator.*;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
 import application.model.helper.PrimaryKey;
@@ -341,6 +339,15 @@ public class DatabaseTools {
                         break;
                     case "NUMERIC":
                         columnInfo.setGenerator(new NumberGenerator(NumberType.NUMERIC));
+                        break;
+                    case "TIME":
+                        columnInfo.setGenerator(new DateGenerator(DateType.TIME));
+                        break;
+                    case "DATE":
+                        columnInfo.setGenerator(new DateGenerator(DateType.DATE));
+                        break;
+                    case "TIMESTAMP":
+                        columnInfo.setGenerator(new DateGenerator(DateType.TIMESTAMP));
                         break;
                 }
 
