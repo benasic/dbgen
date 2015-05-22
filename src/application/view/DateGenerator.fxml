@@ -2,7 +2,6 @@
 
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.DateGeneratorController">
@@ -23,5 +22,16 @@
       <Label layoutX="301.0" layoutY="98.0" text="End time:" />
       <TextField fx:id="startTimeTextField" layoutX="371.0" layoutY="54.0" prefHeight="25.0" prefWidth="75.0" />
       <TextField fx:id="endTimeTextField" layoutX="371.0" layoutY="94.0" prefHeight="25.0" prefWidth="75.0" />
+      <HBox layoutX="18.0" layoutY="141.0" prefHeight="25.0" prefWidth="429.0" spacing="20.0">
+         <children>
+            <CheckBox mnemonicParsing="false" text="Mon." fx:id="monCheckBox" />
+            <CheckBox mnemonicParsing="false" text="Tue." fx:id="tueCheckBox" />
+            <CheckBox mnemonicParsing="false" text="Wed." fx:id="wenCheckBox"/>
+            <CheckBox mnemonicParsing="false" text="Thu." fx:id="thuCheckBox"/>
+            <CheckBox mnemonicParsing="false" text="Fri." fx:id="friCheckBox"/>
+            <CheckBox mnemonicParsing="false" text="Sat." fx:id="satCheckBox"/>
+            <CheckBox mnemonicParsing="false" text="Sun." fx:id="sunCheckBox"/>
+         </children>
+      </HBox>
    </children>
 </AnchorPane>
