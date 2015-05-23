@@ -22,7 +22,7 @@
       <Label layoutX="301.0" layoutY="98.0" text="End time:" />
       <TextField fx:id="startTimeTextField" layoutX="371.0" layoutY="54.0" prefHeight="25.0" prefWidth="75.0" />
       <TextField fx:id="endTimeTextField" layoutX="371.0" layoutY="94.0" prefHeight="25.0" prefWidth="75.0" />
-      <HBox layoutX="18.0" layoutY="141.0" prefHeight="25.0" prefWidth="429.0" spacing="20.0">
+      <HBox fx:id="daysHBox" layoutX="18.0" layoutY="141.0" prefHeight="25.0" prefWidth="429.0" spacing="20.0">
          <children>
             <CheckBox mnemonicParsing="false" text="Mon." fx:id="monCheckBox" />
             <CheckBox mnemonicParsing="false" text="Tue." fx:id="tueCheckBox" />

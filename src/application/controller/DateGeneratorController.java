@@ -7,6 +7,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -27,6 +28,9 @@ public class DateGeneratorController {
 
     @FXML
     private TextField endTimeTextField;
+
+    @FXML
+    private HBox daysHBox;
 
     @FXML
     private CheckBox monCheckBox;
@@ -94,6 +98,7 @@ public class DateGeneratorController {
 
     public void setGenerator(Generator generator, String type) {
         activeGeneratorType = type;
+        enableFields(type);
         dateTypeLabel.setText(type.toLowerCase());
         dateGenerator = (DateGenerator) generator;
         startDatePicker.setValue(dateGenerator.getStartDate().toLocalDate());
@@ -107,5 +112,31 @@ public class DateGeneratorController {
         friCheckBox.selectedProperty().bindBidirectional(dateGenerator.friBooleanPropertyProperty());
         satCheckBox.selectedProperty().bindBidirectional(dateGenerator.satBooleanPropertyProperty());
         sunCheckBox.selectedProperty().bindBidirectional(dateGenerator.sunBooleanPropertyProperty());
+    }
+
+    private void enableFields(String type){
+        switch(type){
+            case "DATE":
+                startDatePicker.disableProperty().set(false);
+                endDatePicker.disableProperty().set(false);
+                startTimeTextField.disableProperty().set(true);
+                endTimeTextField.disableProperty().set(true);
+                daysHBox.disableProperty().set(false);
+                break;
+            case "TIME":
+                startDatePicker.disableProperty().set(true);
+                endDatePicker.disableProperty().set(true);
+                startTimeTextField.disableProperty().set(false);
+                endTimeTextField.disableProperty().set(false);
+                daysHBox.disableProperty().set(true);
+                break;
+            case "TIMESTAMP":
+                startDatePicker.disableProperty().set(false);
+                endDatePicker.disableProperty().set(false);
+                startTimeTextField.disableProperty().set(false);
+                endTimeTextField.disableProperty().set(false);
+                daysHBox.disableProperty().set(false);
+                break;
+        }
     }
 }
