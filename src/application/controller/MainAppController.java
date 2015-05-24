@@ -225,7 +225,7 @@ public class MainAppController {
                     case "LONGVARCHAR":
                         lastGeneratorType = "TEXT";
                         lastActiveGenerator = newValue.getValue().getGenerator();
-                        stringGeneratorController.setGenerator(newValue.getValue().getGenerator());
+                        stringGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
                         mainBorderPane.setCenter(stringGeneratorSubScene);
                         break;
                     case "INTEGER":

@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="anchorPane" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="800.0" stylesheets="@mainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.NumberGeneratorController">
+<AnchorPane fx:id="anchorPane" minHeight="400.0" minWidth="500.0" prefHeight="400.0" prefWidth="500.0" stylesheets="@mainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.NumberGeneratorController">
     <children>
-      <Label layoutX="14.0" layoutY="6.0" text="Number type:">
+      <Label layoutX="14.0" layoutY="14.0" text="Number type:">
          <font>
             <Font size="16.0" />
          </font></Label>
-      <Label fx:id="numberType" layoutX="120.0" layoutY="6.0" text="unknown" textFill="#ffad08">
+      <Label fx:id="numberType" layoutX="120.0" layoutY="14.0" text="unknown" textFill="#ffad08">
          <font>
             <Font size="16.0" />
          </font></Label>
-      <HBox prefHeight="35.0" prefWidth="600.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+        <Region layoutX="8.0" layoutY="47.0" prefHeight="57.0" prefWidth="435.0" styleClass="region" stylesheets="@ConnectSetup.css" />
+      <HBox prefHeight="35.0" prefWidth="600.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
          <children>
-            <RadioButton fx:id="uniformRadioButton" mnemonicParsing="false" selected="true" text="Uniform Distribution">
+            <RadioButton fx:id="uniformRadioButton" mnemonicParsing="false" selected="true" text="Uniform">
                <toggleGroup>
                   <ToggleGroup fx:id="distributionToggleGroup" />
                </toggleGroup>
             </RadioButton>
-            <RadioButton fx:id="binomialRadioButton" mnemonicParsing="false" text="Binomial Distribution" toggleGroup="$distributionToggleGroup">
+            <RadioButton fx:id="binomialRadioButton" mnemonicParsing="false" text="Binomial" toggleGroup="$distributionToggleGroup">
                <HBox.margin>
                   <Insets />
                </HBox.margin>
             </RadioButton>
-            <RadioButton fx:id="poissonRadioButton" mnemonicParsing="false" text="Poisson Distribution" toggleGroup="$distributionToggleGroup" />
-            <RadioButton fx:id="normallyRadioButton" mnemonicParsing="false" text="Normally Distribution" toggleGroup="$distributionToggleGroup" />
-            <RadioButton fx:id="exponentialRadioButton" mnemonicParsing="false" text="Exponential Distribution" toggleGroup="$distributionToggleGroup" />
+            <RadioButton fx:id="poissonRadioButton" mnemonicParsing="false" text="Poisson" toggleGroup="$distributionToggleGroup" />
+            <RadioButton fx:id="normallyRadioButton" mnemonicParsing="false" text="Normally" toggleGroup="$distributionToggleGroup" />
+            <RadioButton fx:id="exponentialRadioButton" mnemonicParsing="false" text="Exponential" toggleGroup="$distributionToggleGroup" />
          </children>
          <padding>
             <Insets left="14.0" top="9.0" />
          </padding>
       </HBox>
-      <Pane fx:id="uniformPane" prefHeight="236.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <Pane fx:id="uniformPane" prefHeight="236.0" prefWidth="402.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
          <children>
               <Label layoutX="14.0" layoutY="18.0" text="Min value:" />
               <TextField fx:id="minNumberUniformTextField" layoutX="83.0" layoutY="14.0" prefHeight="25.0" prefWidth="250.0" />
@@ -43,7 +45,7 @@
             <TextField fx:id="maxNumberUniformTextField" layoutX="83.0" layoutY="56.0" prefHeight="25.0" prefWidth="250.0" />
          </children>
       </Pane>
-      <Pane fx:id="binomialPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <Pane fx:id="binomialPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
          <children>
             <Label layoutX="22.0" layoutY="18.0" text="Number of trials (n):" />
             <TextField fx:id="trailsBinomialTextField" layoutX="153.0" layoutY="14.0" prefHeight="25.0" prefWidth="181.0" />
@@ -51,13 +53,13 @@
             <TextField fx:id="probabilityBinomialTextField" layoutX="154.0" layoutY="56.0" prefHeight="25.0" prefWidth="180.0" />
          </children>
       </Pane>
-      <Pane fx:id="poissonPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <Pane fx:id="poissonPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
          <children>
             <Label layoutX="14.0" layoutY="18.0" text="Mean:" />
             <TextField fx:id="meanPoissonTextField" layoutX="84.0" layoutY="14.0" prefHeight="25.0" prefWidth="250.0" />
          </children>
       </Pane>
-      <Pane fx:id="normallyPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <Pane fx:id="normallyPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
          <children>
             <Label layoutX="14.0" layoutY="18.0" text="Mean:" />
             <TextField fx:id="meanNormallyTextField" layoutX="139.0" layoutY="14.0" prefHeight="25.0" prefWidth="195.0" />
@@ -65,11 +67,16 @@
             <TextField fx:id="standardDeviationTextField" layoutX="139.0" layoutY="56.0" prefHeight="25.0" prefWidth="195.0" />
          </children>
       </Pane>
-      <Pane fx:id="exponentialPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <Pane fx:id="exponentialPane" prefHeight="200.0" prefWidth="200.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
          <children>
             <Label layoutX="14.0" layoutY="18.0" text="Rate:" />
             <TextField fx:id="rateExponentialTextField" layoutX="84.0" layoutY="14.0" prefHeight="25.0" prefWidth="250.0" />
          </children>
       </Pane>
+      <Label layoutX="14.0" layoutY="45.0" text="Distribution type:">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>
