@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 public class StringGenerator implements Generator {
 
-    private StringProperty generatorStringProperty;
+    private StringProperty generatorString;
 
     private Generex generex = null;
 
@@ -30,7 +30,7 @@ public class StringGenerator implements Generator {
     private StringGenerationType stringGenerationType = StringGenerationType.REGEX;
 
     public StringGenerator(){
-        generatorStringProperty = new SimpleStringProperty("[0-7]-([a-k]|[l-z]{5,8})");
+        generatorString = new SimpleStringProperty("[0-7]-([a-k]|[l-z]{5,8})");
     }
 
     public void initiateGenerator(){
@@ -47,7 +47,7 @@ public class StringGenerator implements Generator {
                 break;
             case REGEX:
             case CUSTOM:
-                generex = new Generex(generatorStringProperty.get());
+                generex = new Generex(generatorString.get());
                 break;
         }
     }
@@ -64,8 +64,17 @@ public class StringGenerator implements Generator {
         }
     }
 
-    public StringProperty getGeneratorStringProperty(){
-        return generatorStringProperty;
+    public String getGeneratorString() {
+        return generatorString.get();
+    }
+
+    public StringProperty generatorStringProperty() {
+        return generatorString;
+    }
+
+    //@JsonProperty("generatorString")
+    public void setGeneratorString(String generatorString) {
+        this.generatorString.set(generatorString);
     }
 
     // String Generation Type

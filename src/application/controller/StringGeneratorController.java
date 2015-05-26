@@ -98,7 +98,7 @@ public class StringGeneratorController {
         catalogChoiceBox.getSelectionModel().selectedItemProperty().removeListener(catalogChoiceBoxListener);
         templatesChoiceBox.getSelectionModel().selectedItemProperty().removeListener(templatesChoiceBoxListener);
         stringToggleGroup.selectedToggleProperty().removeListener(toggleChangeListener);
-        generatorTextField.textProperty().unbindBidirectional(stringGenerator.getGeneratorStringProperty());
+        generatorTextField.textProperty().unbindBidirectional(stringGenerator.generatorStringProperty());
     }
 
     public void setGenerator(Generator generator, String type){
@@ -119,7 +119,7 @@ public class StringGeneratorController {
         catalogs.add(new Catalog("Female names", "femaleNames.txt"));
         catalogChoiceBox.setItems(catalogs);
 
-        generatorTextField.textProperty().bindBidirectional(stringGenerator.getGeneratorStringProperty());
+        generatorTextField.textProperty().bindBidirectional(stringGenerator.generatorStringProperty());
 
         customizedRadioButton.selectedProperty().set(true);
     }

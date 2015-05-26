@@ -6,8 +6,8 @@ import application.JDBC_Repository;
 import application.generator.Generator;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
+import application.utils.JSON;
 import application.utils.ObjectCollection;
-import application.utils.XML;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -39,6 +39,9 @@ public class MainAppController {
 
     @FXML
     private Button saveButton;
+
+    @FXML
+    private Button loadButton;
 
     @FXML
     private Button prepareButton;
@@ -102,11 +105,13 @@ public class MainAppController {
     public void init(){
         getTableInfoData();
         fillTableInfoTreeTableView();
+        addTreeTableViewListeners();
         addTableViewSynchronizationWithColumnInfo();
         addPrepareDataListener();
         addPreviewDataListener();
         addGenerateDataListener();
         addSaveProjectListener();
+        addLoadProjectListener();
     }
 
     private void getTableInfoData(){
@@ -184,7 +189,9 @@ public class MainAppController {
         });
         columnInfoTreeTableView.setRoot(mainRoot);
         columnInfoTreeTableView.setShowRoot(false);
+    }
 
+    private void addTreeTableViewListeners(){
         columnInfoTreeTableView.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
             if(blockAll){
                 mouseEvent.consume();
@@ -194,109 +201,113 @@ public class MainAppController {
 
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
-                String type = newValue.getValue().getColumnType();
-                if (type == null) {
-                    System.err.println("Invalid type");
-                    return;
-                }
-                // unbind old values
-                if (lastActiveGenerator != null) {
-                    switch (lastGeneratorType) {
-                        case "TEXT":
-                            stringGeneratorController.unbindValues(lastActiveGenerator);
-                            lastActiveGenerator = null;
+                if(newValue != null) {
+                    String type = newValue.getValue().getColumnType();
+                    if (type == null) {
+                        System.err.println("Invalid type");
+                        return;
+                    }
+                    // unbind old values
+                    if (lastActiveGenerator != null) {
+                        switch (lastGeneratorType) {
+                            case "TEXT":
+                                stringGeneratorController.unbindValues(lastActiveGenerator);
+                                lastActiveGenerator = null;
+                                break;
+                            case "NUMBER":
+                                numberGeneratorController.unbindValues(lastActiveGenerator, lastGeneratorType);
+                                lastActiveGenerator = null;
+                                break;
+                            case "DATE":
+                                dateGeneratorController.unbindValues(lastActiveGenerator);
+                                lastActiveGenerator = null;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    switch (type) {
+                        case "CHAR":
+                        case "VARCHAR":
+                        case "LONGVARCHAR":
+                            lastGeneratorType = "TEXT";
+                            lastActiveGenerator = newValue.getValue().getGenerator();
+                            stringGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
+                            mainBorderPane.setCenter(stringGeneratorSubScene);
                             break;
-                        case "NUMBER":
-                            numberGeneratorController.unbindValues(lastActiveGenerator, lastGeneratorType);
-                            lastActiveGenerator = null;
+                        case "INTEGER":
+                        case "SMALLINT":
+                        case "TINYINT":
+                        case "BIGINT":
+                        case "REAL":
+                        case "FLOAT":
+                        case "DOUBLE":
+                        case "DECIMAL":
+                        case "NUMERIC":
+                            lastGeneratorType = "NUMBER";
+                            lastActiveGenerator = newValue.getValue().getGenerator();
+                            numberGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
+                            mainBorderPane.setCenter(numberGeneratorSubScene);
                             break;
+                        case "TIMESTAMP":
                         case "DATE":
-                            dateGeneratorController.unbindValues(lastActiveGenerator);
-                            lastActiveGenerator = null;
-                            break;
+                        case "TIME":
+                            lastGeneratorType = "DATE";
+                            lastActiveGenerator = newValue.getValue().getGenerator();
+                            dateGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
+                            mainBorderPane.setCenter(dateGeneratorSubScene);
                         default:
                             break;
                     }
                 }
-
-                switch (type) {
-                    case "CHAR":
-                    case "VARCHAR":
-                    case "LONGVARCHAR":
-                        lastGeneratorType = "TEXT";
-                        lastActiveGenerator = newValue.getValue().getGenerator();
-                        stringGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
-                        mainBorderPane.setCenter(stringGeneratorSubScene);
-                        break;
-                    case "INTEGER":
-                    case "SMALLINT":
-                    case "TINYINT":
-                    case "BIGINT":
-                    case "REAL":
-                    case "FLOAT":
-                    case "DOUBLE":
-                    case "DECIMAL":
-                    case "NUMERIC":
-                        lastGeneratorType = "NUMBER";
-                        lastActiveGenerator = newValue.getValue().getGenerator();
-                        numberGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
-                        mainBorderPane.setCenter(numberGeneratorSubScene);
-                        break;
-                    case "TIMESTAMP":
-                    case "DATE":
-                    case "TIME":
-                        lastGeneratorType = "DATE";
-                        lastActiveGenerator = newValue.getValue().getGenerator();
-                        dateGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
-                        mainBorderPane.setCenter(dateGeneratorSubScene);
-                    default:
-                        break;
-                }
-        });
+            });
     }
 
     private void addTableViewSynchronizationWithColumnInfo() {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener(((observable, oldValue, newValue) -> {
-                // in case root is selected
-                if ((oldValue == null && newValue.getValue().getIsRoot())
-                        || (oldValue != null && newValue.getValue().getIsRoot() && !oldValue.getParent().equals(newValue))) {
-                    tableView.getColumns().clear();
-                    tableView.getItems().clear();
+                if (newValue != null) {
+                    // in case root is selected
+                    if ((oldValue == null && newValue.getValue().getIsRoot())
+                            || (oldValue != null && newValue.getValue().getIsRoot() && !oldValue.getParent().equals(newValue))) {
+                        tableView.getColumns().clear();
+                        tableView.getItems().clear();
 
-                    TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
-                    indexColumn.setPrefWidth(40);
-                    // TODO this line will only work correctly if row is unique
-                    indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
-                    indexColumn.setSortable(false);
-                    tableView.getColumns().add(indexColumn);
+                        TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
+                        indexColumn.setPrefWidth(40);
+                        // TODO this line will only work correctly if row is unique
+                        indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
+                        indexColumn.setSortable(false);
+                        tableView.getColumns().add(indexColumn);
 
-                    for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
-                        int column = newValue.getChildren().indexOf(columnInfoTreeItem);
-                        TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
-                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
-                        tableView.getColumns().add(objectStringTableColumn);
+                        for (TreeItem<ColumnInfo> columnInfoTreeItem : newValue.getChildren()) {
+                            int column = newValue.getChildren().indexOf(columnInfoTreeItem);
+                            TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                            objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
+                            tableView.getColumns().add(objectStringTableColumn);
+                        }
                     }
-                }
-                // in case internal element is selected, but only if it
-                // has different root element then previous one
-                else if (oldValue == null || (!oldValue.getParent().equals(newValue.getParent()) && !newValue.getValue().getIsRoot() && !newValue.getParent().equals(oldValue))) {
-                    tableView.getColumns().clear();
-                    tableView.getItems().clear();
+                    // in case internal element is selected, but only if it
+                    // has different root element then previous one
+                    else if (oldValue == null || (!oldValue.getParent().equals(newValue.getParent()) && !newValue.getValue().getIsRoot() && !newValue.getParent().equals(oldValue))) {
+                        tableView.getColumns().clear();
+                        tableView.getItems().clear();
 
-                    TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
-                    indexColumn.setPrefWidth(40);
-                    // TODO this line will only work correctly if row is unique
-                    indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
-                    indexColumn.setSortable(false);
-                    tableView.getColumns().add(indexColumn);
+                        TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
+                        indexColumn.setPrefWidth(40);
+                        // TODO this line will only work correctly if row is unique
+                        indexColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableView.getItems().indexOf(param.getValue()) + 1));
+                        indexColumn.setSortable(false);
+                        tableView.getColumns().add(indexColumn);
 
-                    TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
-                    for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
-                        int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
-                        TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
-                        objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
-                        tableView.getColumns().add(objectStringTableColumn);
+                        TreeItem<ColumnInfo> rootColumnInfoTreeItem = newValue.getParent();
+                        for (TreeItem<ColumnInfo> columnInfoTreeItem : rootColumnInfoTreeItem.getChildren()) {
+                            int column = rootColumnInfoTreeItem.getChildren().indexOf(columnInfoTreeItem);
+                            TableColumn<ObservableList<Object>, String> objectStringTableColumn = new TableColumn<>(columnInfoTreeItem.getValue().getColumnName());
+                            objectStringTableColumn.setCellValueFactory((TableColumn.CellDataFeatures<ObservableList<Object>, String> param) -> new ReadOnlyStringWrapper(param.getValue().get(column).toString()));
+                            tableView.getColumns().add(objectStringTableColumn);
+                        }
                     }
                 }
             }));
@@ -307,7 +318,16 @@ public class MainAppController {
         saveButton.setOnAction(event -> {
             if(!blockAll && columnInfoList != null && !columnInfoList.isEmpty()){
                 List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                XML.createXML(columnInfos);
+                JSON.createJSON(columnInfos, "filip");
+            }
+        });
+    }
+
+    private void addLoadProjectListener() {
+        loadButton.setOnAction(event -> {
+            if(!blockAll){
+                columnInfoList = JSON.createJavaObjects("filip");
+                fillTableInfoTreeTableView();
             }
         });
     }

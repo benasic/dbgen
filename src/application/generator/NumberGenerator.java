@@ -1,5 +1,6 @@
 package application.generator;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -40,6 +41,21 @@ public class NumberGenerator implements Generator {
     private ExponentialGenerator exponentialGenerator = null;
 
     private RandomDataGenerator randomDataGenerator = null;
+
+    public NumberGenerator(){
+        minNumberUniform = new SimpleStringProperty();
+        maxNumberUniform = new SimpleStringProperty();
+
+        numberOfTrailsBinomial = new SimpleStringProperty();
+        probabilityBinomial = new SimpleStringProperty();
+
+        meanPoisson = new SimpleStringProperty();
+
+        meanNormally = new SimpleStringProperty();
+        standardDeviationNormally = new SimpleStringProperty();
+
+        rateExponential = new SimpleStringProperty();
+    }
 
     public NumberGenerator(NumberType numberType){
         this.numberType = numberType;
@@ -186,6 +202,7 @@ public class NumberGenerator implements Generator {
         return minNumberUniform;
     }
 
+    @JsonProperty("minNumberUniform")
     public void setMinNumberUniform(String minNumberUniform) {
         this.minNumberUniform.set(minNumberUniform);
     }
@@ -200,6 +217,7 @@ public class NumberGenerator implements Generator {
         return maxNumberUniform;
     }
 
+    @JsonProperty("maxNumberUniform")
     public void setMaxNumberUniform(String maxNumberUniform) {
         this.maxNumberUniform.set(maxNumberUniform);
     }
@@ -214,6 +232,7 @@ public class NumberGenerator implements Generator {
         return numberOfTrailsBinomial;
     }
 
+    @JsonProperty("numberOfTrailsBinomial")
     public void setNumberOfTrailsBinomial(String numberOfTrailsBinomial) {
         this.numberOfTrailsBinomial.set(numberOfTrailsBinomial);
     }
@@ -228,6 +247,7 @@ public class NumberGenerator implements Generator {
         return probabilityBinomial;
     }
 
+    @JsonProperty("probabilityBinomial")
     public void setProbabilityBinomial(String probabilityBinomial) {
         this.probabilityBinomial.set(probabilityBinomial);
     }
@@ -242,6 +262,7 @@ public class NumberGenerator implements Generator {
         return meanPoisson;
     }
 
+    @JsonProperty("meanPoisson")
     public void setMeanPoisson(String meanPoisson) {
         this.meanPoisson.set(meanPoisson);
     }
@@ -256,6 +277,7 @@ public class NumberGenerator implements Generator {
         return meanNormally;
     }
 
+    @JsonProperty("meanNormally")
     public void setMeanNormally(String meanNormally) {
         this.meanNormally.set(meanNormally);
     }
@@ -270,6 +292,7 @@ public class NumberGenerator implements Generator {
         return standardDeviationNormally;
     }
 
+    @JsonProperty("standardDeviationNormally")
     public void setStandardDeviationNormally(String standardDeviationNormally) {
         this.standardDeviationNormally.set(standardDeviationNormally);
     }
@@ -284,6 +307,7 @@ public class NumberGenerator implements Generator {
         return rateExponential;
     }
 
+    @JsonProperty("rateExponential")
     public void setRateExponential(String rateExponential) {
         this.rateExponential.set(rateExponential);
     }

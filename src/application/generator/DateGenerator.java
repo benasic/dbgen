@@ -13,7 +13,7 @@ import java.util.GregorianCalendar;
 
 public class DateGenerator implements Generator{
 
-    private final DateType dateType;
+    private DateType dateType;
 
     private Date startDate = Date.valueOf("2015-05-01");
     private Date endDate = Date.valueOf("2015-05-30");
@@ -39,6 +39,10 @@ public class DateGenerator implements Generator{
 
     public DateGenerator(DateType dateType){
         this.dateType = dateType;
+    }
+
+    public DateGenerator(){
+
     }
 
     @Override

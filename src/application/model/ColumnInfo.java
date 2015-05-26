@@ -2,6 +2,7 @@ package application.model;
 
 import application.generator.Generator;
 import application.utils.Utils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
@@ -10,11 +11,11 @@ import java.util.Set;
 
 public class ColumnInfo {
 
-    private final StringProperty tableName;
-    private final StringProperty columnName;
-    private final StringProperty columnType;
-    private final StringProperty columnSize;
-    private final IntegerProperty sqlType;
+    private StringProperty tableName;
+    private StringProperty columnName;
+    private StringProperty columnType;
+    private StringProperty columnSize;
+    private IntegerProperty sqlType;
 
     // helper for determining root element
     private BooleanProperty isRoot;
@@ -73,6 +74,7 @@ public class ColumnInfo {
         this.tableName.set(tableName);
     }
 
+    @JsonIgnore
     public StringProperty getTableNameProperty() {
         return tableName;
     }
@@ -86,6 +88,7 @@ public class ColumnInfo {
         this.columnName.set(columnName);
     }
 
+    @JsonIgnore
     public StringProperty getColumnNameProperty() {
         return columnName;
     }
@@ -99,6 +102,7 @@ public class ColumnInfo {
         this.columnType.set(columnType);
     }
 
+    @JsonIgnore
     public StringProperty getColumnTypeProperty() {
         return columnType;
     }
@@ -112,6 +116,7 @@ public class ColumnInfo {
         this.columnSize.set(columnSize);
     }
 
+    @JsonIgnore
     public StringProperty getColumnSizeProperty() {
         return columnSize;
     }
@@ -122,6 +127,7 @@ public class ColumnInfo {
         return  sqlType.get();
     }
 
+    @JsonIgnore
     public IntegerProperty getSqlTypeProperty(){
         return sqlType;
     }
