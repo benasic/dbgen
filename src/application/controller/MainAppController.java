@@ -318,7 +318,7 @@ public class MainAppController {
         saveButton.setOnAction(event -> {
             if(!blockAll && columnInfoList != null && !columnInfoList.isEmpty()){
                 List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                JSON.createJSON(columnInfos, "filip");
+                JSON.createJSONforColumnInfo(columnInfos, "filip");
             }
         });
     }
@@ -326,7 +326,7 @@ public class MainAppController {
     private void addLoadProjectListener() {
         loadButton.setOnAction(event -> {
             if(!blockAll){
-                columnInfoList = JSON.createJavaObjects("filip");
+                columnInfoList = JSON.createJavaObjectsforColumnInfo("filip");
                 fillTableInfoTreeTableView();
             }
         });

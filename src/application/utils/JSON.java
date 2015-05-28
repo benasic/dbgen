@@ -1,6 +1,7 @@
 package application.utils;
 
 import application.model.ColumnInfo;
+import application.model.ConnectionInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,31 +15,46 @@ import java.util.List;
 
 public class JSON {
 
-    public static void createJSON(List<ColumnInfo> columnInfos, String name){
-        ObjectMapper objectMapper = new ObjectMapper();
+    private final static ObjectMapper objectMapper = new ObjectMapper();
+
+
+    public static void createJSONforColumnInfo(List<ColumnInfo> columnInfos, String name){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        //objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //ColumnInfo columnInfo1 = null;
-        //List<ColumnInfo> columnInfos = new ArrayList<>();
         try {
-            objectMapper.writeValue(new File("d:\\" + name + ".json"), columnInfos);
-            //columnInfos = objectMapper.readValue(new File("d:\\user.json"), new TypeReference<ArrayList<ColumnInfo>>() {});
+            objectMapper.writeValue(new File("d:\\" + name + "_project.json"), columnInfos);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //ObservableList<ColumnInfo> columnInfos1 = FXCollections.observableArrayList(columnInfos);
     }
 
-    public static ObservableList<ColumnInfo> createJavaObjects(String name){
-        ObjectMapper objectMapper = new ObjectMapper();
+    public static void createJSONforConnectionInfo(ConnectionInfo connectionInfo, String name){
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try {
+            objectMapper.writeValue(new File("d:\\" + name + "_connection.json"), connectionInfo);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ObservableList<ColumnInfo> createJavaObjectsforColumnInfo(String name){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         List<ColumnInfo> columnInfos = null;
         try {
-            columnInfos = objectMapper.readValue(new File("d:\\" + name + ".json"), new TypeReference<ArrayList<ColumnInfo>>() {});
+            columnInfos = objectMapper.readValue(new File("d:\\" + name + "_project.json"), new TypeReference<ArrayList<ColumnInfo>>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return FXCollections.observableArrayList(columnInfos);
+    }
+
+    public static ConnectionInfo createJavaObjectsforConnectionInfo(String name){
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ConnectionInfo connectionInfo = null;
+        try {
+            connectionInfo = objectMapper.readValue(new File("d:\\" + name + "_connection.json"), ConnectionInfo.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return connectionInfo;
     }
 }

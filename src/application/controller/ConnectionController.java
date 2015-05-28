@@ -5,6 +5,7 @@ import application.DbGen;
 import application.JDBC_Repository;
 import application.model.ConnectionInfo;
 import application.model.ConnectionParameters;
+import application.utils.JSON;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,6 +21,9 @@ import java.sql.SQLException;
 public class ConnectionController {
     @FXML
     private ChoiceBox<ConnectionInfo> connectionChoiceBox;
+
+    @FXML
+    private TextField saveName;
 
     @FXML
     private TextField hostName;
@@ -70,7 +74,7 @@ public class ConnectionController {
                     bindConnectInfo(newValue);
                     JDBC_Repository.getInstance().setConnectionInfo(newValue);
                 });
-        keyColumn.setCellValueFactory(cellData -> cellData.getValue().getKeyProperty());
+        keyColumn.setCellValueFactory(cellData -> cellData.getValue().keyProperty());
         keyColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         keyColumn.setOnEditCommit(
                 new EventHandler<CellEditEvent<ConnectionParameters, String>>() {
@@ -95,7 +99,7 @@ public class ConnectionController {
                     }
                 }
         );
-        valueColumn.setCellValueFactory(cellData -> cellData.getValue().getValueProperty());
+        valueColumn.setCellValueFactory(cellData -> cellData.getValue().valueProperty());
 
         newParameterButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -147,8 +151,8 @@ public class ConnectionController {
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 try {
                     db.testConnection();
+                    JSON.createJSONforConnectionInfo(connectionInfo, connectionInfo.getSaveName());
                     ((Stage) retrieveMetadataButton.getScene().getWindow()).close();
-                    ;
                 } catch (SQLException e1) {
                     Alert retrieveMetadataAlert = new Alert(AlertType.ERROR);
                     retrieveMetadataAlert.setTitle("Connection test");
@@ -164,17 +168,19 @@ public class ConnectionController {
     private void bindConnectInfo(ConnectionInfo connectInfo) {
         currentParameters = connectInfo.getParameters();
         parametersTable.setItems(currentParameters);
-        hostName.textProperty().bindBidirectional(connectInfo.getHostProperty());
-        port.textProperty().bindBidirectional(connectInfo.getPortProperty());
-        database.textProperty().bindBidirectional(connectInfo.getDatabaseProperty());
+        hostName.textProperty().bindBidirectional(connectInfo.hostProperty());
+        port.textProperty().bindBidirectional(connectInfo.portProperty());
+        database.textProperty().bindBidirectional(connectInfo.databaseProperty());
+        saveName.textProperty().bindBidirectional(connectInfo.saveNameProperty());
 
     }
 
     private void unbindConnectInfo(ConnectionInfo connectInfo) {
         if (connectInfo != null) {
-            hostName.textProperty().unbindBidirectional(connectInfo.getHostProperty());
-            port.textProperty().unbindBidirectional(connectInfo.getPortProperty());
-            database.textProperty().unbindBidirectional(connectInfo.getDatabaseProperty());
+            hostName.textProperty().unbindBidirectional(connectInfo.hostProperty());
+            port.textProperty().unbindBidirectional(connectInfo.portProperty());
+            database.textProperty().unbindBidirectional(connectInfo.databaseProperty());
+            saveName.textProperty().unbindBidirectional(connectInfo.saveNameProperty());
         }
     }
 
