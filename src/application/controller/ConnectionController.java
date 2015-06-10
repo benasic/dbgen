@@ -1,5 +1,6 @@
 package application.controller;
 
+import application.Constants;
 import application.DatabaseTools;
 import application.DbGen;
 import application.JDBC_Repository;
@@ -16,7 +17,12 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ConnectionController {
     @FXML
@@ -188,5 +194,14 @@ public class ConnectionController {
         // Add observable list data to the choice box
         connectionChoiceBox.setItems(mainApp.getConnectInfoData());
         connectionChoiceBox.getSelectionModel().selectFirst();
+
+        File f = new File(Constants.SaveLoation);
+        Set<String> names = new HashSet<>(Arrays.asList(f.list()));
+        names = names.stream().filter(s -> s.contains("_connection.json")).collect(Collectors.toSet());
+        for (String name : names){
+            ConnectionInfo connectionInfo = JSON.createJavaObjectsforConnectionInfo(name.replace("_connection.json", ""));
+            connectionChoiceBox.getItems().add(connectionInfo);
+        }
+
     }
 }

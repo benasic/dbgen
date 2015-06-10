@@ -1,5 +1,6 @@
 package application.utils;
 
+import application.Constants;
 import application.model.ColumnInfo;
 import application.model.ConnectionInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -17,11 +18,10 @@ public class JSON {
 
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
-
     public static void createJSONforColumnInfo(List<ColumnInfo> columnInfos, String name){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
-            objectMapper.writeValue(new File("d:\\" + name + "_project.json"), columnInfos);
+            objectMapper.writeValue(new File(Constants.SaveLoation + name + "_project.json"), columnInfos);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,7 +30,7 @@ public class JSON {
     public static void createJSONforConnectionInfo(ConnectionInfo connectionInfo, String name){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
-            objectMapper.writeValue(new File("d:\\" + name + "_connection.json"), connectionInfo);
+            objectMapper.writeValue(new File(Constants.SaveLoation + name + "_connection.json"), connectionInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,7 +40,7 @@ public class JSON {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         List<ColumnInfo> columnInfos = null;
         try {
-            columnInfos = objectMapper.readValue(new File("d:\\" + name + "_project.json"), new TypeReference<ArrayList<ColumnInfo>>() {});
+            columnInfos = objectMapper.readValue(new File(Constants.SaveLoation + name + "_project.json"), new TypeReference<ArrayList<ColumnInfo>>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,7 +51,7 @@ public class JSON {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         ConnectionInfo connectionInfo = null;
         try {
-            connectionInfo = objectMapper.readValue(new File("d:\\" + name + "_connection.json"), ConnectionInfo.class);
+            connectionInfo = objectMapper.readValue(new File(Constants.SaveLoation + name + "_connection.json"), ConnectionInfo.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

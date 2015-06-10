@@ -17,7 +17,7 @@ public class ConnectionInfo {
 	private StringProperty port;
 	private StringProperty database;
 
-	private String JDBCName;
+    private String JDBCName;
 	private String connectionString;
 
 	private ObservableList<ConnectionParameters> parameters = FXCollections.observableArrayList();
@@ -166,6 +166,15 @@ public class ConnectionInfo {
 
 	@Override
 	public String toString() {
-		return connectionName.get();
+		return connectionName.get() + " - " + saveName.get();
 	}
+
+    public String getJDBCName() {
+        return JDBCName;
+    }
+
+    public void setJDBCName(String JDBCName) {
+        this.JDBCName = JDBCName;
+    }
+
 }

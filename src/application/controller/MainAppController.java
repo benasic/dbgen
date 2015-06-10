@@ -1,5 +1,6 @@
 package application.controller;
 
+import application.Constants;
 import application.DatabaseTools;
 import application.DbGen;
 import application.JDBC_Repository;
@@ -21,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -42,6 +44,9 @@ public class MainAppController {
 
     @FXML
     private Button loadButton;
+
+    @FXML
+    private Button refreshMetadata;
 
     @FXML
     private Button prepareButton;
@@ -112,15 +117,32 @@ public class MainAppController {
         addGenerateDataListener();
         addSaveProjectListener();
         addLoadProjectListener();
+        addRefreshMetadataListener();
     }
 
     private void getTableInfoData(){
-        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
-        try {
-            columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+
+        File f = new File(Constants.SaveLoation);
+        Set<String> names = new HashSet<>();
+        names.addAll(Arrays.asList(f.list()));
+
+        boolean projectExist = false;
+        projectExist = names.stream().anyMatch(s -> s.equals(JDBC_Repository.getInstance().getConnectionInfo().getSaveName().concat("_project.json")));
+
+        if(projectExist){
+            columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+            System.out.println("ponovno učitanje");
+        }
+        else{
+            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+            try {
+                columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
+                List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
+                JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+                System.out.println("prvo učitanje");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -318,7 +340,7 @@ public class MainAppController {
         saveButton.setOnAction(event -> {
             if(!blockAll && columnInfoList != null && !columnInfoList.isEmpty()){
                 List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                JSON.createJSONforColumnInfo(columnInfos, "filip");
+                JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
             }
         });
     }
@@ -326,8 +348,26 @@ public class MainAppController {
     private void addLoadProjectListener() {
         loadButton.setOnAction(event -> {
             if(!blockAll){
-                columnInfoList = JSON.createJavaObjectsforColumnInfo("filip");
+                columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
                 fillTableInfoTreeTableView();
+            }
+        });
+    }
+
+    private void addRefreshMetadataListener(){
+        refreshMetadata.setOnAction(event -> {
+            if (!blockAll) {
+                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                try {
+                    // TODO terba popraviti da radi ispravno...... preko usporedbe hesheva
+                    columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
+                    List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
+                    JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+                    System.out.println("refresh podataka");
+                    fillTableInfoTreeTableView();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
