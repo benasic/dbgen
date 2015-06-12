@@ -15,12 +15,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +60,10 @@ public class MainAppController {
     @FXML
     private Button generateButton;
 
+    @FXML
+    private Button visualizeDatabaseButton;
 
+    private Stage primaryStage;
 
     private ObservableList<ColumnInfo> columnInfoList = null;
     private List<ColumnInfo> selectedColumnInfoList = new ArrayList<>();
@@ -107,7 +113,8 @@ public class MainAppController {
         }
     }
 
-    public void init(){
+    public void init(Stage primaryStage){
+        this.primaryStage = primaryStage;
         getTableInfoData();
         fillTableInfoTreeTableView();
         addTreeTableViewListeners();
@@ -118,6 +125,7 @@ public class MainAppController {
         addSaveProjectListener();
         addLoadProjectListener();
         addRefreshMetadataListener();
+        addVisualizeDatabaseListener();
     }
 
     private void getTableInfoData(){
@@ -366,6 +374,30 @@ public class MainAppController {
                     System.out.println("refresh podataka");
                     fillTableInfoTreeTableView();
                 } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void addVisualizeDatabaseListener(){
+        visualizeDatabaseButton.setOnAction(event -> {
+            if (!blockAll){
+                FXMLLoader graphLoader = new FXMLLoader();
+                graphLoader.setLocation(DbGen.class.getResource("view/DatabaseVisualizer.fxml"));
+                try {
+                    AnchorPane databaseVisualizerAnchorPane = graphLoader.load();
+                    Stage databaseVisualizerStage = new Stage();
+                    databaseVisualizerStage.setScene(new Scene(databaseVisualizerAnchorPane));
+                    databaseVisualizerStage.setTitle("Database Visualizer");
+                    databaseVisualizerStage.initModality(Modality.APPLICATION_MODAL);
+                    databaseVisualizerStage.initOwner(primaryStage);
+
+                    DatabaseVisualizerController controller = graphLoader.getController();
+                    controller.init(columnInfoList);
+
+                    databaseVisualizerStage.showAndWait();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }

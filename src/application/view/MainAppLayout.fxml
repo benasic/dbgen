@@ -42,6 +42,7 @@
                   <Button fx:id="prepareButton" mnemonicParsing="false" text="Prepare date" />
                   <Button fx:id="previewButton" mnemonicParsing="false" text="Preview data" />
                   <Button fx:id="generateButton" mnemonicParsing="false" text="Generate into database" />
+                  <Button fx:id="visualizeDatabaseButton" mnemonicParsing="false" text="Visualize database" />
                </children>
                <padding>
                   <Insets left="10.0" top="2.0" />

@@ -75,7 +75,7 @@ public class DbGen extends Application {
 
 
             if(!earlyExit){
-                mainAppController.init();
+                mainAppController.init(this.primaryStage);
             }
 
         } catch (IOException e) {
