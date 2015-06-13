@@ -147,13 +147,20 @@ public class MainAppController {
         boolean projectExist = false;
         projectExist = names.stream().anyMatch(s -> s.equals(JDBC_Repository.getInstance().getConnectionInfo().getSaveName().concat("_columns.json")));
 
+        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+
         if(projectExist){
             columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
             tableInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
             System.out.println("ponovno učitanje");
+            try{
+                dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         else{
-            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+
             try {
                 columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
                 List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
@@ -594,7 +601,7 @@ public class MainAppController {
                                 while (objects.size() < numberOfDataToGenerate) {
                                     ObjectCollection objectCollection = new ObjectCollection(size);
                                     for (int i = 0; i < size; i++) {
-                                        objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(numberOfDataToGenerate));
+                                        objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(fetchedData.get(i).size()));
                                     }
                                     objects.add(objectCollection);
                                 }

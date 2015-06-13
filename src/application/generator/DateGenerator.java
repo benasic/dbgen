@@ -272,4 +272,13 @@ public class DateGenerator implements Generator{
         this.sunBooleanProperty.set(sunBooleanProperty);
     }
 
+    // Date Type
+
+    public DateType getDateType() {
+        return dateType;
+    }
+
+    public void setDateType(DateType dateType) {
+        this.dateType = dateType;
+    }
 }
