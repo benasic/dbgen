@@ -409,6 +409,7 @@ public class MainAppController {
             if (!blockAll) {
                 DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
                 try {
+                    // TODO cijela funkcija prebrise podatke sto nije dobro, napraviti da radi usporedbu
                     // TODO terba popraviti da radi ispravno...... preko usporedbe hesheva
                     columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
                     List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
@@ -452,20 +453,24 @@ public class MainAppController {
             if(!blockAll) {
                 TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
                 if (selectedColumnInfoTreeItem != null) {
+
                     selectedColumnInfoList.clear();
-                    // if root is selected
-                    if (selectedColumnInfoTreeItem.getValue().getIsRoot()) {
-                        selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
-                                .map(TreeItem::getValue)
-                                .collect(Collectors.toList()));
+                    // if root is not selected use data from root
+                    if (!selectedColumnInfoTreeItem.getValue().getIsRoot()) {
+                        selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
                     }
-                    // if leaf is selected
-                    else {
-                        TreeItem<ColumnInfo> columnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
-                        selectedColumnInfoList.addAll(columnInfoTreeItem.getChildren().stream()
-                                .map(TreeItem::getValue)
-                                .collect(Collectors.toList()));
+
+                    selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
+                            .map(TreeItem::getValue)
+                            .collect(Collectors.toList()));
+
+                    if(!selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getAllowGeneration()){
+                        System.out.println("Generation of data for this table is not selected!!");
+                        return;
                     }
+
+                    String numberOfDataToGenerateString = selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getNumberOfDataToGenerate();
+                    int numberOfDataToGenerate = Integer.parseInt(numberOfDataToGenerateString);
 
                     // calling generator for each of selected item
                     // TODO add different collection type support
@@ -514,8 +519,8 @@ public class MainAppController {
                                 // pick random value
                                 Random random = new Random();
                                 random.setSeed(System.currentTimeMillis());
-                                for (int i = 0; i < 1000; i++) {
-                                    Object object = primaryKeyList.get(random.nextInt(1000));
+                                for (int i = 0; i < numberOfDataToGenerate; i++) {
+                                    Object object = primaryKeyList.get(random.nextInt(numberOfDataToGenerate));
                                     jdbc_repository.insertIntoCollection(hash, object);
                                 }
                             } catch (SQLException e) {
@@ -586,10 +591,10 @@ public class MainAppController {
                                 int size = regularForeignKeysSet.size();
                                 Random random = new Random();
                                 random.setSeed(System.currentTimeMillis());
-                                while (objects.size() < 1000) {
+                                while (objects.size() < numberOfDataToGenerate) {
                                     ObjectCollection objectCollection = new ObjectCollection(size);
                                     for (int i = 0; i < size; i++) {
-                                        objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(1000));
+                                        objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(numberOfDataToGenerate));
                                     }
                                     objects.add(objectCollection);
                                 }
@@ -618,7 +623,7 @@ public class MainAppController {
                             }
 
                             jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
-                            for (int i = 0; i < 1000; i++) {
+                            for (int i = 0; i < numberOfDataToGenerate; i++) {
                                 if (columnInfo.getAutoIncrement()) {
                                     jdbc_repository.insertIntoCollection(hash, "Auto generated in DB");
                                 } else {
