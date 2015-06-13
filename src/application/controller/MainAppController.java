@@ -5,6 +5,7 @@ import application.DatabaseTools;
 import application.DbGen;
 import application.JDBC_Repository;
 import application.generator.Generator;
+import application.generator.TableGenerationSettings;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
 import application.utils.JSON;
@@ -66,18 +67,23 @@ public class MainAppController {
     private Stage primaryStage;
 
     private ObservableList<ColumnInfo> columnInfoList = null;
+    private ObservableList<ColumnInfo> tableInfoList = FXCollections.observableArrayList();
     private List<ColumnInfo> selectedColumnInfoList = new ArrayList<>();
     private ObservableList<ObservableList<Object>> previewObservableList = FXCollections.observableArrayList();
 
     private final FXMLLoader stringLoader = new FXMLLoader();
     private final FXMLLoader integerLoader = new FXMLLoader();
     private final FXMLLoader dateLoader = new FXMLLoader();
+    private final FXMLLoader tableSettingsLoader = new FXMLLoader();
     private AnchorPane stringGeneratorSubScene;
     private AnchorPane numberGeneratorSubScene;
     private AnchorPane dateGeneratorSubScene;
+    private AnchorPane tableSettingsSubScene;
     private StringGeneratorController stringGeneratorController;
     private NumberGeneratorController numberGeneratorController;
     private DateGeneratorController dateGeneratorController;
+    private TableGenerationSettingsController tableGenerationSettingsController;
+
     private Image tableIcon;
     private Image primaryKeyIcon;
     private Image foreignKeyIcon;
@@ -85,6 +91,7 @@ public class MainAppController {
 
     private String lastGeneratorType;
     private Generator lastActiveGenerator;
+    private TableGenerationSettings lastSelectedTableGenerationSettings;
 
     public boolean blockAll = false;
 
@@ -99,15 +106,18 @@ public class MainAppController {
         stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
         integerLoader.setLocation(DbGen.class.getResource("view/NumberGenerator.fxml"));
         dateLoader.setLocation(DbGen.class.getResource("view/DateGenerator.fxml"));
+        tableSettingsLoader.setLocation(DbGen.class.getResource("view/TableGenerationSettings.fxml"));
 
         try {
             stringGeneratorSubScene = stringLoader.load();
             numberGeneratorSubScene = integerLoader.load();
             dateGeneratorSubScene = dateLoader.load();
+            tableSettingsSubScene = tableSettingsLoader.load();
             stringGeneratorController = stringLoader.getController();
             numberGeneratorController = integerLoader.getController();
             numberGeneratorController.setMainController(this);
             dateGeneratorController = dateLoader.getController();
+            tableGenerationSettingsController = tableSettingsLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,10 +145,11 @@ public class MainAppController {
         names.addAll(Arrays.asList(f.list()));
 
         boolean projectExist = false;
-        projectExist = names.stream().anyMatch(s -> s.equals(JDBC_Repository.getInstance().getConnectionInfo().getSaveName().concat("_project.json")));
+        projectExist = names.stream().anyMatch(s -> s.equals(JDBC_Repository.getInstance().getConnectionInfo().getSaveName().concat("_columns.json")));
 
         if(projectExist){
-            columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+            columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
+            tableInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
             System.out.println("ponovno učitanje");
         }
         else{
@@ -146,7 +157,7 @@ public class MainAppController {
             try {
                 columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
                 List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+                JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
                 System.out.println("prvo učitanje");
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -155,6 +166,11 @@ public class MainAppController {
     }
 
     private void fillTableInfoTreeTableView(){
+
+        boolean newData = false;
+        if(tableInfoList.size() == 0){
+            newData = true;
+        }
 
         Map<String, TreeItem<ColumnInfo>> roots = new HashMap<>();
 
@@ -168,7 +184,18 @@ public class MainAppController {
             }
             // if root doesn't exits crate new
             else{
-                tempRoot = new TreeItem<>(new ColumnInfo(columnInfo.getTableName(), true), new ImageView (tableIcon));
+                ColumnInfo rootColumnInfo;
+                if(newData){
+                    rootColumnInfo = new ColumnInfo(columnInfo.getTableName(),true);
+                    tableInfoList.add(rootColumnInfo);
+                }
+                else{
+                    rootColumnInfo = tableInfoList.stream()
+                            .filter(tableInfo -> tableInfo.getTableName().equals(columnInfo.getTableName()))
+                            .findFirst().get();
+                }
+
+                tempRoot = new TreeItem<>(rootColumnInfo, new ImageView (tableIcon));
                 tempRoot.setExpanded(true);
                 roots.put(columnInfo.getTableName(), tempRoot);
             }
@@ -185,6 +212,11 @@ public class MainAppController {
                 tempRoot.getChildren().add(new TreeItem<>(columnInfo));
             }
 
+        }
+
+        if(newData){
+            List<ColumnInfo> tableInfRealList = tableInfoList.stream().collect(Collectors.toList());
+            JSON.createJSONforColumnInfo(tableInfRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
         }
 
         TreeItem<ColumnInfo> mainRoot = new TreeItem<>(new ColumnInfo("root", false));
@@ -232,11 +264,17 @@ public class MainAppController {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
                 if(newValue != null) {
-                    String type = newValue.getValue().getColumnType();
-                    if (type == null) {
-                        System.err.println("Invalid type");
+                    Boolean isRoot = newValue.getValue().getIsRoot();
+                    if (isRoot) {
+                        if(lastSelectedTableGenerationSettings != null){
+                            tableGenerationSettingsController.unbindValues(lastSelectedTableGenerationSettings);
+                        }
+                        lastSelectedTableGenerationSettings = newValue.getValue().getTableGenerationSettings();
+                        tableGenerationSettingsController.bindValues(lastSelectedTableGenerationSettings);
+                        mainBorderPane.setCenter(tableSettingsSubScene);
                         return;
                     }
+                    String type = newValue.getValue().getColumnType();
                     // unbind old values
                     if (lastActiveGenerator != null) {
                         switch (lastGeneratorType) {
@@ -347,8 +385,10 @@ public class MainAppController {
     private void addSaveProjectListener() {
         saveButton.setOnAction(event -> {
             if(!blockAll && columnInfoList != null && !columnInfoList.isEmpty()){
-                List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+                List<ColumnInfo> columnInfoRealList = columnInfoList.stream().collect(Collectors.toList());
+                JSON.createJSONforColumnInfo(columnInfoRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
+                List<ColumnInfo> tableInfRealList = tableInfoList.stream().collect(Collectors.toList());
+                JSON.createJSONforColumnInfo(tableInfRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
             }
         });
     }
@@ -356,7 +396,9 @@ public class MainAppController {
     private void addLoadProjectListener() {
         loadButton.setOnAction(event -> {
             if(!blockAll){
-                columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+                columnInfoList.clear();
+                tableInfoList.clear();
+                getTableInfoData();
                 fillTableInfoTreeTableView();
             }
         });
@@ -370,8 +412,9 @@ public class MainAppController {
                     // TODO terba popraviti da radi ispravno...... preko usporedbe hesheva
                     columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
                     List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                    JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName());
+                    JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
                     System.out.println("refresh podataka");
+                    // TODO vidjeti sta treba s table info
                     fillTableInfoTreeTableView();
                 } catch (SQLException e) {
                     e.printStackTrace();

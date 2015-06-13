@@ -1,6 +1,7 @@
 package application.model;
 
 import application.generator.Generator;
+import application.generator.TableGenerationSettings;
 import application.utils.Utils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javafx.beans.property.*;
@@ -18,19 +19,19 @@ public class ColumnInfo {
     private IntegerProperty sqlType;
 
     // helper for determining root element
-    private BooleanProperty isRoot;
+    private BooleanProperty isRoot = new SimpleBooleanProperty();
 
-    private StringProperty databaseType;
-    private BooleanProperty nullable;
-    private BooleanProperty autoIncrement;
-    private IntegerProperty ordinalPosition;
-    private StringProperty columnDefaultValue;
-    private BooleanProperty isPrimaryKey;
-    private BooleanProperty isCompositePrimaryKey;
-    private BooleanProperty isForeignKey;
-    private BooleanProperty isCompositeForeignKey;
-    private BooleanProperty isUniqueKey;
-    private BooleanProperty isCompositeUniqueKey;
+    private StringProperty databaseType = new SimpleStringProperty();
+    private BooleanProperty nullable = new SimpleBooleanProperty();
+    private BooleanProperty autoIncrement = new SimpleBooleanProperty();
+    private IntegerProperty ordinalPosition = new SimpleIntegerProperty();
+    private StringProperty columnDefaultValue = new SimpleStringProperty();
+    private BooleanProperty isPrimaryKey = new SimpleBooleanProperty();
+    private BooleanProperty isCompositePrimaryKey = new SimpleBooleanProperty();
+    private BooleanProperty isForeignKey = new SimpleBooleanProperty();
+    private BooleanProperty isCompositeForeignKey = new SimpleBooleanProperty();
+    private BooleanProperty isUniqueKey = new SimpleBooleanProperty();
+    private BooleanProperty isCompositeUniqueKey = new SimpleBooleanProperty();
 
     private final ObservableSet<String> compositePrimaryKeySet = FXCollections.observableSet();
     private final ObservableSet<String> compositeForeignKeySet = FXCollections.observableSet();
@@ -39,13 +40,14 @@ public class ColumnInfo {
     private String hash;
     private Generator generator;
 
+    private TableGenerationSettings tableGenerationSettings;
+
     public ColumnInfo() {
         tableName = new SimpleStringProperty();
         columnName = new SimpleStringProperty();
         columnType = new SimpleStringProperty();
         columnSize = new SimpleStringProperty();
         sqlType = new SimpleIntegerProperty();
-        setIsRoot(false);
     }
 
     public ColumnInfo(String tableName, boolean root) {
@@ -54,6 +56,7 @@ public class ColumnInfo {
         this.columnType = new SimpleStringProperty();
         this.columnSize = new SimpleStringProperty();
         this.sqlType = new SimpleIntegerProperty();
+        tableGenerationSettings = new TableGenerationSettings();
         setIsRoot(root);
     }
 
@@ -147,9 +150,8 @@ public class ColumnInfo {
     }
 
     public void setIsRoot(boolean isRoot) {
-        if(this.isRoot == null){
-            this.isRoot = new ReadOnlyBooleanWrapper(isRoot);
-        }
+        this.isRoot.set(isRoot);
+
     }
 
     // Database Type
@@ -163,9 +165,7 @@ public class ColumnInfo {
     }
 
     public void setDatabaseType(String databaseType) {
-        if(this.databaseType == null){
-            this.databaseType = new ReadOnlyStringWrapper(databaseType);
-        }
+        this.databaseType.set(databaseType);
     }
 
     // Nullable
@@ -179,9 +179,7 @@ public class ColumnInfo {
     }
 
     public void setNullable(boolean nullable) {
-        if(this.nullable == null){
-            this.nullable = new ReadOnlyBooleanWrapper(nullable);
-        }
+        this.nullable.set(nullable);
     }
 
     // AutoIncrement
@@ -195,9 +193,7 @@ public class ColumnInfo {
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
-        if(this.autoIncrement == null){
-            this.autoIncrement = new ReadOnlyBooleanWrapper(autoIncrement);
-        }
+        this.autoIncrement.set(autoIncrement);
     }
 
     // Ordinar Position
@@ -211,9 +207,7 @@ public class ColumnInfo {
     }
 
     public void setOrdinalPosition(int ordinalPosition) {
-        if(this.ordinalPosition == null){
-            this.ordinalPosition = new ReadOnlyIntegerWrapper(ordinalPosition);
-        }
+        this.ordinalPosition.set(ordinalPosition);
     }
 
     // Column Default Value
@@ -227,9 +221,7 @@ public class ColumnInfo {
     }
 
     public void setColumnDefaultValue(String columnDefaultValue) {
-        if(this.columnDefaultValue == null){
-            this.columnDefaultValue = new ReadOnlyStringWrapper(columnDefaultValue);
-        }
+        this.columnDefaultValue.set(columnDefaultValue);
     }
 
     // Is Primary Key
@@ -243,9 +235,7 @@ public class ColumnInfo {
     }
 
     public void setIsPrimaryKey(boolean isPrimaryKey) {
-        if(this.isPrimaryKey == null){
-            this.isPrimaryKey = new ReadOnlyBooleanWrapper(isPrimaryKey);
-        }
+        this.isPrimaryKey.set(isPrimaryKey);
     }
 
     // Is multiple Column Primary Key
@@ -259,9 +249,7 @@ public class ColumnInfo {
     }
 
     public void setIsCompositePrimaryKey(boolean isCompositePrimaryKey) {
-        if(this.isCompositePrimaryKey == null){
-            this.isCompositePrimaryKey = new ReadOnlyBooleanWrapper(isCompositePrimaryKey);
-        }
+        this.isCompositePrimaryKey.set(isCompositePrimaryKey);
     }
 
     // Is Foreign Key
@@ -275,9 +263,7 @@ public class ColumnInfo {
     }
 
     public void setIsForeignKey(boolean isForeignKey) {
-        if(this.isForeignKey == null){
-            this.isForeignKey = new ReadOnlyBooleanWrapper(isForeignKey);
-        }
+        this.isForeignKey.set(isForeignKey);
     }
 
     // Is Composite Foreign Key
@@ -291,9 +277,7 @@ public class ColumnInfo {
     }
 
     public void setIsCompositeForeignKey(boolean isCompositeForeignKey) {
-        if(this.isCompositeForeignKey == null){
-            this.isCompositeForeignKey = new ReadOnlyBooleanWrapper(isCompositeForeignKey);
-        }
+        this.isCompositeForeignKey.set(isCompositeForeignKey);
     }
 
     // Is Unique Key
@@ -307,9 +291,7 @@ public class ColumnInfo {
     }
 
     public void setIsUniqueKey(boolean isUniqueKey) {
-        if(this.isUniqueKey == null){
-            this.isUniqueKey = new ReadOnlyBooleanWrapper(isUniqueKey);
-        }
+        this.isUniqueKey.set(isUniqueKey);
     }
 
     // Is Composite Unique Key
@@ -323,9 +305,7 @@ public class ColumnInfo {
     }
 
     public void setIsCompositeUniqueKey(boolean isCompositeUniqueKey) {
-        if(this.isCompositeUniqueKey == null){
-            this.isCompositeUniqueKey = new ReadOnlyBooleanWrapper(isCompositeUniqueKey);
-        }
+        this.isCompositeUniqueKey.set(isCompositeUniqueKey);
     }
 
     // Composite Sets Part
@@ -361,6 +341,16 @@ public class ColumnInfo {
     public void setCompositeUniqueKeySet(Set<String> hashSet){
         compositeUniqueKeySet.clear();
         compositeUniqueKeySet.addAll(hashSet);
+    }
+
+    // Table Generation Settings
+
+    public TableGenerationSettings getTableGenerationSettings() {
+        return tableGenerationSettings;
+    }
+
+    public void setTableGenerationSettings(TableGenerationSettings tableGenerationSettings) {
+        this.tableGenerationSettings = tableGenerationSettings;
     }
 
     // Hash

@@ -18,10 +18,11 @@ public class JSON {
 
     private final static ObjectMapper objectMapper = new ObjectMapper();
 
-    public static void createJSONforColumnInfo(List<ColumnInfo> columnInfos, String name){
+    public static void createJSONforColumnInfo(List<ColumnInfo> columnInfos, String name, boolean root){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
-            objectMapper.writeValue(new File(Constants.SaveLoation + name + "_project.json"), columnInfos);
+            String extension = root ? "_tables.json" : "_columns.json";
+            objectMapper.writeValue(new File(Constants.SaveLoation + name + extension), columnInfos);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -36,11 +37,12 @@ public class JSON {
         }
     }
 
-    public static ObservableList<ColumnInfo> createJavaObjectsforColumnInfo(String name){
+    public static ObservableList<ColumnInfo> createJavaObjectsforColumnInfo(String name, boolean root){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         List<ColumnInfo> columnInfos = null;
         try {
-            columnInfos = objectMapper.readValue(new File(Constants.SaveLoation + name + "_project.json"), new TypeReference<ArrayList<ColumnInfo>>() {});
+            String extension = root ? "_tables.json" : "_columns.json";
+            columnInfos = objectMapper.readValue(new File(Constants.SaveLoation + name + extension), new TypeReference<ArrayList<ColumnInfo>>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }
