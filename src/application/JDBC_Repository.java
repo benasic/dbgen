@@ -40,4 +40,8 @@ public class JDBC_Repository {
     public Iterator<Object> returnCollectionIterator(String hash){
         return columnInfoMap.get(hash).iterator();
     }
+
+    public Collection<Object> getCollection(String hash){
+        return columnInfoMap.get(hash);
+    }
 }

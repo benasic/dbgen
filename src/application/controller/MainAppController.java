@@ -136,6 +136,9 @@ public class MainAppController {
         addLoadProjectListener();
         addRefreshMetadataListener();
         addVisualizeDatabaseListener();
+
+        columnInfoTreeTableView.getSelectionModel().clearSelection();
+        columnInfoTreeTableView.getSelectionModel().select(0);
     }
 
     private void getTableInfoData(){
@@ -258,6 +261,7 @@ public class MainAppController {
         });
         columnInfoTreeTableView.setRoot(mainRoot);
         columnInfoTreeTableView.setShowRoot(false);
+        columnInfoTreeTableView.getSelectionModel().select(0);
     }
 
     private void addTreeTableViewListeners(){
@@ -458,33 +462,29 @@ public class MainAppController {
     private void addPrepareDataListener(){
         prepareButton.setOnAction(event -> {
             if(!blockAll) {
-                prepareData();
+                prepareData(100);
             }
         });
     }
 
-    private String prepareData() {
+    private String prepareData(int numberOfDataToGenerate) {
         String returnValue = null;
-        TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
-        if (selectedColumnInfoTreeItem != null) {
+        if (selectedColumnInfoList.size() != 0) {
 
-            selectedColumnInfoList.clear();
-            // if root is not selected use data from root
-            if (!selectedColumnInfoTreeItem.getValue().getIsRoot()) {
-                selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
-            }
-
-            selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
-                    .map(TreeItem::getValue)
-                    .collect(Collectors.toList()));
-
-            if(!selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getAllowGeneration()){
-                System.out.println("Generation of data for this table is not selected!!");
-                return returnValue;
-            }
-
-            String numberOfDataToGenerateString = selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getNumberOfDataToGenerate();
-            int numberOfDataToGenerate = Integer.parseInt(numberOfDataToGenerateString);
+//            selectedColumnInfoList.clear();
+//            // if root is not selected use data from root
+//            if (!selectedColumnInfoTreeItem.getValue().getIsRoot()) {
+//                selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
+//            }
+//
+//            selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
+//                    .map(TreeItem::getValue)
+//                    .collect(Collectors.toList()));
+//
+//            if(!selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getAllowGeneration()){
+//                System.out.println("Generation of data for this table is not selected!!");
+//                return returnValue;
+//            }
 
             // calling generator for each of selected item
             // TODO add different collection type support
@@ -516,16 +516,25 @@ public class MainAppController {
                     DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
                     List<Object[]> primaryKeyReferenceList;
                     List<Object> primaryKeyList;
+                    Set<Object> primaryKeySet;
                     try {
                         primaryKeyReferenceList = dt.fetchData(columnInfoList);
                         primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
+                        // append application data
+                        Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
+                        if(additionalData != null){
+                            if(!additionalData.contains("Auto generated in DB")){
+                                primaryKeyList.addAll(additionalData);
+                            }
+                        }
+
+                        // removing duplicate values
+                        primaryKeySet = primaryKeyList.stream().collect(Collectors.toSet());
+                        primaryKeyList = primaryKeySet.stream().collect(Collectors.toList());
+
 
                         // break generation of data if reference are not satisfied
                         if (primaryKeyList.isEmpty()) {
-                            Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
-                            referenceMissing.setTitle("Preparation warning");
-                            referenceMissing.setContentText("First generate data for reference table: " + primaryKeyColumn.getTableName());
-                            referenceMissing.showAndWait();
                             return primaryKeyColumn.getTableName();
                         }
 
@@ -534,7 +543,7 @@ public class MainAppController {
                         Random random = new Random();
                         random.setSeed(System.currentTimeMillis());
                         for (int i = 0; i < numberOfDataToGenerate; i++) {
-                            Object object = primaryKeyList.get(random.nextInt(numberOfDataToGenerate));
+                            Object object = primaryKeyList.get(random.nextInt(primaryKeyList.size()));
                             jdbc_repository.insertIntoCollection(hash, object);
                         }
                     } catch (SQLException e) {
@@ -578,16 +587,23 @@ public class MainAppController {
                             DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
                             List<Object[]> primaryKeyReferenceList;
                             List<Object> primaryKeyList;
+                            Set<Object> primaryKeySet;
                             try {
                                 primaryKeyReferenceList = dt.fetchData(columnInfoList);
                                 primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
+                                // append application data
+                                Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
+                                if(additionalData != null){
+                                    if(!additionalData.contains("Auto generated in DB")){
+                                        primaryKeyList.addAll(additionalData);
+                                    }
+                                }
+                                // removing duplicate values
+                                primaryKeySet = primaryKeyList.stream().collect(Collectors.toSet());
+                                primaryKeyList = primaryKeySet.stream().collect(Collectors.toList());
 
                                 // break generation of data if reference are not satisfied
-                                if (primaryKeyList.isEmpty()) {
-                                    Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
-                                    referenceMissing.setTitle("Preparation warning");
-                                    referenceMissing.setContentText("First generate data for reference table: " + primaryKeyColumn.getTableName());
-                                    referenceMissing.showAndWait();
+                                if (primaryKeySet.isEmpty()) {
                                     return primaryKeyColumn.getTableName();
                                 }
 
@@ -611,6 +627,9 @@ public class MainAppController {
                                 objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(fetchedData.get(i).size()));
                             }
                             objects.add(objectCollection);
+                            if(objects.size() % numberOfDataToGenerate == 0){
+                                System.out.println("Possibility that not enough data is available:  " + objects.size());
+                            }
                         }
 
                         // return pairs into regular format
@@ -665,7 +684,7 @@ public class MainAppController {
     private void transformData() {
         previewObservableList.clear();
         tableView.getItems().clear();
-        // remaping data!!!
+        // remapping data!!!
         for(int i = 0; i < selectedColumnInfoList.size(); i++){
             String hash = selectedColumnInfoList.get(i).getHash();
             Iterator<Object> objectIterator = JDBC_Repository.getInstance().returnCollectionIterator(hash);
@@ -702,42 +721,78 @@ public class MainAppController {
             }
 
             if(tableInfoListWithoutIgnored.size() == 0){
+                Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
+                referenceMissing.setTitle("Preparation warning");
+                referenceMissing.setContentText("Not possible to generate data!!!\nNone of the table is not selected to generate!");
+                referenceMissing.show();
                 return;
             }
 
-            boolean allDataIsPossibleToGenerate = true;
             Deque<String> availTableNames = new ArrayDeque<>();
             availTableNames.addAll(tableInfoListWithoutIgnored.stream()
                     .map(TreeItem::getValue)
                     .map(ColumnInfo::getTableName)
                     .collect(Collectors.toList()));
-            String tableName = availTableNames.getFirst();
+
+            boolean getNextValueFromTableName = true;
+            String resultOfOperation = null;
             while(availTableNames.size() != 0){
+                // final is necessary because value is used in lambda
+                final String tableName;
+                if(getNextValueFromTableName){
+                    tableName = availTableNames.getFirst();
+                }
+                else{
+                    tableName = resultOfOperation;
+                }
                 long avail = tableInfoListWithoutIgnored.stream()
                         .filter(columnInfo -> columnInfo.getValue().getTableName().equals(tableName))
                         .count();
 
                 if(avail == 0){
-                    System.err.println("Not possibe to generate data!!! Missing correct table column!");
-                    allDataIsPossibleToGenerate = false;
+                    Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
+                    referenceMissing.setTitle("Preparation warning");
+                    referenceMissing.setContentText("Not possible to generate data!!!\nMissing table in selected list " + tableName);
+                    referenceMissing.show();
                     return;
                 }
 
+                TreeItem<ColumnInfo> currentTableInfo = tableInfoListWithoutIgnored.stream()
+                        .filter(columnInfo -> columnInfo.getValue().getTableName().equals(tableName))
+                        .findFirst().get();
+                selectedColumnInfoList.clear();
+                selectedColumnInfoList.addAll(currentTableInfo.getChildren().stream()
+                        .map(TreeItem::getValue)
+                        .collect(Collectors.toList()));
 
-            }
+                String numberOfDataToGenerateString = currentTableInfo.getValue().getTableGenerationSettings().getNumberOfDataToGenerate();
+                int numberOfDataToGenerate = Integer.parseInt(numberOfDataToGenerateString);
 
-            if(!allDataIsPossibleToGenerate){
-                return;
-            }
+                String result = prepareData(numberOfDataToGenerate);
 
+                // if previous operation is successful
+                if(result == null){
+                    availTableNames.remove(tableName);
+                    getNextValueFromTableName = true;
 
-            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
-            try {
-                dt.generateData(previewObservableList, selectedColumnInfoList);
-            } catch (SQLException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                    // generate data into database
+                    transformData();
+                    DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                    try {
+                        dt.generateData(previewObservableList, selectedColumnInfoList);
+                    } catch (SQLException e) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setContentText(e.getMessage());
+                        alert.showAndWait();
+                    }
+
+                }
+                else{
+                    System.out.println("First resolving dependency for " + result);
+                    resultOfOperation = result;
+                    getNextValueFromTableName = false;
+                    // TODO remove first value to last place, optionally
+                }
             }
         });
     }
