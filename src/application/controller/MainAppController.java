@@ -239,6 +239,7 @@ public class MainAppController {
         TreeTableColumn<ColumnInfo, String> columnType = new TreeTableColumn<>("Column Type");
         columnName.setPrefWidth(250);
         columnType.setPrefWidth(250);
+        columnInfoTreeTableView.getColumns().clear();
         columnInfoTreeTableView.getColumns().add(columnName);
         columnInfoTreeTableView.getColumns().add(columnType);
 
@@ -261,6 +262,8 @@ public class MainAppController {
         });
         columnInfoTreeTableView.setRoot(mainRoot);
         columnInfoTreeTableView.setShowRoot(false);
+
+        columnInfoTreeTableView.getSelectionModel().clearSelection();
         columnInfoTreeTableView.getSelectionModel().select(0);
     }
 
@@ -420,13 +423,57 @@ public class MainAppController {
             if (!blockAll) {
                 DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
                 try {
-                    // TODO cijela funkcija prebrise podatke sto nije dobro, napraviti da radi usporedbu
-                    // TODO terba popraviti da radi ispravno...... preko usporedbe hesheva
-                    columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
-                    List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                    JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
-                    System.out.println("refresh podataka");
-                    // TODO vidjeti sta treba s table info
+                    //column info part
+                    ObservableList<ColumnInfo> newColumnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
+                    // get set of existing column info hash values
+                    Set<String> oldColumnInfoHashSet = columnInfoList.stream()
+                            .map(ColumnInfo::getHash)
+                            .collect(Collectors.toSet());
+                    //add new columns
+                    for(ColumnInfo columnInfo : newColumnInfoList){
+                        if(!oldColumnInfoHashSet.contains(columnInfo.getHash())){
+                            columnInfoList.add(columnInfo);
+                        }
+                    }
+
+                    // get set of new column info hash values
+                    Set<String> newColumnInfoHashSet = newColumnInfoList.stream()
+                            .map(ColumnInfo::getHash)
+                            .collect(Collectors.toSet());
+                    // remove unused values
+                     List<ColumnInfo> filteredColumnInfoList = columnInfoList.stream().filter(columnInfo -> newColumnInfoHashSet
+                             .contains(columnInfo.getHash()))
+                             .collect(Collectors.toList());
+                    columnInfoList = FXCollections.observableList(filteredColumnInfoList);
+
+                    //JSON.createJSONforColumnInfo(filteredColumnInfoList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
+
+                    // table info part
+                    // get set of existing tableInfo names
+                    Set<String> oldTableInfoNames = tableInfoList.stream()
+                            .map(ColumnInfo::getTableName)
+                            .collect(Collectors.toSet());
+                    // add new values
+                    for(ColumnInfo columnInfo : newColumnInfoList){
+                        if(!oldTableInfoNames.contains(columnInfo.getTableName())){
+                            oldTableInfoNames.add(columnInfo.getTableName());
+                            tableInfoList.add(new ColumnInfo(columnInfo.getTableName(), true));
+                        }
+                    }
+                    // remove old values
+                    // get set of new values
+                    Set<String> newTableInfoNames = newColumnInfoList.stream()
+                            .map(ColumnInfo::getTableName)
+                            .collect(Collectors.toSet());
+                    // remove unused values
+                    List<ColumnInfo> filteredTableInfoList = tableInfoList.stream().filter(columnInfo -> newTableInfoNames
+                            .contains(columnInfo.getTableName()))
+                            .collect(Collectors.toList());
+                    tableInfoList = FXCollections.observableList(filteredTableInfoList);
+
+                    //JSON.createJSONforColumnInfo(filteredTableInfoList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
+
+                    System.out.println("refresh of data in progress");
                     fillTableInfoTreeTableView();
                 } catch (SQLException e) {
                     e.printStackTrace();
