@@ -7,25 +7,6 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.MainAppController">
    <children>
-      <MenuBar maxHeight="25.0" minHeight="25.0" prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
       <BorderPane fx:id="mainBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
          <left>
             <TreeTableView fx:id="columnInfoTreeTableView" prefHeight="350.0" prefWidth="500.0" BorderPane.alignment="CENTER" />
@@ -39,7 +20,6 @@
                   <Button fx:id="saveButton" mnemonicParsing="false" text="Save project" />
                   <Button fx:id="loadButton" mnemonicParsing="false" text="Load Project" />
                   <Button fx:id="refreshMetadata" mnemonicParsing="false" text="Refresh Metadata" />
-                  <Button fx:id="prepareButton" mnemonicParsing="false" text="Prepare date" />
                   <Button fx:id="previewButton" mnemonicParsing="false" text="Preview data" />
                   <Button fx:id="generateButton" mnemonicParsing="false" text="Generate into database" />
                   <Button fx:id="visualizeDatabaseButton" mnemonicParsing="false" text="Visualize database" />

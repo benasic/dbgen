@@ -53,9 +53,6 @@ public class MainAppController {
     private Button refreshMetadata;
 
     @FXML
-    private Button prepareButton;
-
-    @FXML
     private Button previewButton;
 
     @FXML
@@ -129,7 +126,6 @@ public class MainAppController {
         fillTableInfoTreeTableView();
         addTreeTableViewListeners();
         addTableViewSynchronizationWithColumnInfo();
-        addPrepareDataListener();
         addPreviewDataListener();
         addGenerateDataListener();
         addSaveProjectListener();
@@ -506,32 +502,9 @@ public class MainAppController {
         });
     }
 
-    private void addPrepareDataListener(){
-        prepareButton.setOnAction(event -> {
-            if(!blockAll) {
-                prepareData(100);
-            }
-        });
-    }
-
-    private String prepareData(int numberOfDataToGenerate) {
+    private String prepareData(int numberOfDataToGenerate, boolean preview) {
         String returnValue = null;
         if (selectedColumnInfoList.size() != 0) {
-
-//            selectedColumnInfoList.clear();
-//            // if root is not selected use data from root
-//            if (!selectedColumnInfoTreeItem.getValue().getIsRoot()) {
-//                selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
-//            }
-//
-//            selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
-//                    .map(TreeItem::getValue)
-//                    .collect(Collectors.toList()));
-//
-//            if(!selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getAllowGeneration()){
-//                System.out.println("Generation of data for this table is not selected!!");
-//                return returnValue;
-//            }
 
             // calling generator for each of selected item
             // TODO add different collection type support
@@ -568,12 +541,12 @@ public class MainAppController {
                         primaryKeyReferenceList = dt.fetchData(columnInfoList);
                         primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
                         // append application data
-                        Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
-                        if(additionalData != null){
-                            if(!additionalData.contains("Auto generated in DB")){
-                                primaryKeyList.addAll(additionalData);
-                            }
-                        }
+//                        Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
+//                        if(additionalData != null){
+//                            if(!additionalData.contains("Auto generated in DB")){
+//                                primaryKeyList.addAll(additionalData);
+//                            }
+//                        }
 
                         // removing duplicate values
                         primaryKeySet = primaryKeyList.stream().collect(Collectors.toSet());
@@ -581,7 +554,7 @@ public class MainAppController {
 
 
                         // break generation of data if reference are not satisfied
-                        if (primaryKeyList.isEmpty()) {
+                        if (primaryKeyList.isEmpty() && !preview) {
                             return primaryKeyColumn.getTableName();
                         }
 
@@ -590,7 +563,13 @@ public class MainAppController {
                         Random random = new Random();
                         random.setSeed(System.currentTimeMillis());
                         for (int i = 0; i < numberOfDataToGenerate; i++) {
-                            Object object = primaryKeyList.get(random.nextInt(primaryKeyList.size()));
+                            Object object = null;
+                            if(preview){
+                                object = "Reference";
+                            }
+                            else{
+                                object = primaryKeyList.get(random.nextInt(primaryKeyList.size()));
+                            }
                             jdbc_repository.insertIntoCollection(hash, object);
                         }
                     } catch (SQLException e) {
@@ -639,21 +618,20 @@ public class MainAppController {
                                 primaryKeyReferenceList = dt.fetchData(columnInfoList);
                                 primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
                                 // append application data
-                                Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
-                                if(additionalData != null){
-                                    if(!additionalData.contains("Auto generated in DB")){
-                                        primaryKeyList.addAll(additionalData);
-                                    }
-                                }
+//                                Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
+//                                if(additionalData != null){
+//                                    if(!additionalData.contains("Auto generated in DB")){
+//                                        primaryKeyList.addAll(additionalData);
+//                                    }
+//                                }
                                 // removing duplicate values
                                 primaryKeySet = primaryKeyList.stream().collect(Collectors.toSet());
                                 primaryKeyList = primaryKeySet.stream().collect(Collectors.toList());
 
                                 // break generation of data if reference are not satisfied
-                                if (primaryKeySet.isEmpty()) {
+                                if (primaryKeySet.isEmpty() && !preview) {
                                     return primaryKeyColumn.getTableName();
                                 }
-
                                 fetchedData.add(primaryKeyList);
 
                             } catch (SQLException e) {
@@ -665,16 +643,30 @@ public class MainAppController {
 
                         // generate unique pairs
                         Set<ObjectCollection> objects = new HashSet<>();
+                        // list for preview support
+                        List<ObjectCollection> objectsListPreview = new ArrayList<>();
+
                         int size = regularForeignKeysSet.size();
                         Random random = new Random();
                         random.setSeed(System.currentTimeMillis());
-                        while (objects.size() < numberOfDataToGenerate) {
+                        while (objects.size() < numberOfDataToGenerate && objectsListPreview.isEmpty()
+                                || objectsListPreview.size() < numberOfDataToGenerate && objects.isEmpty()) {
                             ObjectCollection objectCollection = new ObjectCollection(size);
                             for (int i = 0; i < size; i++) {
-                                objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(fetchedData.get(i).size()));
+                                if(!preview){
+                                    objectCollection.objects[i] = fetchedData.get(i).get(random.nextInt(fetchedData.get(i).size()));
+                                }
+                                else{
+                                    objectCollection.objects[i] = "Reference";
+                                }
                             }
-                            objects.add(objectCollection);
-                            if(objects.size() % numberOfDataToGenerate == 0){
+                            if(!preview){
+                                objects.add(objectCollection);
+                            }
+                            else{
+                                objectsListPreview.add(objectCollection);
+                            }
+                            if(!preview && objects.size() % numberOfDataToGenerate == 0){
                                 System.out.println("Possibility that not enough data is available:  " + objects.size());
                             }
                         }
@@ -682,9 +674,17 @@ public class MainAppController {
                         // return pairs into regular format
                         for (int i = 0; i < regularForeignKeysSet.size(); i++) {
                             final int finalI = i;
-                            List<Object> objectList = objects.stream()
-                                    .map(objectCollection -> objectCollection.objects[finalI])
-                                    .collect(Collectors.toList());
+                            List<Object> objectList;
+                            if(!preview){
+                                objectList = objects.stream()
+                                        .map(objectCollection -> objectCollection.objects[finalI])
+                                        .collect(Collectors.toList());
+                            }
+                            else{
+                                objectList = objectsListPreview.stream()
+                                        .map(objectCollection -> objectCollection.objects[finalI])
+                                        .collect(Collectors.toList());
+                            }
                             jdbc_repository.addCollectionToMap(regularForeignKeysSet.get(i), objectList);
                         }
                     } else {
@@ -719,7 +719,28 @@ public class MainAppController {
 
     private void addPreviewDataListener(){
         previewButton.setOnAction(event -> {
-            if(!blockAll && selectedColumnInfoList.size() != 0){
+            if(!blockAll){
+
+                selectedColumnInfoList.clear();
+                TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
+                // if root is not selected use data from root
+                if (!selectedColumnInfoTreeItem.getValue().getIsRoot()) {
+                    selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
+                }
+
+                if(!selectedColumnInfoTreeItem.getValue().getTableGenerationSettings().getAllowGeneration()) {
+                    Alert generationNotAllowed = new Alert(Alert.AlertType.WARNING);
+                    generationNotAllowed.setTitle("Preparation warning");
+                    generationNotAllowed.setContentText("Generation of data for this table is not selected!!");
+                    generationNotAllowed.show();
+                    return;
+                }
+
+                selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
+                    .map(TreeItem::getValue)
+                    .collect(Collectors.toList()));
+
+                prepareData(100, true);
                 transformData();
 
                 tableView.setItems(previewObservableList);
@@ -815,7 +836,7 @@ public class MainAppController {
                 String numberOfDataToGenerateString = currentTableInfo.getValue().getTableGenerationSettings().getNumberOfDataToGenerate();
                 int numberOfDataToGenerate = Integer.parseInt(numberOfDataToGenerateString);
 
-                String result = prepareData(numberOfDataToGenerate);
+                String result = prepareData(numberOfDataToGenerate, false);
 
                 // if previous operation is successful
                 if(result == null){
