@@ -91,7 +91,7 @@ public class StringGeneratorController {
         catalogRadioButton.setUserData(StringGenerationType.CATALOG);
         templateRadioButton.setUserData(StringGenerationType.REGEX);
         customizedRadioButton.setUserData(StringGenerationType.CUSTOM);
-            }
+    }
 
     public void unbindValues(Generator generator){
         stringGenerator = (StringGenerator)generator;

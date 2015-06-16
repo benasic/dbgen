@@ -4,6 +4,7 @@ import application.Constants;
 import application.DatabaseTools;
 import application.DbGen;
 import application.JDBC_Repository;
+import application.generator.BooleanGenerator;
 import application.generator.Generator;
 import application.generator.TableGenerationSettings;
 import application.model.ColumnInfo;
@@ -71,14 +72,17 @@ public class MainAppController {
     private final FXMLLoader stringLoader = new FXMLLoader();
     private final FXMLLoader integerLoader = new FXMLLoader();
     private final FXMLLoader dateLoader = new FXMLLoader();
+    private final FXMLLoader booleanLoader = new FXMLLoader();
     private final FXMLLoader tableSettingsLoader = new FXMLLoader();
     private AnchorPane stringGeneratorSubScene;
     private AnchorPane numberGeneratorSubScene;
     private AnchorPane dateGeneratorSubScene;
+    private AnchorPane booleanGeneratorSubScene;
     private AnchorPane tableSettingsSubScene;
     private StringGeneratorController stringGeneratorController;
     private NumberGeneratorController numberGeneratorController;
     private DateGeneratorController dateGeneratorController;
+    private BooleanController booleanGeneratorController;
     private TableGenerationSettingsController tableGenerationSettingsController;
 
     private Image tableIcon;
@@ -103,17 +107,20 @@ public class MainAppController {
         stringLoader.setLocation(DbGen.class.getResource("view/StringGenerator.fxml"));
         integerLoader.setLocation(DbGen.class.getResource("view/NumberGenerator.fxml"));
         dateLoader.setLocation(DbGen.class.getResource("view/DateGenerator.fxml"));
+        booleanLoader.setLocation(DbGen.class.getResource("view/BooleanGenerator.fxml"));
         tableSettingsLoader.setLocation(DbGen.class.getResource("view/TableGenerationSettings.fxml"));
 
         try {
             stringGeneratorSubScene = stringLoader.load();
             numberGeneratorSubScene = integerLoader.load();
             dateGeneratorSubScene = dateLoader.load();
+            booleanGeneratorSubScene = booleanLoader.load();
             tableSettingsSubScene = tableSettingsLoader.load();
             stringGeneratorController = stringLoader.getController();
             numberGeneratorController = integerLoader.getController();
             numberGeneratorController.setMainController(this);
             dateGeneratorController = dateLoader.getController();
+            booleanGeneratorController = booleanLoader.getController();
             tableGenerationSettingsController = tableSettingsLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
@@ -300,6 +307,9 @@ public class MainAppController {
                                 dateGeneratorController.unbindValues(lastActiveGenerator);
                                 lastActiveGenerator = null;
                                 break;
+                            case "BIT":
+                                booleanGeneratorController.unbindValues(lastActiveGenerator);
+                                lastActiveGenerator = null;
                             default:
                                 break;
                         }
@@ -335,6 +345,13 @@ public class MainAppController {
                             lastActiveGenerator = newValue.getValue().getGenerator();
                             dateGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
                             mainBorderPane.setCenter(dateGeneratorSubScene);
+                            break;
+                        case "BIT":
+                            lastGeneratorType = "BIT";
+                            lastActiveGenerator = newValue.getValue().getGenerator();
+                            booleanGeneratorController.bindValues(newValue.getValue().getGenerator());
+                            mainBorderPane.setCenter(booleanGeneratorSubScene);
+                            break;
                         default:
                             break;
                     }
@@ -700,6 +717,9 @@ public class MainAppController {
 
                     if(!columnInfo.getAutoIncrement()){
                         generator.initiateGenerator();
+                        if(generator instanceof BooleanGenerator){
+                            ((BooleanGenerator)generator).setDataNumber(numberOfDataToGenerate);
+                        }
                     }
 
                     jdbc_repository.addCollectionToMap(hash, new ArrayList<>());

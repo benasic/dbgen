@@ -349,6 +349,9 @@ public class DatabaseTools {
                     case "TIMESTAMP":
                         columnInfo.setGenerator(new DateGenerator(DateType.TIMESTAMP));
                         break;
+                    case "BIT":
+                        columnInfo.setGenerator(new BooleanGenerator());
+                        break;
                 }
 
                 columnInfoCollection.add(columnInfo);
