@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = NumberGenerator.class, name = "numberGenerator"),
         @JsonSubTypes.Type(value = StringGenerator.class, name = "stringGenerator"),
         @JsonSubTypes.Type(value = DateGenerator.class, name = "dateGenerator"),
-        @JsonSubTypes.Type(value = BooleanGenerator.class, name = "booleanGenerator")
+        @JsonSubTypes.Type(value = BooleanGenerator.class, name = "booleanGenerator"),
+        @JsonSubTypes.Type(value = BinaryGenerator.class, name = "binaryGenerator")
 })
 public interface Generator {
 

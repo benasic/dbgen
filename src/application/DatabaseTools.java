@@ -311,6 +311,8 @@ public class DatabaseTools {
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
+                    case "CHAR":
+                    case "LONGVARCHAR":
                         columnInfo.setGenerator(new StringGenerator());
                         break;
                     case "INTEGER":
@@ -352,6 +354,12 @@ public class DatabaseTools {
                     case "BIT":
                         columnInfo.setGenerator(new BooleanGenerator());
                         break;
+                    case "BINARY":
+                    case "VARBINARY":
+                    case "LONGVARBINARY":
+                        columnInfo.setGenerator(new BinaryGenerator());
+                        break;
+
                 }
 
                 columnInfoCollection.add(columnInfo);

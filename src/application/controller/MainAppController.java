@@ -73,16 +73,19 @@ public class MainAppController {
     private final FXMLLoader integerLoader = new FXMLLoader();
     private final FXMLLoader dateLoader = new FXMLLoader();
     private final FXMLLoader booleanLoader = new FXMLLoader();
+    private final FXMLLoader binaryLoader = new FXMLLoader();
     private final FXMLLoader tableSettingsLoader = new FXMLLoader();
     private AnchorPane stringGeneratorSubScene;
     private AnchorPane numberGeneratorSubScene;
     private AnchorPane dateGeneratorSubScene;
     private AnchorPane booleanGeneratorSubScene;
+    private AnchorPane binaryGeneratorSubScene;
     private AnchorPane tableSettingsSubScene;
     private StringGeneratorController stringGeneratorController;
     private NumberGeneratorController numberGeneratorController;
     private DateGeneratorController dateGeneratorController;
     private BooleanController booleanGeneratorController;
+    private BinaryGeneratorController binaryGeneratorController;
     private TableGenerationSettingsController tableGenerationSettingsController;
 
     private Image tableIcon;
@@ -108,6 +111,7 @@ public class MainAppController {
         integerLoader.setLocation(DbGen.class.getResource("view/NumberGenerator.fxml"));
         dateLoader.setLocation(DbGen.class.getResource("view/DateGenerator.fxml"));
         booleanLoader.setLocation(DbGen.class.getResource("view/BooleanGenerator.fxml"));
+        binaryLoader.setLocation(DbGen.class.getResource("view/BinaryGenerator.fxml"));
         tableSettingsLoader.setLocation(DbGen.class.getResource("view/TableGenerationSettings.fxml"));
 
         try {
@@ -115,12 +119,14 @@ public class MainAppController {
             numberGeneratorSubScene = integerLoader.load();
             dateGeneratorSubScene = dateLoader.load();
             booleanGeneratorSubScene = booleanLoader.load();
+            binaryGeneratorSubScene = binaryLoader.load();
             tableSettingsSubScene = tableSettingsLoader.load();
             stringGeneratorController = stringLoader.getController();
             numberGeneratorController = integerLoader.getController();
             numberGeneratorController.setMainController(this);
             dateGeneratorController = dateLoader.getController();
             booleanGeneratorController = booleanLoader.getController();
+            binaryGeneratorController = binaryLoader.getController();
             tableGenerationSettingsController = tableSettingsLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
@@ -310,6 +316,11 @@ public class MainAppController {
                             case "BIT":
                                 booleanGeneratorController.unbindValues(lastActiveGenerator);
                                 lastActiveGenerator = null;
+                                break;
+                            case "BINARY":
+                                binaryGeneratorController.unbindValues(lastActiveGenerator);
+                                lastActiveGenerator = null;
+                                break;
                             default:
                                 break;
                         }
@@ -352,6 +363,13 @@ public class MainAppController {
                             booleanGeneratorController.bindValues(newValue.getValue().getGenerator());
                             mainBorderPane.setCenter(booleanGeneratorSubScene);
                             break;
+                        case "BINARY":
+                        case "VARBINARY":
+                        case "LONGVARBINARY":
+                            lastGeneratorType = "BINARY";
+                            lastActiveGenerator = newValue.getValue().getGenerator();
+                            binaryGeneratorController.bindValues(newValue.getValue().getGenerator(), type);
+                            mainBorderPane.setCenter(binaryGeneratorSubScene);
                         default:
                             break;
                     }
