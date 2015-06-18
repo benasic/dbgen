@@ -71,6 +71,8 @@ public class ConnectionController {
     //private ConnectionInfo currentConnectionInfo;
     //TODO vidjeti da li je pametno drzati u repozitoriju
 
+    private DbGen mainApp;
+
     @FXML
     private void initialize() {
         parametersTable.setEditable(true);
@@ -158,7 +160,8 @@ public class ConnectionController {
                 try {
                     db.testConnection();
                     JSON.createJSONforConnectionInfo(connectionInfo, connectionInfo.getSaveName());
-                    ((Stage) retrieveMetadataButton.getScene().getWindow()).close();
+                    mainApp.earlyExit = false;
+                    ((Stage) retrieveMetadataButton.getScene().getWindow()).hide();
                 } catch (SQLException e1) {
                     Alert retrieveMetadataAlert = new Alert(AlertType.ERROR);
                     retrieveMetadataAlert.setTitle("Connection test");
@@ -172,12 +175,14 @@ public class ConnectionController {
     }
 
     private void bindConnectInfo(ConnectionInfo connectInfo) {
-        currentParameters = connectInfo.getParameters();
-        parametersTable.setItems(currentParameters);
-        hostName.textProperty().bindBidirectional(connectInfo.hostProperty());
-        port.textProperty().bindBidirectional(connectInfo.portProperty());
-        database.textProperty().bindBidirectional(connectInfo.databaseProperty());
-        saveName.textProperty().bindBidirectional(connectInfo.saveNameProperty());
+        if (connectInfo != null) {
+            currentParameters = connectInfo.getParameters();
+            parametersTable.setItems(currentParameters);
+            hostName.textProperty().bindBidirectional(connectInfo.hostProperty());
+            port.textProperty().bindBidirectional(connectInfo.portProperty());
+            database.textProperty().bindBidirectional(connectInfo.databaseProperty());
+            saveName.textProperty().bindBidirectional(connectInfo.saveNameProperty());
+        }
 
     }
 
@@ -191,6 +196,7 @@ public class ConnectionController {
     }
 
     public void setMainApp(DbGen mainApp) {
+        this.mainApp = mainApp;
         // Add observable list data to the choice box
         connectionChoiceBox.setItems(mainApp.getConnectInfoData());
         connectionChoiceBox.getSelectionModel().selectFirst();
@@ -203,5 +209,18 @@ public class ConnectionController {
             connectionChoiceBox.getItems().add(connectionInfo);
         }
 
+    }
+
+    public void setConnectionList(){
+        connectionChoiceBox.getItems().clear();
+        connectionChoiceBox.setItems(mainApp.getConnectInfoData());
+
+        File f = new File(Constants.SaveLoation);
+        Set<String> names = new HashSet<>(Arrays.asList(f.list()));
+        names = names.stream().filter(s -> s.contains("_connection.json")).collect(Collectors.toSet());
+        for (String name : names){
+            ConnectionInfo connectionInfo = JSON.createJavaObjectsforConnectionInfo(name.replace("_connection.json", ""));
+            connectionChoiceBox.getItems().add(connectionInfo);
+        }
     }
 }

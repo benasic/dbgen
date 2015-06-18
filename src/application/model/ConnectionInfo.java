@@ -40,7 +40,7 @@ public class ConnectionInfo {
 		this.host = new SimpleStringProperty(host);
 		this.port = new SimpleStringProperty(port);
 		this.database = new SimpleStringProperty(database);
-        this.saveName = new SimpleStringProperty();
+        this.saveName = new SimpleStringProperty("template");
 	}
 
     // Save Name

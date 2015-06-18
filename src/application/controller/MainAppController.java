@@ -63,6 +63,7 @@ public class MainAppController {
     private Button visualizeDatabaseButton;
 
     private Stage primaryStage;
+    private Stage connectionStage;
 
     private ObservableList<ColumnInfo> columnInfoList = null;
     private ObservableList<ColumnInfo> tableInfoList = FXCollections.observableArrayList();
@@ -88,6 +89,8 @@ public class MainAppController {
     private BinaryGeneratorController binaryGeneratorController;
     private TableGenerationSettingsController tableGenerationSettingsController;
 
+    private ConnectionController connectionController;
+
     private Image tableIcon;
     private Image primaryKeyIcon;
     private Image foreignKeyIcon;
@@ -98,6 +101,7 @@ public class MainAppController {
     private TableGenerationSettings lastSelectedTableGenerationSettings;
 
     public boolean blockAll = false;
+    private boolean noLoad = false;
 
     @FXML
     private void initialize() {
@@ -133,8 +137,10 @@ public class MainAppController {
         }
     }
 
-    public void init(Stage primaryStage){
+    public void init(Stage primaryStage, Stage connectionStage, ConnectionController connectionController){
         this.primaryStage = primaryStage;
+        this.connectionStage = connectionStage;
+        this.connectionController = connectionController;
         getTableInfoData();
         fillTableInfoTreeTableView();
         addTreeTableViewListeners();
@@ -443,9 +449,17 @@ public class MainAppController {
             if(!blockAll){
                 columnInfoList.clear();
                 tableInfoList.clear();
-                getTableInfoData();
-                fillTableInfoTreeTableView();
+                noLoad = false;
+                connectionController.setConnectionList();
+                connectionStage.showAndWait();
+                if(!noLoad){
+                    getTableInfoData();
+                    fillTableInfoTreeTableView();
+                }
             }
+        });
+        connectionStage.setOnCloseRequest(event -> {
+            noLoad = true;
         });
     }
 
@@ -885,6 +899,8 @@ public class MainAppController {
                     transformData();
                     DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
                     try {
+                        System.out.println("Filling table: " + tableName);
+                        System.out.println("Remaining table " + availTableNames.size());
                         dt.generateData(previewObservableList, selectedColumnInfoList);
                     } catch (SQLException e) {
                         Alert alert = new Alert(Alert.AlertType.ERROR);

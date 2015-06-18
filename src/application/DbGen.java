@@ -23,13 +23,16 @@ public class DbGen extends Application {
     private AnchorPane mainAppLayout;
     private ObservableList<ConnectionInfo> connectionInfoData = FXCollections.observableArrayList();
 
-    private boolean earlyExit = false;
+    public boolean earlyExit = true;
+
+    private ConnectionController connectionController = null;
 
     public DbGen() {
         generateData();
     }
 
     private void generateData() {
+        connectionInfoData.clear();
         ConnectionInfo mysql = new ConnectionInfo("MySql", JDBC_Constants.Name.MYSQL, "localhost",
                 JDBC_Constants.Port.MYSQL, "test");
         mysql.addParametar("user", "filip");
@@ -49,6 +52,7 @@ public class DbGen extends Application {
     }
 
     public ObservableList<ConnectionInfo> getConnectInfoData() {
+        generateData();
         return connectionInfoData;
     }
 
@@ -67,15 +71,15 @@ public class DbGen extends Application {
             connectionStage.initOwner(primaryStage);
             showConnectionSetup();
             connectionStage.setOnCloseRequest(event -> {
-                System.out.println("Program exit");
-                earlyExit = true;
-                Platform.exit();
+                if(earlyExit){
+                    System.out.println("Program exit");
+                    Platform.exit();
+                }
             });
             connectionStage.showAndWait();
 
-
             if(!earlyExit){
-                mainAppController.init(this.primaryStage);
+                mainAppController.init(this.primaryStage, connectionStage, connectionController);
             }
 
         } catch (IOException e) {
@@ -113,8 +117,8 @@ public class DbGen extends Application {
             AnchorPane.setBottomAnchor(connectionSetup, 15.0);
             connectionStage.setScene(new Scene(connectionSetup));
 
-            ConnectionController controller = loader.getController();
-            controller.setMainApp(this);
+            connectionController = loader.getController();
+            connectionController.setMainApp(this);
 
         } catch (IOException e) {
             e.printStackTrace();
