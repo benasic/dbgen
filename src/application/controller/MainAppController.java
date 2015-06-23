@@ -375,6 +375,7 @@ public class MainAppController {
                         case "BINARY":
                         case "VARBINARY":
                         case "LONGVARBINARY":
+                        case "BLOB":
                             lastGeneratorType = "BINARY";
                             lastActiveGenerator = newValue.getValue().getGenerator();
                             binaryGeneratorController.bindValues(newValue.getValue().getGenerator(), type);

@@ -274,6 +274,13 @@ public class DatabaseTools {
                 // JDBC implementation dependable
                 columnInfo.setDatabaseType(resultColumns.getString("TYPE_NAME"));
 
+                // MySQL blob fix
+                if(resultColumns.getString("TYPE_NAME").equals("BLOB")){
+                    columnInfo.setColumnType("BLOB");
+                    columnInfo.setColumnSize("");
+                    columnInfo.setSqlType(Types.BLOB);
+                }
+
                 // if column is nullable
                 columnInfo.setNullable(resultColumns.getInt("NULLABLE") == 1);
 
@@ -357,6 +364,7 @@ public class DatabaseTools {
                     case "BINARY":
                     case "VARBINARY":
                     case "LONGVARBINARY":
+                    case "BLOB":
                         columnInfo.setGenerator(new BinaryGenerator());
                         break;
 
