@@ -16,6 +16,9 @@ public class Catalog {
         this.fileName = fileName;
     }
 
+    public Catalog(){
+    }
+
     // Name
 
     public String getName() {

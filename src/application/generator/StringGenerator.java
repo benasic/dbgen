@@ -27,7 +27,7 @@ public class StringGenerator implements Generator {
     private RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
     private int catalogSize;
 
-    private StringGenerationType stringGenerationType = StringGenerationType.REGEX;
+    private StringGenerationType stringGenerationType = StringGenerationType.CUSTOM;
 
     public StringGenerator(){
         generatorString = new SimpleStringProperty("[0-7]-([a-k]|[l-z]{5,8})");

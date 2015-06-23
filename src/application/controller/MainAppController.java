@@ -62,6 +62,9 @@ public class MainAppController {
     @FXML
     private Button visualizeDatabaseButton;
 
+    @FXML
+    private ProgressBar progressBar;
+
     private Stage primaryStage;
     private Stage connectionStage;
 
@@ -854,6 +857,9 @@ public class MainAppController {
                     .map(ColumnInfo::getTableName)
                     .collect(Collectors.toList()));
 
+
+            progressBar.setProgress(0);
+
             boolean getNextValueFromTableName = true;
             String resultOfOperation = null;
             while(availTableNames.size() != 0){
@@ -916,6 +922,8 @@ public class MainAppController {
                     // TODO remove first value to last place, optionally
                 }
             }
+
+            progressBar.setProgress(1);
         });
     }
 }

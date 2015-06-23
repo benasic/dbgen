@@ -121,6 +121,19 @@ public class StringGeneratorController {
 
         generatorTextField.textProperty().bindBidirectional(stringGenerator.generatorStringProperty());
 
-        customizedRadioButton.selectedProperty().set(true);
+        //customizedRadioButton.selectedProperty().set(true);
+        StringGenerationType stringGenerationType = stringGenerator.getStringGenerationType();
+        switch (stringGenerationType){
+            case REGEX:
+                stringToggleGroup.selectToggle(templateRadioButton);
+                break;
+            case CATALOG:
+                stringToggleGroup.selectToggle(catalogRadioButton);
+                break;
+            case CUSTOM:
+                stringToggleGroup.selectToggle(customizedRadioButton);
+                break;
+        }
+
     }
 }
