@@ -21,7 +21,7 @@
                 <Font size="16.0" />
             </font>
         </Label>
-      <TextField fx:id="numberOfRandomBytesTextField" layoutX="206.0" layoutY="45.0" prefHeight="25.0" prefWidth="323.0" />
+      <TextField fx:id="numberOfRandomBytesTextField" layoutX="206.0" layoutY="45.0" prefHeight="25.0" prefWidth="137.0" />
       <RadioButton fx:id="randomBytesRadioButton" layoutX="28.0" layoutY="49.0" mnemonicParsing="false" text="Number of random bytes:">
          <toggleGroup>
             <ToggleGroup fx:id="binaryToggleGroup" />

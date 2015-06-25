@@ -172,6 +172,9 @@ public class DatabaseTools {
                 if(!stringHashSet.isEmpty()){
                     for(String uniqueKeyHash : hashSet){
                         UniqueKey uniqueKey = uniqueKeyMap.get(uniqueKeyHash);
+                        if(uniqueKey.getName() == null){
+                            continue;
+                        }
                         if(uniqueKey.getName().equals(keyName)){
                             stringHashSet.add(uniqueKey.getHash());
                         }
@@ -318,8 +321,11 @@ public class DatabaseTools {
 
                 switch (columnInfo.getColumnType()){
                     case "VARCHAR":
+                    case "NVARCHAR":
                     case "CHAR":
+                    case "NCHAR":
                     case "LONGVARCHAR":
+                    case "LONGNVARCHAR":
                         columnInfo.setGenerator(new StringGenerator());
                         break;
                     case "INTEGER":
@@ -390,16 +396,16 @@ public class DatabaseTools {
             }
 
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("insert into ");
+            stringBuilder.append("insert into \"");
             stringBuilder.append(columnInfos.get(0).getTableName());
-            stringBuilder.append(" (");
+            stringBuilder.append("\" (");
 
             Iterator<ColumnInfo> columnInfoIterator = columnInfos.listIterator();
             while (columnInfoIterator.hasNext()){
                 ColumnInfo columnInfo = columnInfoIterator.next();
 
                 if(!skippableColumns.contains(columnInfo.getOrdinalPosition())) {
-                    stringBuilder.append(columnInfo.getColumnName());
+                    stringBuilder.append('"' + columnInfo.getColumnName() + '"');
                     if (columnInfoIterator.hasNext()) {
                         stringBuilder.append(", ");
                     }
@@ -420,7 +426,7 @@ public class DatabaseTools {
             stringBuilder.append(")");
             String sql = stringBuilder.toString();
             OpenConnection();
-            final int batchSize = 100;
+            final int batchSize = 10000;
             int count = 0;
 
             PreparedStatement ps = DBConnection.prepareStatement(sql);

@@ -30,6 +30,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -337,8 +339,11 @@ public class MainAppController {
 
                     switch (type) {
                         case "CHAR":
+                        case "NCHAR":
                         case "VARCHAR":
+                        case "NVARCHAR":
                         case "LONGVARCHAR":
+                        case "LONGNVARCHAR":
                             lastGeneratorType = "TEXT";
                             lastActiveGenerator = newValue.getValue().getGenerator();
                             stringGeneratorController.setGenerator(newValue.getValue().getGenerator(), type);
@@ -834,6 +839,8 @@ public class MainAppController {
                 return;
             }
 
+            Instant start = Instant.now();
+
             ObservableList<TreeItem<ColumnInfo>> tableInfoList = columnInfoTreeTableView.getRoot().getChildren();
 
             //remove tables that skips data generation
@@ -923,6 +930,9 @@ public class MainAppController {
                     // TODO remove first value to last place, optionally
                 }
             }
+
+            Instant end = Instant.now();
+            System.out.println(Duration.between(start, end));
 
             progressBar.setProgress(1);
         });
