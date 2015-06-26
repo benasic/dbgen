@@ -18,6 +18,8 @@ public class ColumnInfo {
     private StringProperty columnSize;
     private IntegerProperty sqlType;
 
+    private String schema;
+
     // helper for determining root element
     private BooleanProperty isRoot = new SimpleBooleanProperty();
 
@@ -364,6 +366,16 @@ public class ColumnInfo {
 
     private void generateHash(){
         hash = Utils.generateSHA256String(getTableName() + getColumnName());
+    }
+
+    // Schema
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
 }

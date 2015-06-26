@@ -3,6 +3,7 @@ package application;
 import application.generator.*;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
+import application.model.helper.JDBC_Table;
 import application.model.helper.PrimaryKey;
 import application.model.helper.UniqueKey;
 import application.utils.Utils;
@@ -19,7 +20,7 @@ public class DatabaseTools {
     private String connectionString;
     private DatabaseMetaData metadata;
     private static final Map<Integer, String> jdbcTypeNames = new HashMap<>();
-    private static final List<String> tableList = new ArrayList<>();
+    private static final List<JDBC_Table> tableList = new ArrayList<>();
     public static final Map<String, PrimaryKey> primaryKeyMap = new LinkedHashMap<>();
     public static final Map<String, ForeignKey> foreignKeyMap = new LinkedHashMap<>();
     public static final Map<String, UniqueKey> uniqueKeyMap = new LinkedHashMap<>();
@@ -58,8 +59,11 @@ public class DatabaseTools {
 
         ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
         while (result.next()) {
-            tableList.add(result.getString("TABLE_NAME"));
-            System.out.println(result.getString("TABLE_NAME") + " " + result.getString("TABLE_CAT") + " " + result.getString("TABLE_SCHEM"));
+            JDBC_Table jdbc_table = new JDBC_Table();
+            jdbc_table.setName(result.getString("TABLE_NAME"));
+            jdbc_table.setSchema(result.getString("TABLE_SCHEM"));
+            tableList.add(jdbc_table);
+            //System.out.println(result.getString("TABLE_NAME") + " " + result.getString("TABLE_CAT") + " " + result.getString("TABLE_SCHEM"));
         }
     }
 
@@ -189,8 +193,8 @@ public class DatabaseTools {
     private void fetchPrimaryKeys(String catalog, String schema) throws SQLException {
 
         primaryKeyMap.clear();
-        for(String table : tableList){
-            ResultSet resultSet = metadata.getPrimaryKeys(catalog, schema, table);
+        for(JDBC_Table table : tableList){
+            ResultSet resultSet = metadata.getPrimaryKeys(catalog, table.getSchema(), table.getName());
             while (resultSet.next()) {
                 PrimaryKey primaryKey = new PrimaryKey();
                 primaryKey.setName(resultSet.getString("PK_NAME"));
@@ -205,8 +209,8 @@ public class DatabaseTools {
     private void fetchForeignKeys(String catalog, String schema) throws SQLException{
 
         foreignKeyMap.clear();
-        for (String table : tableList){
-            ResultSet resultForeignKeys = metadata.getImportedKeys(catalog, schema, table);
+        for (JDBC_Table table : tableList){
+            ResultSet resultForeignKeys = metadata.getImportedKeys(catalog, table.getSchema(), table.getName());
             while( resultForeignKeys.next()) {
                 ForeignKey foreignKey = new ForeignKey();
                 foreignKey.setName(resultForeignKeys.getString("FK_NAME"));
@@ -225,8 +229,8 @@ public class DatabaseTools {
     private void fetchUniqueKeys(String catalog, String schema, boolean unique, boolean approximate) throws SQLException {
 
         uniqueKeyMap.clear();
-        for (String table : tableList){
-            ResultSet resultUniqueKeys = metadata.getIndexInfo(catalog, schema, table, unique, approximate);
+        for (JDBC_Table table : tableList){
+            ResultSet resultUniqueKeys = metadata.getIndexInfo(catalog, table.getSchema(), table.getName(), unique, approximate);
             while (resultUniqueKeys.next()){
                 UniqueKey uniqueKey = new UniqueKey();
                 uniqueKey.setName(resultUniqueKeys.getString("INDEX_NAME"));
@@ -259,21 +263,23 @@ public class DatabaseTools {
         fetchForeignKeys(catalog, schemaPattern);
         fetchUniqueKeys(catalog, schemaPattern, true, true);
 
-        for (String tableName : tableList) {
+        for (JDBC_Table tableName : tableList) {
 
-            Set<String> primaryKeyHashSet = getPrimaryKeyHashSet(tableName);
-            Set<String> foreignKeyHashSet = getForeignKeyHashSet(tableName);
-            Set<String> uniqueKeyHashSet = getUniqueKeyHashSet(tableName);
+            Set<String> primaryKeyHashSet = getPrimaryKeyHashSet(tableName.getName());
+            Set<String> foreignKeyHashSet = getForeignKeyHashSet(tableName.getName());
+            Set<String> uniqueKeyHashSet = getUniqueKeyHashSet(tableName.getName());
 
-            ResultSet resultColumns = metadata.getColumns(catalog, schemaPattern, tableName, null);
+            ResultSet resultColumns = metadata.getColumns(catalog, tableName.getSchema(), tableName.getName(), null);
             while (resultColumns.next()) {
                 ColumnInfo columnInfo = new ColumnInfo();
 
-                columnInfo.setTableName(tableName);
+                columnInfo.setTableName(tableName.getName());
                 columnInfo.setColumnName(resultColumns.getString("COLUMN_NAME"));
                 columnInfo.setColumnType(jdbcTypeNames.get(resultColumns.getInt("DATA_TYPE")));
                 columnInfo.setColumnSize(resultColumns.getString("COLUMN_SIZE"));
                 columnInfo.setSqlType(resultColumns.getInt("DATA_TYPE"));
+
+                columnInfo.setSchema(tableName.getSchema());
 
                 // JDBC implementation dependable
                 columnInfo.setDatabaseType(resultColumns.getString("TYPE_NAME"));
@@ -399,7 +405,7 @@ public class DatabaseTools {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("insert into ");
             if(JDBC_Repository.getInstance().getConnectionInfo().getJDBCName().equals(JDBC_Constants.Name.SQLSERVER)){
-                stringBuilder.append('"' + columnInfos.get(0).getTableName() + '"');
+                stringBuilder.append(columnInfos.get(0).getSchema() + "." + columnInfos.get(0).getTableName());
             }
             else{
                 stringBuilder.append(columnInfos.get(0).getTableName());
@@ -476,7 +482,12 @@ public class DatabaseTools {
                 }
             }
             stringBuilder.append(" from ");
-            stringBuilder.append(columnInfoList.get(0).getTableName());
+            if(JDBC_Repository.getInstance().getConnectionInfo().getJDBCName().equals(JDBC_Constants.Name.SQLSERVER)){
+                stringBuilder.append(columnInfoList.get(0).getSchema() + "." +columnInfoList.get(0).getTableName());
+            }
+            else{
+                stringBuilder.append(columnInfoList.get(0).getTableName());
+            }
             String sql = stringBuilder.toString();
 
             OpenConnection();

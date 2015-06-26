@@ -646,27 +646,32 @@ public class MainAppController {
                 else if (columnInfo.getIsPrimaryKey() && columnInfo.getIsCompositePrimaryKey()) {
                     // determine is all composite key value reference to regular foreign keys
                     boolean regularForeignKeys = true;
-                    boolean allKeysAreForeign = true;
-                    List<String> regularForeignKeysSet = new LinkedList<>();
+                    List<String> regularForeignKeysList = new LinkedList<>();
+                    List<ColumnInfo> regularKeysList = new LinkedList<>();
                     for (String primaryKeyHash : columnInfo.getCompositePrimaryKeySet()) {
+
                         // stream through all composite key
                         ColumnInfo foreignKeyColumnInfo = columnInfoList.stream()
                                 .filter(column -> column.getHash().equals(primaryKeyHash))
                                 .findFirst().get();
+
                         if (foreignKeyColumnInfo.getIsForeignKey() && !foreignKeyColumnInfo.getIsCompositeForeignKey()) {
-                            regularForeignKeysSet.add(foreignKeyColumnInfo.getHash());
+                            regularForeignKeysList.add(foreignKeyColumnInfo.getHash());
                         } else if (foreignKeyColumnInfo.getIsForeignKey() && foreignKeyColumnInfo.getIsCompositeForeignKey()) {
                             regularForeignKeys = false;
-                        } else if (!foreignKeyColumnInfo.getIsForeignKey()) {
-                            allKeysAreForeign = false;
+                        }
+                        // composite primary key contains regular column
+                        else if (!foreignKeyColumnInfo.getIsForeignKey()) {
+                            regularKeysList.add(foreignKeyColumnInfo);
                         }
                     }
-                    // subcase one: all composite keys are regular foreign
+                    // subcase one: all composite keys are foreign column or regular column
 
-                    if (regularForeignKeys && allKeysAreForeign) {
+                    if (regularForeignKeys) {
                         // steps: fetch data and generate random pair of object that are not equal
                         List<List<Object>> fetchedData = new LinkedList<>();
-                        for (String regularForeignKey : regularForeignKeysSet) {
+
+                        for (String regularForeignKey : regularForeignKeysList) {
                             ForeignKey foreignKey = DatabaseTools.foreignKeyMap.get(regularForeignKey);
                             String primaryKeyHash = foreignKey.getPrimaryKey().getHash();
                             ColumnInfo primaryKeyColumn = columnInfoList.stream().filter(column -> column.getHash().equals(primaryKeyHash)).findFirst().get();
@@ -679,13 +684,7 @@ public class MainAppController {
                             try {
                                 primaryKeyReferenceList = dt.fetchData(columnInfoList);
                                 primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
-                                // append application data
-//                                Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
-//                                if(additionalData != null){
-//                                    if(!additionalData.contains("Auto generated in DB")){
-//                                        primaryKeyList.addAll(additionalData);
-//                                    }
-//                                }
+
                                 // removing duplicate values
                                 primaryKeySet = primaryKeyList.stream().collect(Collectors.toSet());
                                 primaryKeyList = primaryKeySet.stream().collect(Collectors.toList());
@@ -703,14 +702,34 @@ public class MainAppController {
                             finishedColumn.add(regularForeignKey);
                         }
 
+                        for (ColumnInfo regularKey : regularKeysList) {
+                            // these values don't need to have maximum number of data
+                            //  because they are under composite primary key
+                            Set<Object> regularValuesSet = new HashSet<>();
+                            generator = regularKey.getGenerator();
+                            generator.initiateGenerator();
+                            // TODO find better solution for this if part
+                            if(generator instanceof BooleanGenerator){
+                                ((BooleanGenerator)generator).setDataNumber(numberOfDataToGenerate);
+                            }
+
+                            for (int i = 0; i < numberOfDataToGenerate; i++) {
+                                regularValuesSet.add(generator.generate());
+                            }
+                            fetchedData.add(new ArrayList<>(regularValuesSet));
+
+                            finishedColumn.add(regularKey.getHash());
+                        }
+
                         // generate unique pairs
                         Set<ObjectCollection> objects = new HashSet<>();
                         // list for preview support
                         List<ObjectCollection> objectsListPreview = new ArrayList<>();
 
-                        int size = regularForeignKeysSet.size();
+                        int size = regularForeignKeysList.size() + regularKeysList.size();
                         Random random = new Random();
                         random.setSeed(System.currentTimeMillis());
+                        int iteration = 0;
                         while (objects.size() < numberOfDataToGenerate && objectsListPreview.isEmpty()
                                 || objectsListPreview.size() < numberOfDataToGenerate && objects.isEmpty()) {
                             ObjectCollection objectCollection = new ObjectCollection(size);
@@ -728,13 +747,15 @@ public class MainAppController {
                             else{
                                 objectsListPreview.add(objectCollection);
                             }
-                            if(!preview && objects.size() % numberOfDataToGenerate == 0){
-                                System.out.println("Possibility that not enough data is available:  " + objects.size());
+                            iteration++;
+                            // this part is for debugging to see if there is not enough data for unique pairs
+                            if(!preview && iteration % numberOfDataToGenerate == 0){
+                                System.out.println("Generating unique pair: current size" + objects.size() + " requested size " + numberOfDataToGenerate);
                             }
                         }
 
                         // return pairs into regular format
-                        for (int i = 0; i < regularForeignKeysSet.size(); i++) {
+                        for (int i = 0; i < regularForeignKeysList.size(); i++) {
                             final int finalI = i;
                             List<Object> objectList;
                             if(!preview){
@@ -747,10 +768,32 @@ public class MainAppController {
                                         .map(objectCollection -> objectCollection.objects[finalI])
                                         .collect(Collectors.toList());
                             }
-                            jdbc_repository.addCollectionToMap(regularForeignKeysSet.get(i), objectList);
+                            jdbc_repository.addCollectionToMap(regularForeignKeysList.get(i), objectList);
                         }
+
+                        for (int i = 0; i < regularKeysList.size(); i++) {
+                            final int finalI = i + regularForeignKeysList.size();
+                            List<Object> objectList;
+                            if(!preview){
+                                objectList = objects.stream()
+                                        .map(objectCollection -> objectCollection.objects[finalI])
+                                        .collect(Collectors.toList());
+                            }
+                            else{
+                                objectList = objectsListPreview.stream()
+                                        .map(objectCollection -> objectCollection.objects[finalI])
+                                        .collect(Collectors.toList());
+                            }
+                            jdbc_repository.addCollectionToMap(regularKeysList.get(i).getHash(), objectList);
+                        }
+
+
                     } else {
                         // for now
+                        Alert generationNotAllowed = new Alert(Alert.AlertType.ERROR);
+                        generationNotAllowed.setTitle("Preparation error");
+                        generationNotAllowed.setContentText("Composite primary to composite foreign key not yet implemented!!\nBreaking preparation!!");
+                        generationNotAllowed.show();
                         return returnValue;
                     }
                 }
@@ -775,6 +818,18 @@ public class MainAppController {
                         }
                         jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
                         finishedColumn.add(columnInfo.getHash());
+                        continue;
+                    }
+
+                    // unique key
+                    if(!columnInfo.getAutoIncrement() && !columnInfo.getIsPrimaryKey() && columnInfo.getIsUniqueKey() && !columnInfo.getIsCompositeUniqueKey()){
+                        Set<Object> uniqueObjects = new HashSet<>();
+                        while(uniqueObjects.size() < numberOfDataToGenerate){
+                            uniqueObjects.add(generator.generate());
+                        }
+                        jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
+                        finishedColumn.add(columnInfo.getHash());
+                        System.out.println("Unique column generated " + columnInfo.getColumnName() + " " +  columnInfo.getTableName());
                         continue;
                     }
 

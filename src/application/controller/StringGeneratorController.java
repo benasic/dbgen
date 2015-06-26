@@ -111,6 +111,7 @@ public class StringGeneratorController {
         ObservableList<RegexTemplate> regexTemplates = FXCollections.observableArrayList();
         regexTemplates.add(new RegexTemplate("email","[a-z]{5,8}\\.[a-z]{5,8}\\@[a-z]{3,4}\\.com"));
         regexTemplates.add(new RegexTemplate("number","[0-9]{5,8}"));
+        regexTemplates.add(new RegexTemplate("guid","[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         templatesChoiceBox.setItems(regexTemplates);
 
 
