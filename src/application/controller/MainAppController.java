@@ -612,7 +612,7 @@ public class MainAppController {
 
 
                         // break generation of data if reference are not satisfied
-                        if (primaryKeyList.isEmpty() && !preview) {
+                        if (primaryKeyList.isEmpty() && !preview && !columnInfo.getNullable()) {
                             return primaryKeyColumn.getTableName();
                         }
 
@@ -624,6 +624,10 @@ public class MainAppController {
                             Object object = null;
                             if(preview){
                                 object = "Reference";
+                            }
+                            // TODO this else if will be changed to some advanced functionality
+                            else if(columnInfo.getNullable()){
+                                object = null;
                             }
                             else{
                                 object = primaryKeyList.get(random.nextInt(primaryKeyList.size()));
@@ -762,6 +766,18 @@ public class MainAppController {
                             ((BooleanGenerator)generator).setDataNumber(numberOfDataToGenerate);
                         }
                     }
+
+                    // part for unique primary key, will be moved up
+                    if(!columnInfo.getAutoIncrement() && columnInfo.getIsPrimaryKey() && !columnInfo.getIsCompositePrimaryKey()){
+                        Set<Object> uniqueObjects = new HashSet<>();
+                        while(uniqueObjects.size() < numberOfDataToGenerate){
+                            uniqueObjects.add(generator.generate());
+                        }
+                        jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
+                        finishedColumn.add(columnInfo.getHash());
+                        continue;
+                    }
+
 
                     jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
                     for (int i = 0; i < numberOfDataToGenerate; i++) {

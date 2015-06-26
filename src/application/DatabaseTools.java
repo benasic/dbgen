@@ -59,6 +59,7 @@ public class DatabaseTools {
         ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
         while (result.next()) {
             tableList.add(result.getString("TABLE_NAME"));
+            System.out.println(result.getString("TABLE_NAME") + " " + result.getString("TABLE_CAT") + " " + result.getString("TABLE_SCHEM"));
         }
     }
 
@@ -396,16 +397,26 @@ public class DatabaseTools {
             }
 
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("insert into \"");
-            stringBuilder.append(columnInfos.get(0).getTableName());
-            stringBuilder.append("\" (");
+            stringBuilder.append("insert into ");
+            if(JDBC_Repository.getInstance().getConnectionInfo().getJDBCName().equals(JDBC_Constants.Name.SQLSERVER)){
+                stringBuilder.append('"' + columnInfos.get(0).getTableName() + '"');
+            }
+            else{
+                stringBuilder.append(columnInfos.get(0).getTableName());
+            }
+            stringBuilder.append(" (");
 
             Iterator<ColumnInfo> columnInfoIterator = columnInfos.listIterator();
             while (columnInfoIterator.hasNext()){
                 ColumnInfo columnInfo = columnInfoIterator.next();
 
                 if(!skippableColumns.contains(columnInfo.getOrdinalPosition())) {
-                    stringBuilder.append('"' + columnInfo.getColumnName() + '"');
+                    if(JDBC_Repository.getInstance().getConnectionInfo().getJDBCName().equals(JDBC_Constants.Name.SQLSERVER)){
+                        stringBuilder.append('"' + columnInfo.getColumnName() + '"');
+                    }
+                    else{
+                        stringBuilder.append(columnInfo.getColumnName());
+                    }
                     if (columnInfoIterator.hasNext()) {
                         stringBuilder.append(", ");
                     }
