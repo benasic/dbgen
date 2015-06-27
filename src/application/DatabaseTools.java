@@ -333,7 +333,9 @@ public class DatabaseTools {
                     case "NCHAR":
                     case "LONGVARCHAR":
                     case "LONGNVARCHAR":
-                        columnInfo.setGenerator(new StringGenerator());
+                        StringGenerator stringGenerator = new StringGenerator();
+                        stringGenerator.setAppropriateGeneratorContext(columnInfo.getColumnName(), columnInfo.getColumnSize());
+                        columnInfo.setGenerator(stringGenerator);
                         break;
                     case "INTEGER":
                         columnInfo.setGenerator(new NumberGenerator(NumberType.INTEGER));

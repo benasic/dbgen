@@ -869,8 +869,8 @@ public class MainAppController {
                 }
 
                 selectedColumnInfoList.addAll(selectedColumnInfoTreeItem.getChildren().stream()
-                    .map(TreeItem::getValue)
-                    .collect(Collectors.toList()));
+                        .map(TreeItem::getValue)
+                        .collect(Collectors.toList()));
 
                 prepareData(100, true);
                 transformData();
@@ -910,7 +910,12 @@ public class MainAppController {
                 return;
             }
 
+            tableView.getItems().clear();
+            tableView.getColumns().clear();
+
             Instant start = Instant.now();
+
+
 
             ObservableList<TreeItem<ColumnInfo>> tableInfoList = columnInfoTreeTableView.getRoot().getChildren();
 
@@ -1006,6 +1011,11 @@ public class MainAppController {
             System.out.println(Duration.between(start, end));
 
             progressBar.setProgress(1);
+
+            int index = columnInfoTreeTableView.getSelectionModel().getSelectedIndex();
+            columnInfoTreeTableView.getSelectionModel().clearSelection();
+            columnInfoTreeTableView.getSelectionModel().select(index);
+
         });
     }
 }

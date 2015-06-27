@@ -26,6 +26,7 @@ public class StringGenerator implements Generator {
     private List<String> catalogNames = new ArrayList<>();
     private RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
     private int catalogSize;
+    private int maxLength;
 
     private StringGenerationType stringGenerationType = StringGenerationType.CUSTOM;
 
@@ -56,11 +57,24 @@ public class StringGenerator implements Generator {
         switch (stringGenerationType){
             case REGEX:
             case CUSTOM:
-                return generex.random();
+                String value = generex.random();
+                if(value.length() > maxLength){
+                    value = value.substring(0, maxLength);
+                }
+                return value;
             case CATALOG:
-                return catalogNames.get(randomDataGenerator.nextInt(0,catalogSize));
+                return catalogNames.get(randomDataGenerator.nextInt(0, catalogSize));
             default:
                 return "";
+        }
+    }
+
+    public void setAppropriateGeneratorContext(String contextName, String maxLength){
+        this.maxLength = Integer.parseInt(maxLength);
+        if(contextName.toLowerCase().contains("guid")){
+            setStringGenerationType(StringGenerationType.REGEX);
+            setGeneratorString("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+            return;
         }
     }
 
@@ -97,5 +111,14 @@ public class StringGenerator implements Generator {
         this.catalog = catalog;
     }
 
+    // max length
+
+    public int getMaxLength() {
+        return maxLength;
+    }
+
+    public void setMaxLength(int maxLength) {
+        this.maxLength = maxLength;
+    }
 
 }

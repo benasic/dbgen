@@ -61,7 +61,16 @@ public class NumberGenerator implements Generator {
         this.numberType = numberType;
 
         minNumberUniform = new SimpleStringProperty("0");
-        maxNumberUniform = new SimpleStringProperty("10000");
+        switch (numberType) {
+            case TINYINT:
+                maxNumberUniform = new SimpleStringProperty("127");
+                break;
+            case SMALLINT:
+                maxNumberUniform = new SimpleStringProperty("32767");
+                break;
+            default:
+                maxNumberUniform = new SimpleStringProperty("1000000");
+        }
 
         numberOfTrailsBinomial = new SimpleStringProperty("10");
         probabilityBinomial = new SimpleStringProperty("0.248");
