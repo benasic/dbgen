@@ -201,7 +201,7 @@ public class ConnectionController {
         connectionChoiceBox.setItems(mainApp.getConnectInfoData());
         connectionChoiceBox.getSelectionModel().selectFirst();
 
-        File f = new File(Constants.SaveLoation);
+        File f = new File(Constants.SaveLocation);
         Set<String> names = new HashSet<>(Arrays.asList(f.list()));
         names = names.stream().filter(s -> s.contains("_connection.json")).collect(Collectors.toSet());
         for (String name : names){
@@ -215,7 +215,7 @@ public class ConnectionController {
         connectionChoiceBox.getItems().clear();
         connectionChoiceBox.setItems(mainApp.getConnectInfoData());
 
-        File f = new File(Constants.SaveLoation);
+        File f = new File(Constants.SaveLocation);
         Set<String> names = new HashSet<>(Arrays.asList(f.list()));
         names = names.stream().filter(s -> s.contains("_connection.json")).collect(Collectors.toSet());
         for (String name : names){

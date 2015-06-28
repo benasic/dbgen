@@ -22,7 +22,7 @@ public class JSON {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
             String extension = root ? "_tables.json" : "_columns.json";
-            objectMapper.writeValue(new File(Constants.SaveLoation + name + extension), columnInfos);
+            objectMapper.writeValue(new File(Constants.SaveLocation + name + extension), columnInfos);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -31,7 +31,7 @@ public class JSON {
     public static void createJSONforConnectionInfo(ConnectionInfo connectionInfo, String name){
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         try {
-            objectMapper.writeValue(new File(Constants.SaveLoation + name + "_connection.json"), connectionInfo);
+            objectMapper.writeValue(new File(Constants.SaveLocation + name + "_connection.json"), connectionInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,7 +42,7 @@ public class JSON {
         List<ColumnInfo> columnInfos = null;
         try {
             String extension = root ? "_tables.json" : "_columns.json";
-            columnInfos = objectMapper.readValue(new File(Constants.SaveLoation + name + extension), new TypeReference<ArrayList<ColumnInfo>>() {});
+            columnInfos = objectMapper.readValue(new File(Constants.SaveLocation + name + extension), new TypeReference<ArrayList<ColumnInfo>>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,7 +53,7 @@ public class JSON {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         ConnectionInfo connectionInfo = null;
         try {
-            connectionInfo = objectMapper.readValue(new File(Constants.SaveLoation + name + "_connection.json"), ConnectionInfo.class);
+            connectionInfo = objectMapper.readValue(new File(Constants.SaveLocation + name + "_connection.json"), ConnectionInfo.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -167,7 +167,7 @@ public class MainAppController {
 
     private void getTableInfoData(){
 
-        File f = new File(Constants.SaveLoation);
+        File f = new File(Constants.SaveLocation);
         Set<String> names = new HashSet<>();
         names.addAll(Arrays.asList(f.list()));
 

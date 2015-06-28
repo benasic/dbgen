@@ -1,5 +1,6 @@
 package application.controller;
 
+import application.Constants;
 import application.generator.Generator;
 import application.generator.StringGenerationType;
 import application.generator.StringGenerator;
@@ -11,6 +12,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StringGeneratorController {
 
@@ -55,7 +61,7 @@ public class StringGeneratorController {
         @Override
         public void changed(ObservableValue<? extends Catalog> observable, Catalog oldValue, Catalog newValue) {
             if(newValue != null){
-                stringGenerator.setCatalog(newValue);
+                stringGenerator.setCatalog(newValue.getFileName());
             }
         }
     };
@@ -109,16 +115,30 @@ public class StringGeneratorController {
         stringToggleGroup.selectedToggleProperty().addListener(toggleChangeListener);
 
         ObservableList<RegexTemplate> regexTemplates = FXCollections.observableArrayList();
-        regexTemplates.add(new RegexTemplate("email","[a-z]{5,8}\\.[a-z]{5,8}\\@[a-z]{3,4}\\.com"));
-        regexTemplates.add(new RegexTemplate("number","[0-9]{5,8}"));
-        regexTemplates.add(new RegexTemplate("guid","[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+        regexTemplates.add(new RegexTemplate("email", "[a-z]{5,8}\\.[a-z]{5,8}\\@[a-z]{3,4}\\.com"));
+        regexTemplates.add(new RegexTemplate("number", "[0-9]{5,8}"));
+        regexTemplates.add(new RegexTemplate("guid", "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         templatesChoiceBox.setItems(regexTemplates);
 
 
         ObservableList<Catalog> catalogs = FXCollections.observableArrayList();
         catalogs.add(new Catalog("Male names", "maleNames.txt"));
         catalogs.add(new Catalog("Female names", "femaleNames.txt"));
+        catalogs.add(new Catalog("Names", "names.txt"));
+        catalogs.add(new Catalog("Countries", "country.txt"));
+        catalogs.add(new Catalog("Cities", "city.txt"));
+        catalogs.add(new Catalog("Ženska imena", "zenskaImena.txt"));
+        catalogs.add(new Catalog("Muška imena", "muskaImena.txt"));
+        catalogs.add(new Catalog("Imena", "imena.txt"));
+        catalogs.add(new Catalog("Gradovi", "gradovi.txt"));
+        catalogs.add(new Catalog("Države", "drzave.txt"));
         catalogChoiceBox.setItems(catalogs);
+
+        File f = new File(Constants.CatalogLocation);
+        Set<String> customCatalogs = new HashSet<>(Arrays.asList(f.list()));
+        customCatalogs.stream().forEach(s ->
+            catalogChoiceBox.getItems().add(new Catalog(s.replace(".txt",""), s)));
+
 
         generatorTextField.textProperty().bindBidirectional(stringGenerator.generatorStringProperty());
 
@@ -127,9 +147,17 @@ public class StringGeneratorController {
         switch (stringGenerationType){
             case REGEX:
                 stringToggleGroup.selectToggle(templateRadioButton);
+                RegexTemplate regex = templatesChoiceBox.getItems().stream()
+                        .filter(e -> e.getRegex().equals(stringGenerator.getGeneratorString()))
+                        .findFirst().get();
+                templatesChoiceBox.getSelectionModel().select(regex);
                 break;
             case CATALOG:
                 stringToggleGroup.selectToggle(catalogRadioButton);
+                Catalog catalog = catalogChoiceBox.getItems().stream()
+                        .filter(e -> e.getFileName().equals(stringGenerator.getCatalogName()))
+                        .findFirst().get();
+                catalogChoiceBox.getSelectionModel().select(catalog);
                 break;
             case CUSTOM:
                 stringToggleGroup.selectToggle(customizedRadioButton);

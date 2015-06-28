@@ -67,7 +67,7 @@ public class TableVisualizerController {
             count++;
         }
         // add last chart
-        if(count % split != 0){
+        if(count == split || count % split != 0){
             bc.setLegendVisible(false);
             bc.getData().add(series);
             VBox.getChildren().add(bc);

@@ -1,7 +1,7 @@
 package application.generator;
 
+import application.Constants;
 import application.DbGen;
-import application.model.Catalog;
 import com.mifmif.common.regex.Generex;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -22,7 +22,7 @@ public class StringGenerator implements Generator {
 
     private Generex generex = null;
 
-    private Catalog catalog;
+    private String catalogName;
     private List<String> catalogNames = new ArrayList<>();
     private RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
     private int catalogSize;
@@ -38,7 +38,13 @@ public class StringGenerator implements Generator {
         switch (stringGenerationType){
             case CATALOG:
                 try {
-                    Stream<String> lines = Files.lines(Paths.get(DbGen.class.getClassLoader().getResource("application/resources/catalogs/" + catalog.getFileName()).toURI()));
+                    Stream<String> lines;
+                    try{
+                        lines = Files.lines(Paths.get(DbGen.class.getClassLoader().getResource("application/resources/catalogs/" + catalogName).toURI()));
+                    } catch (NullPointerException e){
+                        lines = Files.readAllLines(Paths.get(Constants.CatalogLocation + catalogName)).stream();
+                    }
+
                     catalogNames = lines.collect(Collectors.toList());
                     lines.close();
                     catalogSize = catalogNames.size() - 1;
@@ -76,6 +82,41 @@ public class StringGenerator implements Generator {
             setGeneratorString("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
             return;
         }
+        if(contextName.toLowerCase().contains("firstname")){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "names.txt";
+            return;
+        }
+        if(contextName.toLowerCase().contains("lastname") || contextName.toLowerCase().contains("surname") ){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "lastNames.txt";
+            return;
+        }
+        if(contextName.toLowerCase().contains("country")){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "country.txt";
+            return;
+        }
+        if(contextName.toLowerCase().contains("city")){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "city.txt";
+            return;
+        }
+        if(contextName.toLowerCase().contains("ime")){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "imena.txt";
+            return;
+        }
+        if(contextName.toLowerCase().contains("grad")){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "gradovi.txt";
+            return;
+        }
+        if(contextName.toLowerCase().contains("drzava")){
+            setStringGenerationType(StringGenerationType.CATALOG);
+            catalogName = "drzave.txt";
+            return;
+        }
     }
 
     public String getGeneratorString() {
@@ -101,14 +142,14 @@ public class StringGenerator implements Generator {
         this.stringGenerationType = stringGenerationType;
     }
 
-    // Catalog
+    // Catalog Name
 
-    public Catalog getCatalog() {
-        return catalog;
+    public String getCatalogName() {
+        return catalogName;
     }
 
-    public void setCatalog(Catalog catalog) {
-        this.catalog = catalog;
+    public void setCatalog(String catalogName) {
+        this.catalogName = catalogName;
     }
 
     // max length
