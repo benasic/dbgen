@@ -31,7 +31,7 @@ public class StringGenerator implements Generator {
     private StringGenerationType stringGenerationType = StringGenerationType.CUSTOM;
 
     public StringGenerator(){
-        generatorString = new SimpleStringProperty("[0-7]-([a-k]|[l-z]{5,8})");
+        generatorString = new SimpleStringProperty("[a-z0-9]{10,15}");
     }
 
     public void initiateGenerator(){

@@ -63,13 +63,13 @@ public class NumberGenerator implements Generator {
         minNumberUniform = new SimpleStringProperty("0");
         switch (numberType) {
             case TINYINT:
-                maxNumberUniform = new SimpleStringProperty("127");
+                maxNumberUniform = new SimpleStringProperty("120");
                 break;
             case SMALLINT:
                 maxNumberUniform = new SimpleStringProperty("32767");
                 break;
             default:
-                maxNumberUniform = new SimpleStringProperty("1000000");
+                maxNumberUniform = new SimpleStringProperty("30000");
         }
 
         numberOfTrailsBinomial = new SimpleStringProperty("10");

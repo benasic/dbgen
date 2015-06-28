@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DatabaseTools {
     private Connection DBConnection;
@@ -59,9 +60,19 @@ public class DatabaseTools {
 
         ResultSet result = metadata.getTables(catalog, schemaPattern, tableNamePattern, types);
         while (result.next()) {
+
+            String tableScheme = result.getString("TABLE_SCHEM");
+            if(tableScheme != null && tableScheme.equals("sys")){
+                continue;
+            }
+            String tableName = result.getString("TABLE_NAME");
+            if(tableScheme != null && tableName.equals("sysdiagrams")){
+                continue;
+            }
+
             JDBC_Table jdbc_table = new JDBC_Table();
-            jdbc_table.setName(result.getString("TABLE_NAME"));
-            jdbc_table.setSchema(result.getString("TABLE_SCHEM"));
+            jdbc_table.setName(tableName);
+            jdbc_table.setSchema(tableScheme);
             tableList.add(jdbc_table);
             //System.out.println(result.getString("TABLE_NAME") + " " + result.getString("TABLE_CAT") + " " + result.getString("TABLE_SCHEM"));
         }
@@ -242,6 +253,47 @@ public class DatabaseTools {
                 uniqueKeyMap.put(uniqueKey.getHash(), uniqueKey);
             }
         }
+    }
+
+    public Map<String, Integer> getRowCount() throws SQLException {
+        Map<String, Integer> rowCountMap = new HashMap<>();
+        OpenConnection();
+        for(JDBC_Table table : tableList){
+            Statement statement = DBConnection.createStatement();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("SELECT COUNT(*) FROM ");
+            if(JDBC_Repository.getInstance().getConnectionInfo().getJDBCName().equals(JDBC_Constants.Name.SQLSERVER)){
+                stringBuilder.append(table.getSchema() + "." + table.getName());
+            }
+            else{
+                stringBuilder.append(table.getName());
+            }
+
+            ResultSet resultSet = statement.executeQuery(stringBuilder.toString());
+            resultSet.next();
+
+            if(JDBC_Repository.getInstance().getConnectionInfo().getJDBCName().equals(JDBC_Constants.Name.SQLSERVER)){
+                rowCountMap.put(table.getSchema() + "." + table.getName(), resultSet.getInt(1));
+            }
+            else{
+                rowCountMap.put(table.getName(), resultSet.getInt(1));
+            }
+        }
+
+        CloseConnection();
+
+        Comparator<Map.Entry<String, Integer>> byValue = (entry1, entry2) -> entry1.getValue().compareTo(
+                entry2.getValue());
+
+        // must be linked map for correct sort
+        Map<String, Integer> result = new LinkedHashMap<>();
+        Stream<Map.Entry<String, Integer>> st = rowCountMap.entrySet().stream();
+
+        st.sorted(byValue.reversed())
+                .forEach(e ->result.put(e.getKey(),e.getValue()));
+
+        return result;
     }
 
     public String testConnection() throws SQLException {

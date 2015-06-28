@@ -65,6 +65,9 @@ public class MainAppController {
     private Button visualizeDatabaseButton;
 
     @FXML
+    private Button visualizeTablesButton;
+
+    @FXML
     private ProgressBar progressBar;
 
     private Stage primaryStage;
@@ -156,6 +159,7 @@ public class MainAppController {
         addLoadProjectListener();
         addRefreshMetadataListener();
         addVisualizeDatabaseListener();
+        addVisualizeTablesCapacity();
 
         columnInfoTreeTableView.getSelectionModel().clearSelection();
         columnInfoTreeTableView.getSelectionModel().select(0);
@@ -297,10 +301,10 @@ public class MainAppController {
 
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
-                if(newValue != null) {
+                if (newValue != null) {
                     Boolean isRoot = newValue.getValue().getIsRoot();
                     if (isRoot) {
-                        if(lastSelectedTableGenerationSettings != null){
+                        if (lastSelectedTableGenerationSettings != null) {
                             tableGenerationSettingsController.unbindValues(lastSelectedTableGenerationSettings);
                         }
                         lastSelectedTableGenerationSettings = newValue.getValue().getTableGenerationSettings();
@@ -444,7 +448,7 @@ public class MainAppController {
 
     private void addSaveProjectListener() {
         saveButton.setOnAction(event -> {
-            if(!blockAll && columnInfoList != null && !columnInfoList.isEmpty()){
+            if (!blockAll && columnInfoList != null && !columnInfoList.isEmpty()) {
                 List<ColumnInfo> columnInfoRealList = columnInfoList.stream().collect(Collectors.toList());
                 JSON.createJSONforColumnInfo(columnInfoRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
                 List<ColumnInfo> tableInfRealList = tableInfoList.stream().collect(Collectors.toList());
@@ -484,8 +488,8 @@ public class MainAppController {
                             .map(ColumnInfo::getHash)
                             .collect(Collectors.toSet());
                     //add new columns
-                    for(ColumnInfo columnInfo : newColumnInfoList){
-                        if(!oldColumnInfoHashSet.contains(columnInfo.getHash())){
+                    for (ColumnInfo columnInfo : newColumnInfoList) {
+                        if (!oldColumnInfoHashSet.contains(columnInfo.getHash())) {
                             columnInfoList.add(columnInfo);
                         }
                     }
@@ -495,9 +499,9 @@ public class MainAppController {
                             .map(ColumnInfo::getHash)
                             .collect(Collectors.toSet());
                     // remove unused values
-                     List<ColumnInfo> filteredColumnInfoList = columnInfoList.stream().filter(columnInfo -> newColumnInfoHashSet
-                             .contains(columnInfo.getHash()))
-                             .collect(Collectors.toList());
+                    List<ColumnInfo> filteredColumnInfoList = columnInfoList.stream().filter(columnInfo -> newColumnInfoHashSet
+                            .contains(columnInfo.getHash()))
+                            .collect(Collectors.toList());
                     columnInfoList = FXCollections.observableList(filteredColumnInfoList);
 
                     //JSON.createJSONforColumnInfo(filteredColumnInfoList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
@@ -508,8 +512,8 @@ public class MainAppController {
                             .map(ColumnInfo::getTableName)
                             .collect(Collectors.toSet());
                     // add new values
-                    for(ColumnInfo columnInfo : newColumnInfoList){
-                        if(!oldTableInfoNames.contains(columnInfo.getTableName())){
+                    for (ColumnInfo columnInfo : newColumnInfoList) {
+                        if (!oldTableInfoNames.contains(columnInfo.getTableName())) {
                             oldTableInfoNames.add(columnInfo.getTableName());
                             tableInfoList.add(new ColumnInfo(columnInfo.getTableName(), true));
                         }
@@ -554,6 +558,34 @@ public class MainAppController {
 
                     databaseVisualizerStage.showAndWait();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void addVisualizeTablesCapacity(){
+        visualizeTablesButton.setOnAction(event -> {
+            if(!blockAll){
+                FXMLLoader chartLoader = new FXMLLoader();
+                chartLoader.setLocation(DbGen.class.getResource("view/TableVisualizer.fxml"));
+                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                try {
+                    Map<String, Integer> rowCount = dt.getRowCount();
+
+                    ScrollPane tableVisualizerScrollPane = chartLoader.load();
+                    Stage tableVisualizerStage = new Stage();
+                    tableVisualizerStage.setScene(new Scene(tableVisualizerScrollPane));
+                    tableVisualizerStage.setTitle("Tables usage visualizer");
+                    tableVisualizerStage.initModality(Modality.APPLICATION_MODAL);
+                    tableVisualizerStage.initOwner(primaryStage);
+
+                    TableVisualizerController controller = chartLoader.getController();
+
+
+                    tableVisualizerStage.show();
+                    controller.init(rowCount);
+                }catch (SQLException | IOException e){
                     e.printStackTrace();
                 }
             }
