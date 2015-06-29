@@ -40,7 +40,7 @@ public class TableVisualizerController {
 
     public void init(Map<String, Integer> rowCount){
         int count = 0;
-        final int split = 3;
+        final int split = 8;
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setLabel("Tables");
         NumberAxis yAxis = new NumberAxis();

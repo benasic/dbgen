@@ -1,14 +1,12 @@
 package application.generator;
 
 import application.Constants;
-import application.DbGen;
 import com.mifmif.common.regex.Generex;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -38,17 +36,13 @@ public class StringGenerator implements Generator {
         switch (stringGenerationType){
             case CATALOG:
                 try {
-                    Stream<String> lines;
-                    try{
-                        lines = Files.lines(Paths.get(DbGen.class.getClassLoader().getResource("application/resources/catalogs/" + catalogName).toURI()));
-                    } catch (NullPointerException e){
-                        lines = Files.readAllLines(Paths.get(Constants.CatalogLocation + catalogName)).stream();
-                    }
+                    Stream<String> lines = Files.readAllLines(Paths.get(Constants.CatalogLocation + catalogName)).stream();
+
 
                     catalogNames = lines.collect(Collectors.toList());
                     lines.close();
                     catalogSize = catalogNames.size() - 1;
-                } catch (IOException | NullPointerException | URISyntaxException e) {
+                } catch (IOException | NullPointerException e) {
                     e.printStackTrace();
                 }
                 break;

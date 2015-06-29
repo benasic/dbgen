@@ -1,0 +1,196 @@
+Avganistan
+Albanija
+Alžir
+Andora
+Angola
+Antigva i Deps
+Argentina
+Armenija
+Australija
+Austrija
+Azerbejdžan
+Bahami
+Bahrein
+Bangladeš
+Barbados
+Bjelorusija
+Belgija
+Belize
+Benin
+Butan
+Bolivija
+Bosna i Hercegovina
+Bocvana
+Brazil
+Brunej
+Bugarska
+Burkina
+Burundi
+Kambodža
+Kamerun
+Kanada
+Cape Verde
+Centralna Afrička Rep
+Čad
+Čile
+Kina
+Kolumbija
+Komori
+Kongo
+Kongo {Demokratska Rep}
+Kostarika
+Hrvatska
+Kuba
+Kipar
+Češka Republika
+Danska
+Džibuti
+Dominika
+Dominikanska Republika
+Istočni Timor
+Ekvador
+Egipat
+El Salvador
+Ekvatorska Gvineja
+Eritreja
+Estonija
+Etiopija
+Fidži
+Finska
+Francuska
+Gabon
+Gambija
+Gruzija
+Njemačka
+Gana
+Grčka
+Grenada
+Gvatemala
+Gvineja
+Gvineja Bisau
+Gvajana
+Haiti
+Honduras
+Mađarska
+Island
+Indija
+Indonezija
+Iran
+Irak
+Irska {Republika}
+Izrael
+Italija
+Obala Slonovače
+Jamajka
+Japan
+Jordan
+Kazahstan
+Kenija
+Kiribati
+Koreja Sjeverna
+Koreja Južna
+Kosovo
+Kuvajt
+Kirgistan
+Laos
+Letonija
+Liban
+Lesoto
+Liberija
+Libija
+Lihtenštajn
+Litvanija
+Luksemburg
+Makedonija
+Madagaskar
+Malavi
+Malezija
+Maldivi
+Mali
+Malta
+Maršalovi Otoci
+Mauritanija
+Mauricijus
+Meksiko
+Mikronezija
+Moldavija
+Monaco
+Mongolija
+Crna Gora
+Maroko
+Mozambik
+Mianmar, {Burma}
+Namibija
+Nauru
+Nepal
+Nizozemska
+Novi Zeland
+Nikaragva
+Niger
+Nigerija
+Norveška
+Oman
+Pakistan
+Palau
+Panama
+Papua Nova Gvineja
+Paragvaj
+Peru
+Filipini
+Poljska
+Portugal
+Katar
+Rumunija
+Ruska Federacija
+Ruanda
+St. Kitts & Nevis
+St Lucia
+Sveti Vincent i Grenadini
+Samoa
+San Marino
+Sao Tome i Principe
+Saudijska Arabija
+Senegal
+Srbija
+Sejšeli
+Sierra Leone
+Singapur
+Slovačka
+Slovenija
+Solomonski Otoci
+Somalija
+Južna Afrika
+Južni Sudan
+Španija
+Šri Lanka
+Sudan
+Surinam
+Svazi
+Švedska
+Švicarska
+Sirija
+Tajvan
+Tadžikistan
+Tanzanija
+Tajland
+Ići
+Laka dvokolica
+Trinidad & Tobago
+Tunis
+Turska
+Turkmenistan
+Tuvalu
+Uganda
+Ukrajina
+Ujedinjeni Arapski Emirati
+Ujedinjeno Kraljevstvo
+Sjedinjene Države
+Urugvaj
+Uzbekistan
+Vanuatu
+Vatikan
+Venecuela
+Vijetnam
+Jemen
+Zambija
+Zimbabve

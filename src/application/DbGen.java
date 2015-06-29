@@ -48,6 +48,8 @@ public class DbGen extends Application {
                 JDBC_Constants.Port.SQLSERVER, "test");
         sqlServer.addParametar("user", "filip");
         sqlServer.addParametar("password", "filip");
+        sqlServer.addParametar("EnableBulkLoad", "true");
+        sqlServer.addParametar("BulkLoadBatchSize", "10000");
         connectionInfoData.add(sqlServer);
     }
 

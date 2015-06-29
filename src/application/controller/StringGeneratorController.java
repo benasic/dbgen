@@ -133,7 +133,7 @@ public class StringGeneratorController {
         catalogs.add(new Catalog("Gradovi", "gradovi.txt"));
         catalogs.add(new Catalog("Države", "drzave.txt"));
         catalogChoiceBox.setItems(catalogs);
-
+        catalogChoiceBox.getItems().clear();
         File f = new File(Constants.CatalogLocation);
         Set<String> customCatalogs = new HashSet<>(Arrays.asList(f.list()));
         customCatalogs.stream().forEach(s ->
