@@ -1,9 +1,12 @@
-The project will be completed by 30/06/2015.
+Work in progress...
+29.6.2015
+For now program have basic functionality for generating data.
+In next few days program will be upgraded with bug fixes and performance optimization.
 
 How to import project into Eclipse:
 
 Preconditions:
-    1.Java 8u40 installed
+    1.Java 8u45 installed
     2.Git 1.9.5 or newer installed
 
 1.In Eclipse switch to Git perspective:
