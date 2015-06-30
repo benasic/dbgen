@@ -290,7 +290,7 @@ public class DatabaseTools {
         Map<String, Integer> result = new LinkedHashMap<>();
         Stream<Map.Entry<String, Integer>> st = rowCountMap.entrySet().stream();
 
-        st.sorted(byValue.reversed())
+        st.sorted(byValue)
                 .forEach(e ->result.put(e.getKey(),e.getValue()));
 
         return result;

@@ -876,7 +876,7 @@ public class MainAppController {
                         while(uniqueObjects.size() < numberOfDataToGenerate){
                             Object value = generator.generate();
                             if(!keyList.contains(value)){
-                                uniqueObjects.add(generator.generate());
+                                uniqueObjects.add(value);
                             }
                         }
                         jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));

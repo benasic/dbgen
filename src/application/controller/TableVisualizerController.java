@@ -1,6 +1,8 @@
 package application.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -8,6 +10,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
 import java.util.Map;
 
@@ -22,66 +25,71 @@ public class TableVisualizerController {
     @FXML
     private AnchorPane anchorPane;
 
-    // for last reference of bar chart
-    private BarChart<String,Number> bc = null;
-    // for previous reference of bar chart
-    private BarChart<String,Number> previousBc = new BarChart<>(new CategoryAxis(), new NumberAxis());
+    private BarChart<Number,String> barChart = null;
+
 
 
     @FXML
     private void initialize(){
         scrollPane.widthProperty().addListener((observable, oldValue, newValue) -> {
                     anchorPane.setMinWidth(newValue.doubleValue() - 30);
-
                 }
         );
-
     }
 
     public void init(Map<String, Integer> rowCount){
-        int count = 0;
-        final int split = 8;
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel("Tables");
-        NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Rows");
-        bc = new BarChart<>(xAxis,yAxis);
-        XYChart.Series<String,Number> series = new XYChart.Series<>();
+        CategoryAxis yAxis = new CategoryAxis();
+        yAxis.setLabel("Tables");
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Rows");
+        barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setLegendVisible(false);
+        XYChart.Series<Number, String> series = new XYChart.Series<>();
         for (Map.Entry<String, Integer> stringIntegerEntry : rowCount.entrySet()){
+            XYChart.Data<Number, String> data = new XYChart.Data<>(stringIntegerEntry.getValue(), stringIntegerEntry.getKey());
+            data.nodeProperty().addListener((ov, oldNode, node) -> {
+                if (node != null) {
+                    displayLabelForData(data);
+                }
+            });
+            series.getData().add(data);
 
-            // save existing and add new
-            if(count != 0 && count % split == 0){
-                bc.setLegendVisible(false);
-                bc.getData().add(series);
-                VBox.getChildren().add(bc);
-                xAxis = new CategoryAxis();
-                xAxis.setLabel("Tables");
-                yAxis = new NumberAxis();
-                yAxis.setLabel("Rows");
-                // keep last reference
-                previousBc = bc;
-                bc = new BarChart<>(xAxis,yAxis);
-                series = new XYChart.Series<>();
-            }
-            series.getData().add(new XYChart.Data<>(stringIntegerEntry.getKey(), stringIntegerEntry.getValue()));
-            count++;
         }
-        // add last chart
-        if(count == split || count % split != 0){
-            bc.setLegendVisible(false);
-            bc.getData().add(series);
-            VBox.getChildren().add(bc);
-        }
+        barChart.setPrefHeight(rowCount.size() * 50);
+        barChart.getData().add(series);
+        VBox.getChildren().add(barChart);
 
-        previousBc.widthProperty().addListener((observable, oldValue, newValue) -> {
-            if(bc.getData().size() !=0){
-                Integer columnNumberInPrevious = previousBc.getData().get(0).getData().size();
-                Integer columnSize = bc.getData().get(0).getData().size();
-                double previousWidth = previousBc.getWidth();
-                double additionalWidth = 20 * (columnNumberInPrevious - columnSize) * (1d - columnSize.doubleValue() / columnNumberInPrevious);
-                bc.setMaxWidth(columnSize * (previousWidth / columnNumberInPrevious) + additionalWidth);
-            }
+    }
+
+    private void displayLabelForData(XYChart.Data<Number, String> data) {
+        final Node node = data.getNode();
+        final Text dataText = new Text(data.getXValue().toString());
+        node.parentProperty().addListener((ov, oldParent, parent) -> {
+            Group parentGroup = (Group) parent;
+            parentGroup.getChildren().add(dataText);
         });
 
+        node.boundsInParentProperty().addListener((ov, oldBounds, bounds) -> {
+            if(dataText.prefHeight(-1) < bounds.getWidth()){
+                dataText.setLayoutX(
+                        Math.round(
+                                bounds.getMinX() + bounds.getWidth() - dataText.prefWidth(-1)
+                        )
+                );
+            }
+            else{
+                dataText.setLayoutX(
+                        Math.round(
+                                bounds.getMinX() + bounds.getWidth() + dataText.prefWidth(-1)
+                        )
+                );
+            }
+
+            dataText.setLayoutY(
+                    Math.round(
+                            bounds.getMinY() + dataText.prefHeight(-1)
+                    )
+            );
+        });
     }
 }
