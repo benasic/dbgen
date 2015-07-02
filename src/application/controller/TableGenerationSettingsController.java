@@ -15,11 +15,11 @@ public class TableGenerationSettingsController {
 
     public void bindValues(TableGenerationSettings tableGenerationSettings){
         allowGenerationCheckBox.selectedProperty().bindBidirectional(tableGenerationSettings.allowGenerationProperty());
-        numberOfDataToGenerateTextField.textProperty().bindBidirectional(tableGenerationSettings.numberOfDataToGenerateProperty());
+        numberOfDataToGenerateTextField.textProperty().bindBidirectional(tableGenerationSettings.numberOfDataToGenerateStringProperty());
     }
 
     public void unbindValues(TableGenerationSettings tableGenerationSettings){
         allowGenerationCheckBox.selectedProperty().unbindBidirectional(tableGenerationSettings.allowGenerationProperty());
-        numberOfDataToGenerateTextField.textProperty().unbindBidirectional(tableGenerationSettings.numberOfDataToGenerateProperty());
+        numberOfDataToGenerateTextField.textProperty().unbindBidirectional(tableGenerationSettings.numberOfDataToGenerateStringProperty());
     }
 }

@@ -1,31 +1,62 @@
 package application.generator;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 public class TableGenerationSettings {
 
-    private StringProperty numberOfDataToGenerate;
+    private StringProperty numberOfDataToGenerateString;
+    private IntegerProperty numberOfDataToGenerate;
     private BooleanProperty allowGeneration;
 
     public TableGenerationSettings(){
-        numberOfDataToGenerate = new SimpleStringProperty("1000");
+        numberOfDataToGenerateString = new SimpleStringProperty("1000");
+        numberOfDataToGenerate = new SimpleIntegerProperty(1000);
         allowGeneration = new SimpleBooleanProperty(true);
+
+        numberOfDataToGenerateString.addListener((observable, oldValue, newValue) -> {
+                    if(!oldValue.equals(newValue)){
+                        numberOfDataToGenerate.setValue(Integer.parseInt(newValue));
+                    }
+                }
+        );
+
+        numberOfDataToGenerate.addListener((observable, oldValue, newValue) -> {
+                    if(!oldValue.equals(newValue)){
+                        numberOfDataToGenerateString.setValue(newValue.toString());
+                        if(newValue.intValue() == 0){
+                            allowGeneration.setValue(false);
+                        }
+                    }
+                }
+        );
+
+    }
+
+    // Number Of Data To Generate String
+
+    public String getNumberOfDataToGenerateString() {
+        return numberOfDataToGenerateString.get();
+    }
+
+    public StringProperty numberOfDataToGenerateStringProperty() {
+        return numberOfDataToGenerateString;
+    }
+
+    public void setNumberOfDataToGenerateString(String numberOfDataToGenerateString) {
+        this.numberOfDataToGenerateString.set(numberOfDataToGenerateString);
     }
 
     // Number Of Data To Generate
 
-    public String getNumberOfDataToGenerate() {
+    public int getNumberOfDataToGenerate() {
         return numberOfDataToGenerate.get();
     }
 
-    public StringProperty numberOfDataToGenerateProperty() {
+    public IntegerProperty numberOfDataToGenerateProperty() {
         return numberOfDataToGenerate;
     }
 
-    public void setNumberOfDataToGenerate(String numberOfDataToGenerate) {
+    public void setNumberOfDataToGenerate(int numberOfDataToGenerate) {
         this.numberOfDataToGenerate.set(numberOfDataToGenerate);
     }
 

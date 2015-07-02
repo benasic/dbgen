@@ -21,7 +21,8 @@ public class ColumnInfo {
     private String schema;
 
     // helper for determining root element
-    private BooleanProperty isRoot = new SimpleBooleanProperty();
+    private BooleanProperty isTableRoot = new SimpleBooleanProperty();
+    private boolean databaseRootFlag;
 
     private StringProperty databaseType = new SimpleStringProperty();
     private BooleanProperty nullable = new SimpleBooleanProperty();
@@ -59,7 +60,7 @@ public class ColumnInfo {
         this.columnSize = new SimpleStringProperty();
         this.sqlType = new SimpleIntegerProperty();
         tableGenerationSettings = new TableGenerationSettings();
-        setIsRoot(root);
+        setIsTableRoot(root);
     }
 
     public Generator getGenerator() {
@@ -143,17 +144,27 @@ public class ColumnInfo {
 
     // Root Flag
 
-    public boolean getIsRoot() {
-        return isRoot.get();
+    public boolean getIsTableRoot() {
+        return isTableRoot.get();
     }
 
-    public BooleanProperty isRootProperty() {
-        return isRoot;
+    public BooleanProperty isTableRootProperty() {
+        return isTableRoot;
     }
 
-    public void setIsRoot(boolean isRoot) {
-        this.isRoot.set(isRoot);
+    public void setIsTableRoot(boolean isTableRoot) {
+        this.isTableRoot.set(isTableRoot);
 
+    }
+
+    // Database Root Flag
+
+    public boolean getDatabaseRootFlag() {
+        return databaseRootFlag;
+    }
+
+    public void setDatabaseRootFlag(boolean databaseRootFlag) {
+        this.databaseRootFlag = databaseRootFlag;
     }
 
     // Database Type

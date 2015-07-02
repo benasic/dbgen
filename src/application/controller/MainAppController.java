@@ -84,18 +84,21 @@ public class MainAppController {
     private final FXMLLoader booleanLoader = new FXMLLoader();
     private final FXMLLoader binaryLoader = new FXMLLoader();
     private final FXMLLoader tableSettingsLoader = new FXMLLoader();
+    private final FXMLLoader databaseSettingsLoader = new FXMLLoader();
     private AnchorPane stringGeneratorSubScene;
     private AnchorPane numberGeneratorSubScene;
     private AnchorPane dateGeneratorSubScene;
     private AnchorPane booleanGeneratorSubScene;
     private AnchorPane binaryGeneratorSubScene;
     private AnchorPane tableSettingsSubScene;
+    private ScrollPane databaseSettingsSubScene;
     private StringGeneratorController stringGeneratorController;
     private NumberGeneratorController numberGeneratorController;
     private DateGeneratorController dateGeneratorController;
     private BooleanController booleanGeneratorController;
     private BinaryGeneratorController binaryGeneratorController;
     private TableGenerationSettingsController tableGenerationSettingsController;
+    private DatabaseSettingsController databaseSettingsController;
 
     private ConnectionController connectionController;
 
@@ -125,6 +128,7 @@ public class MainAppController {
         booleanLoader.setLocation(DbGen.class.getResource("view/BooleanGenerator.fxml"));
         binaryLoader.setLocation(DbGen.class.getResource("view/BinaryGenerator.fxml"));
         tableSettingsLoader.setLocation(DbGen.class.getResource("view/TableGenerationSettings.fxml"));
+        databaseSettingsLoader.setLocation(DbGen.class.getResource("view/DatabaseSettings.fxml"));
 
         try {
             stringGeneratorSubScene = stringLoader.load();
@@ -133,6 +137,7 @@ public class MainAppController {
             booleanGeneratorSubScene = booleanLoader.load();
             binaryGeneratorSubScene = binaryLoader.load();
             tableSettingsSubScene = tableSettingsLoader.load();
+            databaseSettingsSubScene = databaseSettingsLoader.load();
             stringGeneratorController = stringLoader.getController();
             numberGeneratorController = integerLoader.getController();
             numberGeneratorController.setMainController(this);
@@ -140,6 +145,7 @@ public class MainAppController {
             booleanGeneratorController = booleanLoader.getController();
             binaryGeneratorController = binaryLoader.getController();
             tableGenerationSettingsController = tableSettingsLoader.getController();
+            databaseSettingsController = databaseSettingsLoader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -151,6 +157,7 @@ public class MainAppController {
         this.connectionController = connectionController;
         getTableInfoData();
         fillTableInfoTreeTableView();
+        setupDatabaseSettings();
         addTreeTableViewListeners();
         addTableViewSynchronizationWithColumnInfo();
         addPreviewDataListener();
@@ -253,10 +260,13 @@ public class MainAppController {
             JSON.createJSONforColumnInfo(tableInfRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
         }
 
-        TreeItem<ColumnInfo> mainRoot = new TreeItem<>(new ColumnInfo("root", false));
-        mainRoot.setExpanded(true);
+        TreeItem<ColumnInfo> databaseRoot = new TreeItem<>();
+        ColumnInfo rootColumnInfo = new ColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getDatabase(), false);
+        rootColumnInfo.setDatabaseRootFlag(true);
+        databaseRoot.setValue(rootColumnInfo);
+        databaseRoot.setExpanded(true);
         for (TreeItem<ColumnInfo> root : roots.values()) {
-            mainRoot.getChildren().add(root);
+            databaseRoot.getChildren().add(root);
         }
 
         TreeTableColumn<ColumnInfo, String> columnName = new TreeTableColumn<>("Column Name");
@@ -269,7 +279,8 @@ public class MainAppController {
 
         columnName.setCellValueFactory(p -> {
             ColumnInfo columnInfo = p.getValue().getValue();
-            if (columnInfo.getIsRoot()) {
+            if (columnInfo.getIsTableRoot() || columnInfo.getDatabaseRootFlag()) {
+                // in case of database root this is database name
                 return new ReadOnlyStringWrapper(columnInfo.getTableName());
             } else {
                 return new ReadOnlyStringWrapper(columnInfo.getColumnName());
@@ -277,18 +288,24 @@ public class MainAppController {
         });
         columnType.setCellValueFactory(p -> {
             ColumnInfo columnInfo = p.getValue().getValue();
-            if(columnInfo.getIsRoot()){
+            if(columnInfo.getIsTableRoot() || columnInfo.getDatabaseRootFlag()){
                 return new ReadOnlyStringWrapper("");
             }
             else{
                 return new ReadOnlyStringWrapper(columnInfo.getColumnType() + " [" + columnInfo.getColumnSize() + "]");
             }
         });
-        columnInfoTreeTableView.setRoot(mainRoot);
-        columnInfoTreeTableView.setShowRoot(false);
+        columnInfoTreeTableView.setRoot(databaseRoot);
+        columnInfoTreeTableView.setShowRoot(true);
 
         columnInfoTreeTableView.getSelectionModel().clearSelection();
         columnInfoTreeTableView.getSelectionModel().select(0);
+
+        databaseSettingsController.init(tableInfoList);
+    }
+
+    private void setupDatabaseSettings(){
+
     }
 
     private void addTreeTableViewListeners(){
@@ -302,14 +319,17 @@ public class MainAppController {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener((observable, oldValue, newValue) -> {
                 if (newValue != null) {
-                    Boolean isRoot = newValue.getValue().getIsRoot();
-                    if (isRoot) {
+                    if (newValue.getValue().getIsTableRoot()) {
                         if (lastSelectedTableGenerationSettings != null) {
                             tableGenerationSettingsController.unbindValues(lastSelectedTableGenerationSettings);
                         }
                         lastSelectedTableGenerationSettings = newValue.getValue().getTableGenerationSettings();
                         tableGenerationSettingsController.bindValues(lastSelectedTableGenerationSettings);
                         mainBorderPane.setCenter(tableSettingsSubScene);
+                        return;
+                    }
+                    if (newValue.getValue().getDatabaseRootFlag()){
+                        mainBorderPane.setCenter(databaseSettingsSubScene);
                         return;
                     }
                     String type = newValue.getValue().getColumnType();
@@ -400,11 +420,17 @@ public class MainAppController {
         columnInfoTreeTableView.getSelectionModel().selectedItemProperty()
             .addListener(((observable, oldValue, newValue) -> {
                 if (newValue != null) {
-                    // in case root is selected
-                    if ((oldValue == null && newValue.getValue().getIsRoot())
-                            || (oldValue != null && newValue.getValue().getIsRoot() && !oldValue.getParent().equals(newValue))) {
-                        tableView.getColumns().clear();
+
+                    if (newValue.getValue().getDatabaseRootFlag()){
                         tableView.getItems().clear();
+                        tableView.getColumns().clear();
+                        return;
+                    }
+                    // in case table root is selected
+                    if ((oldValue.getValue().getDatabaseRootFlag() && newValue.getValue().getIsTableRoot())
+                            || (newValue.getValue().getIsTableRoot() && !oldValue.getParent().equals(newValue))) {
+                        tableView.getItems().clear();
+                        tableView.getColumns().clear();
 
                         TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
                         indexColumn.setPrefWidth(40);
@@ -422,9 +448,11 @@ public class MainAppController {
                     }
                     // in case internal element is selected, but only if it
                     // has different root element then previous one
-                    else if (oldValue == null || (!oldValue.getParent().equals(newValue.getParent()) && !newValue.getValue().getIsRoot() && !newValue.getParent().equals(oldValue))) {
-                        tableView.getColumns().clear();
+                    else if (oldValue.getValue().getDatabaseRootFlag()
+                            || (!oldValue.getParent().equals(newValue.getParent()) && !newValue.getValue().getIsTableRoot() && !newValue.getParent().equals(oldValue))) {
                         tableView.getItems().clear();
+                        tableView.getColumns().clear();
+
 
                         TableColumn<ObservableList<Object>, Object> indexColumn = new TableColumn<>("#");
                         indexColumn.setPrefWidth(40);
@@ -909,7 +937,7 @@ public class MainAppController {
                 selectedColumnInfoList.clear();
                 TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
                 // if root is not selected use data from root
-                if (!selectedColumnInfoTreeItem.getValue().getIsRoot()) {
+                if (!selectedColumnInfoTreeItem.getValue().getIsTableRoot()) {
                     selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
                 }
 
@@ -1043,7 +1071,7 @@ public class MainAppController {
                         .map(TreeItem::getValue)
                         .collect(Collectors.toList()));
 
-                String numberOfDataToGenerateString = currentTableInfo.getValue().getTableGenerationSettings().getNumberOfDataToGenerate();
+                String numberOfDataToGenerateString = currentTableInfo.getValue().getTableGenerationSettings().getNumberOfDataToGenerateString();
                 int numberOfDataToGenerate = Integer.parseInt(numberOfDataToGenerateString);
 
                 String result = prepareData(numberOfDataToGenerate, false);
