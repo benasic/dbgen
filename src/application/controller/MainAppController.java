@@ -1029,6 +1029,48 @@ public class MainAppController {
                     .collect(Collectors.toList()));
 
 
+            // this block checks are all reference available
+            List<String> availableHashes = columnInfoList.stream()
+                    .filter(columnInfo -> availTableNames.contains(columnInfo.getTableName()))
+                    .map(ColumnInfo::getHash)
+                    .collect(Collectors.toList());
+            boolean generationPossible = true;
+            Set<String> missingTables = new HashSet<>();
+            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+            Map<String, Integer> rowCount = new HashMap<>();
+
+            try {
+                rowCount = dt.getRowCount();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            for(String hash : availableHashes){
+                if(DatabaseTools.foreignKeyMap.containsKey(hash)){
+                    ForeignKey foreignKey = DatabaseTools.foreignKeyMap.get(hash);
+                    String primaryKeyTableName = foreignKey.getPrimaryKey().getTableName();
+                    if(!availTableNames.contains(primaryKeyTableName) && rowCount.get(primaryKeyTableName) == 0 ){
+                        generationPossible = false;
+                        missingTables.add(primaryKeyTableName);
+                    }
+                }
+            }
+
+            if(!generationPossible){
+                StringBuilder missingNames = new StringBuilder();
+                missingTables.forEach(name -> {
+                    missingNames.append(name);
+                    missingNames.append(' ');
+                });
+                Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
+                referenceMissing.setTitle("Preparation warning");
+                referenceMissing.setContentText("Not possible to generate data!!!\n" +
+                      "Missing tables: " + missingNames.toString());
+                referenceMissing.show();
+                return;
+            }
+            ///////
+
             Integer tableCount = availTableNames.size();
             progressBar.setProgress(0);
 
@@ -1092,7 +1134,6 @@ public class MainAppController {
                     // generate data into database
                     transformData();
                     System.out.println("transform done");
-                    DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
                     try {
                         System.out.println("Filling table: " + tableName);
                         System.out.println("Remaining table " + availTableNames.size());

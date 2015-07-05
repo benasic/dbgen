@@ -506,18 +506,14 @@ public class DatabaseTools {
             for(ObservableList<Object> observableList : observableLists){
 
                 if(observableList.size() == regularSize) {
-
                     // j value is used as help for object that needs to be skipped
                     for (int i = 0, j = 1; i < columnInfos.size(); i++) {
                         if (!skippableColumns.contains(i + 1) && observableList.size() == regularSize) {
                             ps.setObject(j++, observableList.get(i), columnInfos.get(i).getSqlType());
                         }
                     }
-
                     ps.addBatch();
                 }
-                //System.out.println(ps);
-
                 if(++count % batchSize == 0) {
                     ps.executeBatch();
                     ps.clearBatch();
