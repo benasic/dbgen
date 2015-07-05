@@ -500,18 +500,27 @@ public class DatabaseTools {
             final int batchSize = 10000;
             int count = 0;
 
+            int regularSize = columnInfos.size();
+
             PreparedStatement ps = DBConnection.prepareStatement(sql);
             for(ObservableList<Object> observableList : observableLists){
-                // j value is used as help for object that needs to be skipped
-                for(int i = 0, j = 1; i < columnInfos.size(); i++){
-                    if(!skippableColumns.contains(i+1)){
-                        ps.setObject(j++, observableList.get(i), columnInfos.get(i).getSqlType());
+
+                if(observableList.size() == regularSize) {
+
+                    // j value is used as help for object that needs to be skipped
+                    for (int i = 0, j = 1; i < columnInfos.size(); i++) {
+                        if (!skippableColumns.contains(i + 1) && observableList.size() == regularSize) {
+                            ps.setObject(j++, observableList.get(i), columnInfos.get(i).getSqlType());
+                        }
                     }
+
+                    ps.addBatch();
                 }
                 //System.out.println(ps);
-                ps.addBatch();
+
                 if(++count % batchSize == 0) {
                     ps.executeBatch();
+                    ps.clearBatch();
                     System.out.println("execute batch (entry count): " + count);
                 }
             }

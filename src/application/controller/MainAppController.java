@@ -900,11 +900,18 @@ public class MainAppController {
                             e.printStackTrace();
                         }
 
+                        // this block is for preventing infinity loop
+                        int maxTry = numberOfDataToGenerate * 5;
+                        int count = 0;
+
                         Set<Object> uniqueObjects = new HashSet<>();
                         while(uniqueObjects.size() < numberOfDataToGenerate){
                             Object value = generator.generate();
                             if(!keyList.contains(value)){
                                 uniqueObjects.add(value);
+                            }
+                            if(++count == maxTry){
+                                break;
                             }
                         }
                         jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
@@ -1022,9 +1029,10 @@ public class MainAppController {
                     .collect(Collectors.toList()));
 
 
+            Integer tableCount = availTableNames.size();
             progressBar.setProgress(0);
 
-            List<String> previousHashes = new ArrayList<String>();
+            List<String> previousHashes = new ArrayList<>();
 
             boolean getNextValueFromTableName = true;
             String resultOfOperation = null;
@@ -1101,10 +1109,12 @@ public class MainAppController {
                     getNextValueFromTableName = false;
                     // TODO remove first value to last place, optionally
                 }
+
+                progressBar.setProgress(tableCount.doubleValue() / availTableNames.size());
             }
 
             Instant end = Instant.now();
-            System.out.println(Duration.between(start, end));
+            System.out.println("Final time: " + Duration.between(start, end));
 
             progressBar.setProgress(1);
 

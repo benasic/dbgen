@@ -7,7 +7,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.MainAppController">
    <children>
-      <BorderPane fx:id="mainBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+      <BorderPane fx:id="mainBorderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <left>
             <TreeTableView fx:id="columnInfoTreeTableView" prefHeight="350.0" prefWidth="500.0" BorderPane.alignment="CENTER" />
          </left>
@@ -24,7 +24,10 @@
                   <Button fx:id="generateButton" mnemonicParsing="false" text="Generate into database" />
                   <Button fx:id="visualizeDatabaseButton" mnemonicParsing="false" text="Visualize database" />
                   <Button fx:id="visualizeTablesButton" mnemonicParsing="false" text="Chart for tables" />
-                  <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
+                  <ProgressBar fx:id="progressBar" prefHeight="26.0" prefWidth="200.0" progress="0.0">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin></ProgressBar>
                </children>
                <padding>
                   <Insets left="10.0" top="2.0" />
