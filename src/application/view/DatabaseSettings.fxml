@@ -34,6 +34,13 @@
             <Label layoutX="100.0" layoutY="18.0" text="Set all values to:" />
             <TextField fx:id="valueForAllTextField" layoutX="193.0" layoutY="14.0" />
             <Button fx:id="setButton" layoutX="348.0" layoutY="14.0" mnemonicParsing="false" text="Set" />
+            <ToggleButton fx:id="trueToggleButton" layoutX="585.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="True">
+               <toggleGroup>
+                  <ToggleGroup fx:id="toggleGroup" />
+               </toggleGroup>
+            </ToggleButton>
+            <Label layoutX="400.0" layoutY="18.0" text="Toggle generation for all tables:" />
+            <ToggleButton fx:id="falseToggleButton" layoutX="637.0" layoutY="14.0" mnemonicParsing="false" text="False" toggleGroup="$toggleGroup" />
             </children>
         </AnchorPane>
     </content>

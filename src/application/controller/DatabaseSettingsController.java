@@ -35,6 +35,15 @@ public class DatabaseSettingsController {
     @FXML
     private Button setButton;
 
+    @FXML
+    private ToggleGroup toggleGroup;
+
+    @FXML
+    private ToggleButton trueToggleButton;
+
+    @FXML
+    private ToggleButton falseToggleButton;
+
     private ObservableList<ColumnInfo> settingsList;
     private Random random = new MersenneTwisterRNG();
 
@@ -51,6 +60,23 @@ public class DatabaseSettingsController {
                     columnInfo.getTableGenerationSettings().setNumberOfDataToGenerate(Integer.parseInt(valueForAllTextField.getText()))
                 )
         );
+        trueToggleButton.setUserData(true);
+        falseToggleButton.setUserData(false);
+
+        toggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue != null){
+                if((boolean) newValue.getUserData()){
+                    settingsList.forEach(columnInfo -> {
+                        columnInfo.getTableGenerationSettings().setAllowGeneration(true);
+                    });
+                }
+                else {
+                    settingsList.forEach(columnInfo -> {
+                        columnInfo.getTableGenerationSettings().setAllowGeneration(false);
+                    });
+                }
+            }
+        });
     }
 
     public void init(ObservableList<ColumnInfo> settingsList){

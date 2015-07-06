@@ -27,8 +27,8 @@
             <ToggleGroup fx:id="binaryToggleGroup" />
          </toggleGroup>
       </RadioButton>
-      <RadioButton fx:id="imageRadioButton" layoutX="29.0" layoutY="89.0" mnemonicParsing="false" text="Use images:" toggleGroup="$binaryToggleGroup" />
-      <Button fx:id="imagePathButton" layoutX="206.0" layoutY="85.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="137.0" text="Choose images ..." />
+      <RadioButton fx:id="fileRadioButton" layoutX="29.0" layoutY="89.0" mnemonicParsing="false" text="Use files:" toggleGroup="$binaryToggleGroup" />
+      <Button fx:id="filePathButton" layoutX="206.0" layoutY="85.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="137.0" text="Choose files ..." />
 
     </children>
 </AnchorPane>

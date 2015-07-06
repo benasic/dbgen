@@ -24,18 +24,18 @@ public class BinaryGeneratorController {
     private RadioButton randomBytesRadioButton;
 
     @FXML
-    private RadioButton imageRadioButton;
+    private RadioButton fileRadioButton;
 
     @FXML
     private TextField numberOfRandomBytesTextField;
 
     @FXML
-    private Button imagePathButton;
+    private Button filePathButton;
 
 
     private BinaryGenerator binaryGenerator;
 
-    private FileChooser imageChooser = new FileChooser();
+    private FileChooser fileChooser = new FileChooser();
 
 
     private ChangeListener<Toggle> toggleChangeListener = new ChangeListener<Toggle>() {
@@ -44,12 +44,12 @@ public class BinaryGeneratorController {
             switch ((BinaryGenerationType) newValue.getUserData()) {
                 case BINARY:
                     numberOfRandomBytesTextField.disableProperty().set(false);
-                    imagePathButton.disableProperty().set(true);
+                    filePathButton.disableProperty().set(true);
                     binaryGenerator.setBinaryGenerationType(BinaryGenerationType.BINARY);
                     break;
                 case BLOB:
                     numberOfRandomBytesTextField.disableProperty().set(true);
-                    imagePathButton.disableProperty().set(false);
+                    filePathButton.disableProperty().set(false);
                     binaryGenerator.setBinaryGenerationType(BinaryGenerationType.BLOB);
                     break;
             }
@@ -61,15 +61,17 @@ public class BinaryGeneratorController {
     @FXML
     private void initialize(){
         randomBytesRadioButton.setUserData(BinaryGenerationType.BINARY);
-        imageRadioButton.setUserData(BinaryGenerationType.BLOB);
-        imageChooser.setTitle("Select images ...");
-        imageChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"));
+        fileRadioButton.setUserData(BinaryGenerationType.BLOB);
+        fileChooser.setTitle("Select images ...");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
+                new FileChooser.ExtensionFilter("All", "*")
+        );
 
-        imagePathButton.setOnAction(
+        filePathButton.setOnAction(
                 e -> {
                     List<File> list =
-                            imageChooser.showOpenMultipleDialog(imagePathButton.getScene().getWindow());
+                            fileChooser.showOpenMultipleDialog(filePathButton.getScene().getWindow());
                     if (list != null) {
                         binaryGenerator.setImageList(list);
                     }
@@ -88,7 +90,7 @@ public class BinaryGeneratorController {
                 binaryToggleGroup.selectToggle(randomBytesRadioButton);
                 break;
             case BLOB:
-                binaryToggleGroup.selectToggle(imageRadioButton);
+                binaryToggleGroup.selectToggle(fileRadioButton);
                 break;
         }
 
