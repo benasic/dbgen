@@ -328,7 +328,7 @@ public class MainAppController {
                         mainBorderPane.setCenter(tableSettingsSubScene);
                         return;
                     }
-                    if (newValue.getValue().getDatabaseRootFlag()){
+                    if (newValue.getValue().getDatabaseRootFlag()) {
                         mainBorderPane.setCenter(databaseSettingsSubScene);
                         return;
                     }
@@ -421,7 +421,7 @@ public class MainAppController {
             .addListener(((observable, oldValue, newValue) -> {
                 if (newValue != null) {
 
-                    if (newValue.getValue().getDatabaseRootFlag()){
+                    if (newValue.getValue().getDatabaseRootFlag()) {
                         tableView.getItems().clear();
                         tableView.getColumns().clear();
                         return;
@@ -658,18 +658,10 @@ public class MainAppController {
                     try {
                         primaryKeyReferenceList = dt.fetchData(columnInfoList);
                         primaryKeyList = primaryKeyReferenceList.stream().map(objects -> objects[0]).collect(Collectors.toList());
-                        // append application data
-//                        Collection<Object> additionalData = jdbc_repository.getCollection(primaryKeyHash);
-//                        if(additionalData != null){
-//                            if(!additionalData.contains("Auto generated in DB")){
-//                                primaryKeyList.addAll(additionalData);
-//                            }
-//                        }
-                        System.out.println("prije");
+
                         // removing duplicate values
                         primaryKeyList = primaryKeyList.stream().collect(Collectors.toSet())
                                 .stream().collect(Collectors.toList());
-                        System.out.println("poslje");
 
                         // break generation of data if reference are not satisfied
                         if (primaryKeyList.isEmpty() && !preview && !columnInfo.getNullable()) {
@@ -914,9 +906,17 @@ public class MainAppController {
                                 break;
                             }
                         }
+
+                        //for preview
+                        if(preview && uniqueObjects.size() < 100){
+                            while(uniqueObjects.size() < 100){
+                                uniqueObjects.add(generator.generate());
+                            }
+                        }
+
                         jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
                         finishedColumn.add(columnInfo.getHash());
-                        System.out.println("Unique column generated " + columnInfo.getColumnName() + " " +  columnInfo.getTableName());
+                        System.out.println("Unique column generated " + columnInfo.getColumnName() + " " + columnInfo.getTableName());
                         continue;
                     }
 
@@ -943,6 +943,11 @@ public class MainAppController {
 
                 selectedColumnInfoList.clear();
                 TreeItem<ColumnInfo> selectedColumnInfoTreeItem = columnInfoTreeTableView.getSelectionModel().getSelectedItem();
+
+                if(selectedColumnInfoTreeItem.getValue().getDatabaseRootFlag()){
+                    return;
+                }
+
                 // if root is not selected use data from root
                 if (!selectedColumnInfoTreeItem.getValue().getIsTableRoot()) {
                     selectedColumnInfoTreeItem = selectedColumnInfoTreeItem.getParent();
