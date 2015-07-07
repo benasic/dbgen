@@ -1054,6 +1054,7 @@ public class MainAppController {
                 if(DatabaseTools.foreignKeyMap.containsKey(hash)){
                     ForeignKey foreignKey = DatabaseTools.foreignKeyMap.get(hash);
                     String primaryKeyTableName = foreignKey.getPrimaryKey().getTableName();
+                    System.out.println(primaryKeyTableName);
                     if(!availTableNames.contains(primaryKeyTableName) && rowCount.get(primaryKeyTableName) == 0 ){
                         generationPossible = false;
                         missingTables.add(primaryKeyTableName);
@@ -1144,9 +1145,10 @@ public class MainAppController {
                         System.out.println("Remaining table " + availTableNames.size());
                         dt.generateData(previewObservableList, selectedColumnInfoList);
                     } catch (SQLException e) {
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setContentText(e.getMessage());
-                        alert.showAndWait();
+                        System.err.println(e.getMessage());
+                        //Alert alert = new Alert(Alert.AlertType.ERROR);
+                        //alert.setContentText(e.getMessage());
+                        //alert.showAndWait();
                     }
 
                 } else {

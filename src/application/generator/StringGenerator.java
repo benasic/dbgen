@@ -86,12 +86,12 @@ public class StringGenerator implements Generator {
             catalogName = "lastNames.txt";
             return;
         }
-        if(contextName.toLowerCase().contains("country")){
+        if(contextName.toLowerCase().contains("country") && !contextName.toLowerCase().contains("code")){
             setStringGenerationType(StringGenerationType.CATALOG);
             catalogName = "country.txt";
             return;
         }
-        if(contextName.toLowerCase().contains("city")){
+        if(contextName.toLowerCase().contains("city") && !contextName.toLowerCase().contains("code")){
             setStringGenerationType(StringGenerationType.CATALOG);
             catalogName = "city.txt";
             return;
