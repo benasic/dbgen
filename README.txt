@@ -1,4 +1,6 @@
 Work in progress...
+13.7.2015
+Code optimization and reformatting in progress...
 29.6.2015
 For now program have basic functionality for generating data.
 In next few days program will be upgraded with bug fixes and performance optimization.
