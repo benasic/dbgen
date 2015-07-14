@@ -3,12 +3,13 @@ package application.controller;
 import application.Constants;
 import application.DatabaseTools;
 import application.DbGen;
-import application.JDBC_Repository;
+import application.Repository;
 import application.generator.BooleanGenerator;
 import application.generator.Generator;
 import application.generator.TableGenerationSettings;
 import application.model.ColumnInfo;
 import application.model.helper.ForeignKey;
+import application.service.GenerateService;
 import application.utils.JSON;
 import application.utils.ObjectCollection;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -24,14 +25,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,6 +69,9 @@ public class MainAppController {
 
     @FXML
     private ProgressBar progressBar;
+
+    @FXML
+    private Text progressText;
 
     private Stage primaryStage;
     private Stage connectionStage;
@@ -113,6 +116,8 @@ public class MainAppController {
 
     public boolean blockAll = false;
     private boolean noLoad = false;
+
+    private GenerateService generateService = new GenerateService();
 
     @FXML
     private void initialize() {
@@ -170,6 +175,11 @@ public class MainAppController {
 
         columnInfoTreeTableView.getSelectionModel().clearSelection();
         columnInfoTreeTableView.getSelectionModel().select(0);
+
+        progressBar.progressProperty().bind(generateService.progressProperty());
+        progressText.setText("Service ready for data generation");
+        generateService.setOnRunning(event -> progressText.setText("Service is generation data"));
+        generateService.setOnSucceeded(event -> progressText.setText("Service done and ready for data generation"));
     }
 
     private void getTableInfoData(){
@@ -179,13 +189,14 @@ public class MainAppController {
         names.addAll(Arrays.asList(f.list()));
 
         boolean projectExist = false;
-        projectExist = names.stream().anyMatch(s -> s.equals(JDBC_Repository.getInstance().getConnectionInfo().getSaveName().concat("_columns.json")));
+        projectExist = names.stream().anyMatch(s -> s.equals(Repository.getInstance().getConnectionInfo().getSaveName().concat("_columns.json")));
 
-        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+        DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
 
         if(projectExist){
-            columnInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
-            tableInfoList = JSON.createJavaObjectsforColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
+            columnInfoList = JSON.createJavaObjectsforColumnInfo(Repository.getInstance().getConnectionInfo().getSaveName(), false);
+            Repository.getInstance().setColumnInfoList(columnInfoList);
+            tableInfoList = JSON.createJavaObjectsforColumnInfo(Repository.getInstance().getConnectionInfo().getSaveName(), true);
             System.out.println("ponovno učitanje");
             try{
                 dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
@@ -197,8 +208,9 @@ public class MainAppController {
 
             try {
                 columnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
+                Repository.getInstance().setColumnInfoList(columnInfoList);
                 List<ColumnInfo> columnInfos = columnInfoList.stream().collect(Collectors.toList());
-                JSON.createJSONforColumnInfo(columnInfos, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
+                JSON.createJSONforColumnInfo(columnInfos, Repository.getInstance().getConnectionInfo().getSaveName(), false);
                 System.out.println("prvo učitanje");
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -257,11 +269,11 @@ public class MainAppController {
 
         if(newData){
             List<ColumnInfo> tableInfRealList = tableInfoList.stream().collect(Collectors.toList());
-            JSON.createJSONforColumnInfo(tableInfRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
+            JSON.createJSONforColumnInfo(tableInfRealList, Repository.getInstance().getConnectionInfo().getSaveName(), true);
         }
 
         TreeItem<ColumnInfo> databaseRoot = new TreeItem<>();
-        ColumnInfo rootColumnInfo = new ColumnInfo(JDBC_Repository.getInstance().getConnectionInfo().getDatabase(), false);
+        ColumnInfo rootColumnInfo = new ColumnInfo(Repository.getInstance().getConnectionInfo().getDatabase(), false);
         rootColumnInfo.setDatabaseRootFlag(true);
         databaseRoot.setValue(rootColumnInfo);
         databaseRoot.setExpanded(true);
@@ -478,9 +490,9 @@ public class MainAppController {
         saveButton.setOnAction(event -> {
             if (!blockAll && columnInfoList != null && !columnInfoList.isEmpty()) {
                 List<ColumnInfo> columnInfoRealList = columnInfoList.stream().collect(Collectors.toList());
-                JSON.createJSONforColumnInfo(columnInfoRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
+                JSON.createJSONforColumnInfo(columnInfoRealList, Repository.getInstance().getConnectionInfo().getSaveName(), false);
                 List<ColumnInfo> tableInfRealList = tableInfoList.stream().collect(Collectors.toList());
-                JSON.createJSONforColumnInfo(tableInfRealList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
+                JSON.createJSONforColumnInfo(tableInfRealList, Repository.getInstance().getConnectionInfo().getSaveName(), true);
             }
         });
     }
@@ -507,7 +519,7 @@ public class MainAppController {
     private void addRefreshMetadataListener(){
         refreshMetadata.setOnAction(event -> {
             if (!blockAll) {
-                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
                 try {
                     //column info part
                     ObservableList<ColumnInfo> newColumnInfoList = dt.getColumnInfoObservableList(null, null, null, new String[]{"TABLE"});
@@ -531,8 +543,7 @@ public class MainAppController {
                             .contains(columnInfo.getHash()))
                             .collect(Collectors.toList());
                     columnInfoList = FXCollections.observableList(filteredColumnInfoList);
-
-                    //JSON.createJSONforColumnInfo(filteredColumnInfoList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), false);
+                    Repository.getInstance().setColumnInfoList(columnInfoList);
 
                     // table info part
                     // get set of existing tableInfo names
@@ -556,8 +567,6 @@ public class MainAppController {
                             .contains(columnInfo.getTableName()))
                             .collect(Collectors.toList());
                     tableInfoList = FXCollections.observableList(filteredTableInfoList);
-
-                    //JSON.createJSONforColumnInfo(filteredTableInfoList, JDBC_Repository.getInstance().getConnectionInfo().getSaveName(), true);
 
                     System.out.println("refresh of data in progress");
                     fillTableInfoTreeTableView();
@@ -597,7 +606,7 @@ public class MainAppController {
             if(!blockAll){
                 FXMLLoader chartLoader = new FXMLLoader();
                 chartLoader.setLocation(DbGen.class.getResource("view/TableVisualizer.fxml"));
-                DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
                 try {
                     Map<String, Integer> rowCount = dt.getRowCount();
 
@@ -620,13 +629,14 @@ public class MainAppController {
         });
     }
 
+    // TODO this method will be replaced with simple method
     private String prepareData(int numberOfDataToGenerate, boolean preview) {
         String returnValue = null;
         if (selectedColumnInfoList.size() != 0) {
 
             // calling generator for each of selected item
             // TODO add different collection type support
-            JDBC_Repository jdbc_repository = JDBC_Repository.getInstance();
+            Repository repository = Repository.getInstance();
 
 
             Set<String> finishedColumn = new HashSet<>();
@@ -651,7 +661,7 @@ public class MainAppController {
                     ColumnInfo primaryKeyColumn = columnInfoList.stream().filter(column -> column.getHash().equals(primaryKeyHash)).findFirst().get();
                     List<ColumnInfo> columnInfoList = new ArrayList<>();
                     columnInfoList.add(primaryKeyColumn);
-                    DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                    DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
                     List<Object[]> primaryKeyReferenceList;
                     List<Object> primaryKeyList;
 
@@ -668,7 +678,7 @@ public class MainAppController {
                             return primaryKeyColumn.getTableName();
                         }
 
-                        jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
+                        repository.addCollectionToMap(hash, new ArrayList<>());
                         // pick random value
                         Random random = new Random();
                         random.setSeed(System.currentTimeMillis());
@@ -684,7 +694,7 @@ public class MainAppController {
                             else{
                                 object = primaryKeyList.get(random.nextInt(primaryKeyList.size()));
                             }
-                            jdbc_repository.insertIntoCollection(hash, object);
+                            repository.insertIntoCollection(hash, object);
                             if(i % 10000 == 0){
                                 System.out.println("Trenutno " + i);
                             }
@@ -732,7 +742,7 @@ public class MainAppController {
                             ColumnInfo primaryKeyColumn = columnInfoList.stream().filter(column -> column.getHash().equals(primaryKeyHash)).findFirst().get();
                             List<ColumnInfo> columnInfoList = new ArrayList<>();
                             columnInfoList.add(primaryKeyColumn);
-                            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                            DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
                             List<Object[]> primaryKeyReferenceList;
                             List<Object> primaryKeyList;
                             Set<Object> primaryKeySet;
@@ -823,7 +833,7 @@ public class MainAppController {
                                         .map(objectCollection -> objectCollection.objects[finalI])
                                         .collect(Collectors.toList());
                             }
-                            jdbc_repository.addCollectionToMap(regularForeignKeysList.get(i), objectList);
+                            repository.addCollectionToMap(regularForeignKeysList.get(i), objectList);
                         }
 
                         for (int i = 0; i < regularKeysList.size(); i++) {
@@ -839,7 +849,7 @@ public class MainAppController {
                                         .map(objectCollection -> objectCollection.objects[finalI])
                                         .collect(Collectors.toList());
                             }
-                            jdbc_repository.addCollectionToMap(regularKeysList.get(i).getHash(), objectList);
+                            repository.addCollectionToMap(regularKeysList.get(i).getHash(), objectList);
                         }
 
 
@@ -871,7 +881,7 @@ public class MainAppController {
                         while(uniqueObjects.size() < numberOfDataToGenerate){
                             uniqueObjects.add(generator.generate());
                         }
-                        jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
+                        repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
                         finishedColumn.add(columnInfo.getHash());
                         continue;
                     }
@@ -881,7 +891,7 @@ public class MainAppController {
 
                         List<ColumnInfo> columnInfoList = new ArrayList<>();
                         columnInfoList.add(columnInfo);
-                        DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+                        DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
                         List<Object[]> keyReferenceList;
                         Set<Object> keyList = new HashSet<>();
 
@@ -914,23 +924,23 @@ public class MainAppController {
                             }
                         }
 
-                        jdbc_repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
+                        repository.addCollectionToMap(hash, new ArrayList<>(uniqueObjects));
                         finishedColumn.add(columnInfo.getHash());
                         System.out.println("Unique column generated " + columnInfo.getColumnName() + " " + columnInfo.getTableName());
                         continue;
                     }
 
 
-                    jdbc_repository.addCollectionToMap(hash, new ArrayList<>());
+                    repository.addCollectionToMap(hash, new ArrayList<>());
                     for (int i = 0; i < numberOfDataToGenerate; i++) {
                         if (columnInfo.getAutoIncrement()) {
-                            jdbc_repository.insertIntoCollection(hash, "Auto generated in DB");
+                            repository.insertIntoCollection(hash, "Auto generated in DB");
                         } else {
-                            jdbc_repository.insertIntoCollection(hash, generator.generate());
+                            repository.insertIntoCollection(hash, generator.generate());
                         }
                         finishedColumn.add(columnInfo.getHash());
                     }
-                    jdbc_repository.getConnectionInfo();
+                    repository.getConnectionInfo();
                 }
             }
         }
@@ -980,7 +990,7 @@ public class MainAppController {
         // remapping data!!!
         for(int i = 0; i < selectedColumnInfoList.size(); i++){
             String hash = selectedColumnInfoList.get(i).getHash();
-            Iterator<Object> objectIterator = JDBC_Repository.getInstance().returnCollectionIterator(hash);
+            Iterator<Object> objectIterator = Repository.getInstance().returnCollectionIterator(hash);
             int counter = previewObservableList.size();
             int previewObservableListSize = previewObservableList.size();
             while(objectIterator.hasNext()) {
@@ -1005,9 +1015,6 @@ public class MainAppController {
 
             tableView.getItems().clear();
             tableView.getColumns().clear();
-
-            Instant start = Instant.now();
-
 
             ObservableList<TreeItem<ColumnInfo>> tableInfoList = columnInfoTreeTableView.getRoot().getChildren();
 
@@ -1041,7 +1048,7 @@ public class MainAppController {
                     .collect(Collectors.toList());
             boolean generationPossible = true;
             Set<String> missingTables = new HashSet<>();
-            DatabaseTools dt = new DatabaseTools(JDBC_Repository.getInstance().getConnectionInfo().getConnectionString());
+            DatabaseTools dt = new DatabaseTools(Repository.getInstance().getConnectionInfo().getConnectionString());
             Map<String, Integer> rowCount = new HashMap<>();
 
             try {
@@ -1054,7 +1061,6 @@ public class MainAppController {
                 if(DatabaseTools.foreignKeyMap.containsKey(hash)){
                     ForeignKey foreignKey = DatabaseTools.foreignKeyMap.get(hash);
                     String primaryKeyTableName = foreignKey.getPrimaryKey().getTableName();
-                    System.out.println(primaryKeyTableName);
                     if(!availTableNames.contains(primaryKeyTableName) && rowCount.get(primaryKeyTableName) == 0 ){
                         generationPossible = false;
                         missingTables.add(primaryKeyTableName);
@@ -1076,95 +1082,9 @@ public class MainAppController {
                 return;
             }
             ///////
-
-            Integer tableCount = availTableNames.size();
-            progressBar.setProgress(0);
-
-            List<String> previousHashes = new ArrayList<>();
-
-            boolean getNextValueFromTableName = true;
-            String resultOfOperation = null;
-            while (availTableNames.size() != 0) {
-                // final is necessary because value is used in lambda
-                final String tableName;
-                if (getNextValueFromTableName) {
-                    tableName = availTableNames.getFirst();
-                } else {
-                    tableName = resultOfOperation;
-                }
-                long avail = tableInfoListWithoutIgnored.stream()
-                        .filter(columnInfo -> columnInfo.getValue().getTableName().equals(tableName))
-                        .count();
-
-                if (avail == 0) {
-                    Alert referenceMissing = new Alert(Alert.AlertType.WARNING);
-                    referenceMissing.setTitle("Preparation warning");
-                    referenceMissing.setContentText("Not possible to generate data!!!\nMissing table in selected list " + tableName);
-                    referenceMissing.show();
-                    return;
-                }
-
-                TreeItem<ColumnInfo> currentTableInfo = tableInfoListWithoutIgnored.stream()
-                        .filter(columnInfo -> columnInfo.getValue().getTableName().equals(tableName))
-                        .findFirst().get();
-                selectedColumnInfoList.clear();
-
-                if (!previousHashes.isEmpty()) {
-                    // rewriting content of collection so that garbage collection can collect old one
-                    previousHashes.stream().forEach(s ->
-                                    JDBC_Repository.getInstance().addCollectionToMap(s, new ArrayList<>())
-                    );
-                    //System.gc();
-                }
-
-                previousHashes.clear();
-                previousHashes = currentTableInfo.getChildren().stream()
-                        .map(TreeItem::getValue)
-                        .map(ColumnInfo::getHash)
-                        .collect(Collectors.toList());
-
-                selectedColumnInfoList.addAll(currentTableInfo.getChildren().stream()
-                        .map(TreeItem::getValue)
-                        .collect(Collectors.toList()));
-
-                String numberOfDataToGenerateString = currentTableInfo.getValue().getTableGenerationSettings().getNumberOfDataToGenerateString();
-                int numberOfDataToGenerate = Integer.parseInt(numberOfDataToGenerateString);
-
-                String result = prepareData(numberOfDataToGenerate, false);
-                System.out.println("preparation done");
-                // if previous operation is successful
-                if (result == null) {
-                    availTableNames.remove(tableName);
-                    getNextValueFromTableName = true;
-
-                    // generate data into database
-                    transformData();
-                    System.out.println("transform done");
-                    try {
-                        System.out.println("Filling table: " + tableName);
-                        System.out.println("Remaining table " + availTableNames.size());
-                        dt.generateData(previewObservableList, selectedColumnInfoList);
-                    } catch (SQLException e) {
-                        System.err.println(e.getMessage());
-                        //Alert alert = new Alert(Alert.AlertType.ERROR);
-                        //alert.setContentText(e.getMessage());
-                        //alert.showAndWait();
-                    }
-
-                } else {
-                    System.out.println("First resolving dependency for " + result);
-                    resultOfOperation = result;
-                    getNextValueFromTableName = false;
-                    // TODO remove first value to last place, optionally
-                }
-
-                progressBar.setProgress(tableCount.doubleValue() / availTableNames.size());
-            }
-
-            Instant end = Instant.now();
-            System.out.println("Final time: " + Duration.between(start, end));
-
-            progressBar.setProgress(1);
+            generateService.reset();
+            generateService.setTableNameList(tableInfoListWithoutIgnored);
+            generateService.start();
 
             int index = columnInfoTreeTableView.getSelectionModel().getSelectedIndex();
             columnInfoTreeTableView.getSelectionModel().clearSelection();

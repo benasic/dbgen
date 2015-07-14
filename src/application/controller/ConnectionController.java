@@ -3,7 +3,7 @@ package application.controller;
 import application.Constants;
 import application.DatabaseTools;
 import application.DbGen;
-import application.JDBC_Repository;
+import application.Repository;
 import application.model.ConnectionInfo;
 import application.model.ConnectionParameters;
 import application.utils.JSON;
@@ -80,7 +80,7 @@ public class ConnectionController {
                 .addListener((observable, oldValue, newValue) -> {
                     unbindConnectInfo(oldValue);
                     bindConnectInfo(newValue);
-                    JDBC_Repository.getInstance().setConnectionInfo(newValue);
+                    Repository.getInstance().setConnectionInfo(newValue);
                 });
         keyColumn.setCellValueFactory(cellData -> cellData.getValue().keyProperty());
         keyColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -134,7 +134,7 @@ public class ConnectionController {
         testConnectionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getConnectionInfo();
+                ConnectionInfo connectionInfo = Repository.getInstance().getConnectionInfo();
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 Alert testConectionAlert;
                 try {
@@ -155,7 +155,7 @@ public class ConnectionController {
         retrieveMetadataButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                ConnectionInfo connectionInfo = JDBC_Repository.getInstance().getConnectionInfo();
+                ConnectionInfo connectionInfo = Repository.getInstance().getConnectionInfo();
                 DatabaseTools db = new DatabaseTools(connectionInfo.getConnectionString());
                 try {
                     db.testConnection();
